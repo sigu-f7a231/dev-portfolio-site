@@ -7,10 +7,10 @@ class HeroSection extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       height: MediaQuery.of(context).size.height,
-      color: Colors.blueGrey,
+      color: Theme.of(context).brightness == Brightness.dark ? Colors.grey[900] : Colors.blueAccent,
       child: const Center(
         child: Text(
-          'Hero Section\nYour Name',
+          'Welcome to My Portfolio',
           textAlign: TextAlign.center,
           style: TextStyle(fontSize: 36, color: Colors.white),
         ),
