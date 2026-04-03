@@ -1,4 +1,3 @@
-// lib/sections/skills/skills_section.dart
 import 'package:flutter/material.dart';
 import 'data/skills_work.dart';
 import 'data/skills_private.dart';
@@ -13,52 +12,45 @@ class SkillsSection extends StatefulWidget {
 }
 
 class _SkillsSectionState extends State<SkillsSection>
-    with SingleTickerProviderStateMixin {
-  late TabController _tabController;
+    with TickerProviderStateMixin {
+  late TabController _mainTabController; // Work / Private
+  late TabController _categoryTabController; // skills / server_os / db / tools_fw
   bool _showPie = false;
 
-  // 非同期でロードしたスキルデータ
-  Map<String, double>? workSkills;
-  Map<String, double>? privateSkills;
-  bool _isLoading = true;
+  late Future<Map<String, Map<String, double>>> _workSkillsFuture;
+  late Future<Map<String, Map<String, double>>> _privateSkillsFuture;
+
+  final List<String> categories = ['skills', 'server_os', 'db', 'tools_fw'];
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
-    _loadSkills();
-  }
+    _mainTabController = TabController(length: 2, vsync: this);
+    _categoryTabController = TabController(length: categories.length, vsync: this);
 
-  Future<void> _loadSkills() async {
-    try {
-      final loadedWork = await loadWorkSkillsAll(); // workSkills の非同期読み込み
-      final loadedPrivate = await loadPrivateSkillsAll(); // privateSkills の非同期読み込み
-
-      setState(() {
-        workSkills = loadedWork['skills'];
-        privateSkills = loadedPrivate['skills'];
-        _isLoading = false;
-      });
-    } catch (e) {
-      // エラー処理
-      debugPrint('Error loading skills: $e');
-      setState(() {
-        _isLoading = false;
-      });
-    }
+    // データ読み込み
+    _workSkillsFuture = loadWorkSkillsAll();
+    _privateSkillsFuture = loadPrivateSkillsAll();
   }
 
   @override
   void dispose() {
-    _tabController.dispose();
+    _mainTabController.dispose();
+    _categoryTabController.dispose();
     super.dispose();
+  }
+
+  Map<String, double> _getCategoryData(Map<String, Map<String, double>> data, String category) {
+    return data[category] ?? {};
   }
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final bgColor = isDark ? Colors.black : Colors.deepPurple;
-    final textColor = Colors.white;
+
+    final bgColor = isDark ? Colors.black : const Color(0xFFDADAE3);
+    final cardColor = isDark ? const Color(0xFF2A2A3D) : const Color(0xFFFDFDFD);
+    final textColor = isDark ? Colors.white : const Color(0xFF222222);
 
     return Container(
       color: bgColor,
@@ -66,7 +58,7 @@ class _SkillsSectionState extends State<SkillsSection>
       height: MediaQuery.of(context).size.height,
       child: Column(
         children: [
-          // タイトルと Pie/Switch
+          // タイトルとPie切り替え
           Row(
             children: [
               Text('Skills', style: TextStyle(fontSize: 28, color: textColor)),
@@ -83,46 +75,108 @@ class _SkillsSectionState extends State<SkillsSection>
             ],
           ),
           const SizedBox(height: 16),
-
-          // タブ
+          // Work / Private タブ
           TabBar(
-            controller: _tabController,
+            controller: _mainTabController,
             labelColor: Colors.orangeAccent,
             unselectedLabelColor: textColor,
             indicatorColor: Colors.orangeAccent,
-            tabs: const [Tab(text: 'Work'), Tab(text: 'Private')],
+            tabs: const [
+              Tab(text: 'Work'),
+              Tab(text: 'Private'),
+            ],
           ),
           const SizedBox(height: 16),
-
-          // タブビュー
+          // カテゴリータブ
+          TabBar(
+            controller: _categoryTabController,
+            labelColor: Colors.orangeAccent,
+            unselectedLabelColor: textColor,
+            indicatorColor: Colors.orangeAccent,
+            tabs: categories.map((c) => Tab(text: c.toUpperCase())).toList(),
+          ),
+          const SizedBox(height: 16),
           Expanded(
-            child: _isLoading
-                ? const Center(child: CircularProgressIndicator())
-                : TabBarView(
-                    controller: _tabController,
-                    children: [
-                      // Work タブ
-                      Center(
-                        child: SizedBox(
-                          width: 1000,
-                          height: 500,
-                          child: _showPie
-                              ? SkillsPieChart(data: workSkills!, isDark: isDark)
-                              : SkillsBarChart(data: workSkills!, isDark: isDark),
-                        ),
-                      ),
-                      // Private タブ
-                      Center(
-                        child: SizedBox(
-                          width: 1000,
-                          height: 500,
-                          child: _showPie
-                              ? SkillsPieChart(data: privateSkills!, isDark: isDark)
-                              : SkillsBarChart(data: privateSkills!, isDark: isDark),
-                        ),
-                      ),
-                    ],
-                  ),
+            child: TabBarView(
+              controller: _mainTabController,
+              children: [
+                // Work Tab
+                FutureBuilder<Map<String, Map<String, double>>>(
+                  future: _workSkillsFuture,
+                  builder: (context, snapshot) {
+                    if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
+
+                    final data = snapshot.data!;
+                    return TabBarView(
+                      controller: _categoryTabController,
+                      children: categories.map((category) {
+                        final categoryData = _getCategoryData(data, category);
+                        return Center(
+                          child: Container(
+                            width: 1000,
+                            height: 500,
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: cardColor,
+                              borderRadius: BorderRadius.circular(16),
+                              boxShadow: [
+                                if (!isDark)
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.12),
+                                    blurRadius: 16,
+                                    offset: const Offset(0, 8),
+                                  ),
+                              ],
+                            ),
+                            child: _showPie
+                                ? SkillsPieChart(data: categoryData, isDark: isDark)
+                                : SkillsBarChart(data: categoryData, isDark: isDark),
+                          ),
+                        );
+                      }).toList(),
+                    );
+                  },
+                ),
+
+                // Private Tab
+                FutureBuilder<Map<String, Map<String, double>>>(
+                  future: _privateSkillsFuture,
+                  builder: (context, snapshot) {
+                    if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
+
+                    final data = snapshot.data!;
+                    return TabBarView(
+                      controller: _categoryTabController,
+                      children: categories.map((category) {
+                        final categoryData = _getCategoryData(data, category);
+                        return Center(
+                          child: Container(
+                            width: 1000,
+                            height: 500,
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: cardColor,
+                              borderRadius: BorderRadius.circular(16),
+                              boxShadow: [
+                                if (!isDark)
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.12),
+                                    blurRadius: 16,
+                                    offset: const Offset(0, 8),
+                                  ),
+                              ],
+                            ),
+                            child: _showPie
+                                ? SkillsPieChart(data: categoryData, isDark: isDark)
+                                : SkillsBarChart(data: categoryData, isDark: isDark),
+                          ),
+                        );
+                      }).toList(),
+                    );
+                  },
+                ),
+              ],
+            ),
           ),
         ],
       ),

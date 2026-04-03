@@ -1,3 +1,4 @@
+// lib/sections/skills/charts/skills_pie_chart.dart
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/gestures.dart';
@@ -13,8 +14,8 @@ class SkillsPieChart extends StatefulWidget {
 }
 
 class _SkillsPieChartState extends State<SkillsPieChart> {
-  int? hoveredIndex;   // マウスオーバー
-  int? selectedIndex;  // クリック選択
+  int? hoveredIndex;
+  int? selectedIndex;
 
   final List<Color> colors = [
     Colors.blueAccent,
@@ -29,69 +30,69 @@ class _SkillsPieChartState extends State<SkillsPieChart> {
 
   @override
   Widget build(BuildContext context) {
+    final labelColor = widget.isDark ? Colors.white : Colors.black87;
+    final valueColor = widget.isDark ? Colors.white70 : Colors.black54;
+
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // -------- 円グラフ --------
-        SizedBox(
-          width: 300,
-          height: 300,
-          child: PieChart(
-            PieChartData(
-              sectionsSpace: 4,
-              centerSpaceRadius: 60,
-              pieTouchData: PieTouchData(
-                touchCallback: (event, pieTouchResponse) {
-                  setState(() {
-                    final idx = pieTouchResponse?.touchedSection?.touchedSectionIndex;
-                    hoveredIndex = (idx != null &&
-                            event is! PointerExitEvent &&
-                            event is! PointerUpEvent)
-                        ? idx
-                        : null;
+        // 左側の余白を確保して円グラフを配置
+        Padding(
+          padding: const EdgeInsets.only(top: 24.0, left: 32.0),
+          child: SizedBox(
+            width: 300,
+            height: 300,
+            child: PieChart(
+              PieChartData(
+                sectionsSpace: 4,
+                centerSpaceRadius: 60,
+                pieTouchData: PieTouchData(
+                  touchCallback: (event, pieTouchResponse) {
+                    setState(() {
+                      final idx = pieTouchResponse?.touchedSection?.touchedSectionIndex;
+                      hoveredIndex = (idx != null &&
+                              event is! PointerExitEvent &&
+                              event is! PointerUpEvent)
+                          ? idx
+                          : null;
 
-                    // クリックで選択状態にする
-                    if (event is PointerDownEvent && idx != null) {
-                      if (selectedIndex == idx) {
-                        selectedIndex = null; // 同じ箇所なら選択解除
-                      } else {
-                        selectedIndex = idx;
+                      if (event is PointerDownEvent && idx != null) {
+                        selectedIndex = selectedIndex == idx ? null : idx;
                       }
-                    }
-                  });
-                },
+                    });
+                  },
+                ),
+                sections: widget.data.entries.mapIndexed((entry, index) {
+                  final isActive = index == hoveredIndex || index == selectedIndex;
+                  Color baseColor = colors[index % colors.length];
+                  Color highlightColor = HSLColor.fromColor(baseColor)
+                      .withLightness(0.7)
+                      .toColor();
+
+                  return PieChartSectionData(
+                    value: entry.value,
+                    color: isActive ? highlightColor : baseColor,
+                    radius: isActive ? 120 : 100,
+                    borderSide: isActive
+                        ? BorderSide(color: Colors.orangeAccent, width: 3)
+                        : BorderSide(color: Colors.transparent, width: 0),
+                    showTitle: false,
+                  );
+                }).toList(),
               ),
-              sections: widget.data.entries.mapIndexed((entry, index) {
-                final isActive = index == hoveredIndex || index == selectedIndex;
-
-                Color baseColor = colors[index % colors.length];
-                Color highlightColor = HSLColor.fromColor(baseColor)
-                    .withLightness(0.7)
-                    .toColor(); // 明るくして光らせる
-
-                return PieChartSectionData(
-                  value: entry.value,
-                  color: isActive ? highlightColor : baseColor,
-                  radius: isActive ? 120 : 100,
-                  borderSide: isActive
-                      ? BorderSide(color: Colors.orangeAccent, width: 3)
-                      : BorderSide(color: Colors.transparent, width: 0),
-                  showTitle: false, // 円内ラベル非表示
-                );
-              }).toList(),
             ),
           ),
         ),
 
-        const SizedBox(width: 24),
+        // 凡例との距離を広げる（カード内で収まるよう調整）
+        const SizedBox(width: 100),
 
-        // -------- 凡例 --------
+        // 凡例
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: widget.data.entries.mapIndexed((entry, index) {
               final isActive = index == hoveredIndex || index == selectedIndex;
-
               return MouseRegion(
                 cursor: SystemMouseCursors.click,
                 onEnter: (_) => setState(() => hoveredIndex = index),
@@ -99,11 +100,7 @@ class _SkillsPieChartState extends State<SkillsPieChart> {
                 child: GestureDetector(
                   onTap: () {
                     setState(() {
-                      if (selectedIndex == index) {
-                        selectedIndex = null;
-                      } else {
-                        selectedIndex = index;
-                      }
+                      selectedIndex = selectedIndex == index ? null : index;
                     });
                   },
                   child: Padding(
@@ -127,16 +124,15 @@ class _SkillsPieChartState extends State<SkillsPieChart> {
                             entry.key,
                             style: TextStyle(
                               fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
-                              color: isActive
-                                  ? Colors.orangeAccent
-                                  : (widget.isDark ? Colors.white : Colors.black),
+                              color: isActive ? Colors.orangeAccent : labelColor,
                             ),
                           ),
                         ),
                         Text(
                           '${entry.value.toInt()}%',
                           style: TextStyle(
-                            color: widget.isDark ? Colors.white70 : Colors.black54,
+                            color: valueColor,
+                            fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
                           ),
                         ),
                       ],

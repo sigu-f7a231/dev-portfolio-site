@@ -35,6 +35,11 @@ class _SkillsBarChartState extends State<SkillsBarChart> {
     final entries = widget.data.entries.toList()
       ..sort((a, b) => b.value.compareTo(a.value));
 
+    // 文字色をテーマに応じて設定
+    final labelColor = widget.isDark ? Colors.white : Colors.black87;
+    final valueColor = widget.isDark ? Colors.white70 : Colors.black54;
+    final bgBarColor = widget.isDark ? Colors.white10 : Colors.black12;
+
     return Row(
       children: [
         // -------- 左：棒グラフ --------
@@ -61,9 +66,7 @@ class _SkillsBarChartState extends State<SkillsBarChart> {
                             Container(
                               height: 24,
                               decoration: BoxDecoration(
-                                color: widget.isDark
-                                    ? Colors.white10
-                                    : Colors.black12,
+                                color: bgBarColor,
                                 borderRadius: BorderRadius.circular(4),
                               ),
                             ),
@@ -94,9 +97,7 @@ class _SkillsBarChartState extends State<SkillsBarChart> {
                         child: Text(
                           '${e.value.toStringAsFixed(1)}%',
                           style: TextStyle(
-                            color: isActive
-                                ? Colors.orangeAccent
-                                : Colors.white70,
+                            color: isActive ? Colors.orangeAccent : valueColor,
                             fontWeight:
                                 isActive ? FontWeight.bold : FontWeight.normal,
                           ),
@@ -146,9 +147,7 @@ class _SkillsBarChartState extends State<SkillsBarChart> {
                         child: Text(
                           e.key,
                           style: TextStyle(
-                            color: isActive
-                                ? Colors.orangeAccent
-                                : Colors.white,
+                            color: isActive ? Colors.orangeAccent : labelColor,
                             fontWeight:
                                 isActive ? FontWeight.bold : FontWeight.normal,
                           ),
@@ -160,9 +159,7 @@ class _SkillsBarChartState extends State<SkillsBarChart> {
                         child: Text(
                           '${e.value.toStringAsFixed(1)}%',
                           style: TextStyle(
-                            color: isActive
-                                ? Colors.orangeAccent
-                                : Colors.white70,
+                            color: isActive ? Colors.orangeAccent : valueColor,
                           ),
                         ),
                       ),
