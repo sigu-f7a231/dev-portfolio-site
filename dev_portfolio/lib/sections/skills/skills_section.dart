@@ -1,9 +1,9 @@
 // lib/sections/skills/skills_section.dart
 import 'package:flutter/material.dart';
-import 'skills_work.dart';
-import 'skills_private.dart';
-import 'skills_bar_chart.dart';
-import 'skills_pie_chart.dart';
+import 'data/skills_work.dart';
+import 'data/skills_private.dart';
+import 'charts/skills_bar_chart.dart';
+import 'charts/skills_pie_chart.dart';
 
 class SkillsSection extends StatefulWidget {
   const SkillsSection({super.key});
@@ -17,10 +17,35 @@ class _SkillsSectionState extends State<SkillsSection>
   late TabController _tabController;
   bool _showPie = false;
 
+  // 非同期でロードしたスキルデータ
+  Map<String, double>? workSkills;
+  Map<String, double>? privateSkills;
+  bool _isLoading = true;
+
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+    _loadSkills();
+  }
+
+  Future<void> _loadSkills() async {
+    try {
+      final loadedWork = await loadWorkSkillsAll(); // workSkills の非同期読み込み
+      final loadedPrivate = await loadPrivateSkillsAll(); // privateSkills の非同期読み込み
+
+      setState(() {
+        workSkills = loadedWork['skills'];
+        privateSkills = loadedPrivate['skills'];
+        _isLoading = false;
+      });
+    } catch (e) {
+      // エラー処理
+      debugPrint('Error loading skills: $e');
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 
   @override
@@ -71,29 +96,33 @@ class _SkillsSectionState extends State<SkillsSection>
 
           // タブビュー
           Expanded(
-            child: TabBarView(
-              controller: _tabController,
-              children: [
-                Center(
-                  child: SizedBox(
-                    width: 1000,
-                    height: 500,
-                    child: _showPie
-                        ? SkillsPieChart(data: workSkills, isDark: isDark)
-                        : SkillsBarChart(data: workSkills, isDark: isDark),
+            child: _isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : TabBarView(
+                    controller: _tabController,
+                    children: [
+                      // Work タブ
+                      Center(
+                        child: SizedBox(
+                          width: 1000,
+                          height: 500,
+                          child: _showPie
+                              ? SkillsPieChart(data: workSkills!, isDark: isDark)
+                              : SkillsBarChart(data: workSkills!, isDark: isDark),
+                        ),
+                      ),
+                      // Private タブ
+                      Center(
+                        child: SizedBox(
+                          width: 1000,
+                          height: 500,
+                          child: _showPie
+                              ? SkillsPieChart(data: privateSkills!, isDark: isDark)
+                              : SkillsBarChart(data: privateSkills!, isDark: isDark),
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-                Center(
-                  child: SizedBox(
-                    width: 1000,
-                    height: 500,
-                    child: _showPie
-                        ? SkillsPieChart(data: privateSkills, isDark: isDark)
-                        : SkillsBarChart(data: privateSkills, isDark: isDark),
-                  ),
-                ),
-              ],
-            ),
           ),
         ],
       ),

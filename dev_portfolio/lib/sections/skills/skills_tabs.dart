@@ -1,11 +1,11 @@
 // lib/sections/skills/skills_tabs.dart
 import 'package:flutter/material.dart';
-import 'skills_bar_chart.dart';
-import 'skills_pie_chart.dart';
-import 'skills_work.dart';
-import 'skills_private.dart';
+import 'charts/skills_bar_chart.dart';
+import 'charts/skills_pie_chart.dart';
+import 'data/skills_work.dart';
+import 'data/skills_private.dart';
 
-class SkillsTabs extends StatelessWidget {
+class SkillsTabs extends StatefulWidget {
   final TabController tabController;
   final bool showPie;
   final bool isDark;
@@ -18,13 +18,49 @@ class SkillsTabs extends StatelessWidget {
   });
 
   @override
+  State<SkillsTabs> createState() => _SkillsTabsState();
+}
+
+class _SkillsTabsState extends State<SkillsTabs> {
+  Map<String, double>? workSkills;
+  Map<String, double>? privateSkills;
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSkills();
+  }
+
+  Future<void> _loadSkills() async {
+    try {
+      final loadedWork = await loadWorkSkillsAll();
+      final loadedPrivate = await loadPrivateSkillsAll();
+      setState(() {
+        workSkills = loadedWork['skills'];
+        privateSkills = loadedPrivate['skills'];
+        _isLoading = false;
+      });
+    } catch (e) {
+      debugPrint('Error loading skills: $e');
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
     return Column(
       children: [
         TabBar(
-          controller: tabController,
+          controller: widget.tabController,
           labelColor: Colors.orangeAccent,
-          unselectedLabelColor: isDark ? Colors.white : Colors.white,
+          unselectedLabelColor: widget.isDark ? Colors.white : Colors.white,
           indicatorColor: Colors.orangeAccent,
           tabs: const [
             Tab(text: 'Work'),
@@ -34,24 +70,24 @@ class SkillsTabs extends StatelessWidget {
         const SizedBox(height: 16),
         Expanded(
           child: TabBarView(
-            controller: tabController,
+            controller: widget.tabController,
             children: [
               Center(
                 child: SizedBox(
                   width: 1000,
                   height: 500,
-                  child: showPie
-                      ? SkillsPieChart(data: workSkills, isDark: isDark)
-                      : SkillsBarChart(data: workSkills, isDark: isDark),
+                  child: widget.showPie
+                      ? SkillsPieChart(data: workSkills!, isDark: widget.isDark)
+                      : SkillsBarChart(data: workSkills!, isDark: widget.isDark),
                 ),
               ),
               Center(
                 child: SizedBox(
                   width: 1000,
                   height: 500,
-                  child: showPie
-                      ? SkillsPieChart(data: privateSkills, isDark: isDark)
-                      : SkillsBarChart(data: privateSkills, isDark: isDark),
+                  child: widget.showPie
+                      ? SkillsPieChart(data: privateSkills!, isDark: widget.isDark)
+                      : SkillsBarChart(data: privateSkills!, isDark: widget.isDark),
                 ),
               ),
             ],
