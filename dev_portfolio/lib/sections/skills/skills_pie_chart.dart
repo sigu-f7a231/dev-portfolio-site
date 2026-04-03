@@ -1,6 +1,6 @@
-// lib/sections/skills/skills_pie_chart.dart
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:flutter/gestures.dart'; // PointerEvent系を使うため
 
 class SkillsPieChart extends StatefulWidget {
   final Map<String, double> data;
@@ -9,7 +9,7 @@ class SkillsPieChart extends StatefulWidget {
   const SkillsPieChart({super.key, required this.data, required this.isDark});
 
   @override
-  State<SkillsPieChart> createState() => _SkillsPieChartState();
+  _SkillsPieChartState createState() => _SkillsPieChartState();
 }
 
 class _SkillsPieChartState extends State<SkillsPieChart> {
@@ -17,57 +17,65 @@ class _SkillsPieChartState extends State<SkillsPieChart> {
 
   @override
   Widget build(BuildContext context) {
-    final entries = widget.data.entries.toList();
-    final screenWidth = MediaQuery.of(context).size.width;
-    final chartSize = screenWidth * 0.35;
-    final maxRadius = chartSize / 2;
+    final colors = [
+      Colors.blueAccent,
+      Colors.orangeAccent,
+      Colors.greenAccent,
+      Colors.purpleAccent,
+      Colors.redAccent,
+      Colors.tealAccent,
+      Colors.yellowAccent,
+      Colors.pinkAccent,
+    ];
 
-    return Center(
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
       child: SizedBox(
-        width: chartSize + 40,
-        height: chartSize + 40,
+        height: 600, // 円グラフのサイズを大きく
         child: PieChart(
           PieChartData(
+            sectionsSpace: 4,
+            centerSpaceRadius: 40,
             pieTouchData: PieTouchData(
-              touchCallback: (event, response) {
+              touchCallback: (event, pieTouchResponse) {
                 setState(() {
-                  if (!event.isInterestedForInteractions ||
-                      response == null ||
-                      response.touchedSection == null) {
-                    touchedIndex = null;
+                  final idx = pieTouchResponse?.touchedSection?.touchedSectionIndex;
+                  if (idx != null &&
+                      event is! PointerExitEvent &&
+                      event is! PointerUpEvent) {
+                    touchedIndex = idx;
                   } else {
-                    touchedIndex = response.touchedSection!.touchedSectionIndex;
+                    touchedIndex = null;
                   }
                 });
               },
             ),
-            sections: List.generate(entries.length, (i) {
-              final e = entries[i];
-              final isTouched = i == touchedIndex;
-              final radius = isTouched ? maxRadius * 1.05 : maxRadius;
-              final fontSize = isTouched ? 14.0 : 12.0;
-              final percentage = e.value.round();
-
+            sections: widget.data.entries.mapIndexed((entry, index) {
+              final isTouched = index == touchedIndex;
+              final double radius = isTouched ? 110 : 100; // マウスオーバーで大きく
               return PieChartSectionData(
-                value: e.value.toDouble(),
-                title: '${e.key}\n$percentage%',
+                value: entry.value,
+                title: '${entry.key}\n${entry.value.toInt()}%',
                 radius: radius,
-                color: widget.isDark
-                    ? Colors.tealAccent.shade400
-                    : Colors.primaries[i % Colors.primaries.length],
                 titleStyle: TextStyle(
-                  fontSize: fontSize,
                   color: widget.isDark ? Colors.white : Colors.black,
+                  fontSize: isTouched ? 14 : 12,
                   fontWeight: FontWeight.bold,
                 ),
-                titlePositionPercentageOffset: 1.15,
+                color: colors[index % colors.length],
               );
-            }),
-            sectionsSpace: 4,
-            centerSpaceRadius: 0,
+            }).toList(),
           ),
         ),
       ),
     );
+  }
+}
+
+// Map.entries に index を付けるヘルパー
+extension MapIndex<K, V> on Iterable<MapEntry<K, V>> {
+  Iterable<T> mapIndexed<T>(T Function(MapEntry<K, V>, int) f) {
+    var i = 0;
+    return map((e) => f(e, i++));
   }
 }

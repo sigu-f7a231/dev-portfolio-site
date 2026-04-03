@@ -4,7 +4,7 @@ import '../sections/header/header.dart';
 import '../sections/hero_section.dart';
 import '../sections/about_section.dart';
 import '../sections/skills/skills_section.dart';
-import '../sections/projects_section.dart';
+import '../sections/projects/projects_section.dart';
 import '../controllers/scroll_controller.dart';
 
 class HomePage extends StatelessWidget {

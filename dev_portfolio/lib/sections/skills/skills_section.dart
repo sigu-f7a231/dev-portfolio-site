@@ -1,7 +1,7 @@
 // lib/sections/skills/skills_section.dart
 import 'package:flutter/material.dart';
-import 'work_skills.dart';
-import 'private_skills.dart';
+import 'skills_work.dart';
+import 'skills_private.dart';
 import 'skills_bar_chart.dart';
 import 'skills_pie_chart.dart';
 
@@ -76,7 +76,7 @@ class _SkillsSectionState extends State<SkillsSection>
               children: [
                 Center(
                   child: SizedBox(
-                    width: 1000, // グラフ領域
+                    width: 1000,
                     height: 500,
                     child: _showPie
                         ? SkillsPieChart(data: workSkills, isDark: isDark)

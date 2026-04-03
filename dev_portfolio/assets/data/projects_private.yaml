@@ -1,0 +1,18 @@
+projects:
+  - title: ポートフォリオサイト
+    description: Flutter Webで制作
+    details: UI/UX設計とデプロイまで担当
+    server_os: Ubuntu
+    db: Firebase
+    tools_fw: Flutter, Firebase
+    skills: Dart, Firebase, UI設計
+    period: 2023-03 ~ 2023-05
+
+  - title: ゲーム開発
+    description: Unityで2Dゲーム制作
+    details: キャラクター・ステージ制作
+    server_os: Windows
+    db: SQLite
+    tools_fw: Unity, Git
+    skills: C#, Unity
+    period: 2022-11 ~ 2023-01
