@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../chart_config.dart';
+import '../../config/chart_config.dart';
 
 class BarLegend extends StatelessWidget {
   final List<MapEntry<String, double>> entries;

@@ -4,6 +4,7 @@ import 'charts/skills_bar_chart.dart';
 import 'charts/skills_pie_chart.dart';
 import 'data/skills_work.dart';
 import 'data/skills_private.dart';
+import 'config/skills_tabs_config.dart'; // ← 追加
 
 class SkillsTabs extends StatefulWidget {
   final TabController tabController;
@@ -59,23 +60,20 @@ class _SkillsTabsState extends State<SkillsTabs> {
       children: [
         TabBar(
           controller: widget.tabController,
-          labelColor: Colors.orangeAccent,
-          unselectedLabelColor: widget.isDark ? Colors.white : Colors.white,
-          indicatorColor: Colors.orangeAccent,
-          tabs: const [
-            Tab(text: 'Work'),
-            Tab(text: 'Private'),
-          ],
+          labelColor: SkillsTabsConfig.labelColor(widget.isDark),
+          unselectedLabelColor: SkillsTabsConfig.unselectedLabelColor(widget.isDark),
+          indicatorColor: SkillsTabsConfig.indicatorColor(widget.isDark),
+          tabs: SkillsTabsConfig.mainTabs.map((t) => Tab(text: t)).toList(),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: SkillsTabsConfig.spacingBetweenTabBarAndContent),
         Expanded(
           child: TabBarView(
             controller: widget.tabController,
             children: [
               Center(
                 child: SizedBox(
-                  width: 1000,
-                  height: 500,
+                  width: SkillsTabsConfig.cardWidth,
+                  height: SkillsTabsConfig.cardHeight,
                   child: widget.showPie
                       ? SkillsPieChart(data: workSkills!, isDark: widget.isDark)
                       : SkillsBarChart(data: workSkills!, isDark: widget.isDark),
@@ -83,8 +81,8 @@ class _SkillsTabsState extends State<SkillsTabs> {
               ),
               Center(
                 child: SizedBox(
-                  width: 1000,
-                  height: 500,
+                  width: SkillsTabsConfig.cardWidth,
+                  height: SkillsTabsConfig.cardHeight,
                   child: widget.showPie
                       ? SkillsPieChart(data: privateSkills!, isDark: widget.isDark)
                       : SkillsBarChart(data: privateSkills!, isDark: widget.isDark),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../config/chart_config.dart';
 import 'bar_chart/bar_graph.dart';
 import 'bar_chart/bar_legend.dart';
 
@@ -22,9 +23,23 @@ class _SkillsBarChartState extends State<SkillsBarChart> {
 
     return Row(
       children: [
-        Expanded(flex: 2, child: BarGraph(entries: entries, touchedIndex: touchedIndex, isDark: widget.isDark)),
-        const SizedBox(width: 32),
-        Expanded(flex: 2, child: BarLegend(entries: entries, touchedIndex: touchedIndex, isDark: widget.isDark)),
+        Expanded(
+         flex: ChartLayout.barGraphFlex,
+          child: BarGraph(
+            entries: entries,
+            touchedIndex: touchedIndex,
+            isDark: widget.isDark,
+          ),
+        ),
+        SizedBox(width: ChartLayout.barSpacing),
+        Expanded(
+          flex: ChartLayout.barLegendFlex,
+          child: BarLegend(
+            entries: entries,
+            touchedIndex: touchedIndex,
+            isDark: widget.isDark,
+          ),
+        ),
       ],
     );
   }

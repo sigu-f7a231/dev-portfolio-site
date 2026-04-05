@@ -1,30 +1,41 @@
-// lib/sections/skills/skills_header.dart
 import 'package:flutter/material.dart';
+import '../config/skills_section_config.dart';
 
 class SkillsHeader extends StatelessWidget {
   final bool showPie;
-  final ValueChanged<bool> onToggle;
-  final Color textColor;
+  final bool isDark;
+  final Function(bool) onToggle;
 
   const SkillsHeader({
     super.key,
     required this.showPie,
+    required this.isDark,
     required this.onToggle,
-    required this.textColor,
   });
 
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Text('Skills', style: TextStyle(fontSize: 28, color: textColor)),
+        // タイトル
+        Text(
+          'Skills',
+          style: SkillsTextStyle.title(isDark),
+        ),
+
         const Spacer(),
+
+        // Pie切り替え
         Row(
           children: [
-            Text('Pie', style: TextStyle(color: textColor)),
+            Text(
+              'Pie',
+              style: SkillsTextStyle.label(isDark),
+            ),
             Switch(
               value: showPie,
               onChanged: onToggle,
+              activeColor: SkillsColors.accent,
             ),
           ],
         ),

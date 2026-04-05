@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../chart_config.dart';
+import '../../config/chart_config.dart';
 
 class BarGraph extends StatelessWidget {
   final List<MapEntry<String, double>> entries;
@@ -43,7 +43,7 @@ class BarGraph extends StatelessWidget {
                         height: ChartLayout.barHeight,
                         decoration: BoxDecoration(
                           color: ChartColors.mainColors[i % ChartColors.mainColors.length]
-                              .withOpacity(isActive ? ChartLayout.barActiveOpacity : 1.0),
+                          .withOpacity(isActive? ChartLayout.barActiveOpacity: ChartLayout.barInactiveOpacity,),
                           borderRadius:
                               BorderRadius.circular(ChartLayout.barBorderRadius),
                           border: isActive

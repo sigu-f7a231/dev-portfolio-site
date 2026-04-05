@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../chart_config.dart';
-import '../utils.dart'; // ← 追加
+import '../../config/chart_config.dart';
+import '../../../../utils/graph_utils.dart'; // ← 追加
 
 class PieLegend extends StatelessWidget {
   final Map<String, double> data;

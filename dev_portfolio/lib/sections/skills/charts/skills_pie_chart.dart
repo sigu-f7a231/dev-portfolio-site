@@ -1,12 +1,17 @@
 import 'package:flutter/material.dart';
 import 'pie_chart/pie_graph.dart';
 import 'pie_chart/pie_legend.dart';
+import '../config/chart_config.dart';
 
 class SkillsPieChart extends StatefulWidget {
   final Map<String, double> data;
   final bool isDark;
 
-  const SkillsPieChart({super.key, required this.data, required this.isDark});
+  const SkillsPieChart({
+    super.key,
+    required this.data,
+    required this.isDark,
+  });
 
   @override
   State<SkillsPieChart> createState() => _SkillsPieChartState();
@@ -18,7 +23,7 @@ class _SkillsPieChartState extends State<SkillsPieChart> {
 
   void _handleHover(int? idx) {
     setState(() {
-      hoveredIndex = idx == -1 ? null : idx;
+      hoveredIndex = idx;
     });
   }
 
@@ -33,8 +38,12 @@ class _SkillsPieChartState extends State<SkillsPieChart> {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // ■ Pie グラフ
         Padding(
-          padding: const EdgeInsets.only(top: 24.0, left: 32.0),
+          padding: const EdgeInsets.only(
+            top: ChartLayout.pieTopPadding,
+            left: ChartLayout.pieLeftPadding,
+          ),
           child: PieGraph(
             data: widget.data,
             isDark: widget.isDark,
@@ -44,15 +53,18 @@ class _SkillsPieChartState extends State<SkillsPieChart> {
             onSelect: _handleSelect,
           ),
         ),
-        const SizedBox(width: 100),
+
+        SizedBox(width: ChartLayout.pieLegendSpacingRow),
+
+        // ■ Legend
         Expanded(
           child: PieLegend(
             data: widget.data,
             isDark: widget.isDark,
             hoveredIndex: hoveredIndex,
             selectedIndex: selectedIndex,
-            onHover: (idx) => _handleHover(idx),
-            onSelect: (idx) => _handleSelect(idx),
+            onHover: _handleHover,
+            onSelect: _handleSelect,
           ),
         ),
       ],
