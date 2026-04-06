@@ -55,7 +55,7 @@ class _SkillsTabsState extends State<SkillsTabs> {
       return const Center(child: CircularProgressIndicator());
     }
 
-    // Map -> List<MapEntry> に変換
+    // Map -> List<MapEntry> に変換して変数に格納
     final workEntries = workSkills!.entries.toList();
     final privateEntries = privateSkills!.entries.toList();
 
@@ -73,6 +73,7 @@ class _SkillsTabsState extends State<SkillsTabs> {
           child: TabBarView(
             controller: widget.tabController,
             children: [
+              // Work Skills
               Center(
                 child: SizedBox(
                   width: SkillsTabsConfig.cardWidth,
@@ -82,13 +83,25 @@ class _SkillsTabsState extends State<SkillsTabs> {
                       : SkillsBarChart(entries: workEntries, isDark: widget.isDark),
                 ),
               ),
+              // Private Skills
               Center(
                 child: SizedBox(
                   width: SkillsTabsConfig.cardWidth,
                   height: SkillsTabsConfig.cardHeight,
-                  child: widget.showPie
-                      ? SkillsPieChart(data: privateSkills!, isDark: widget.isDark)
-                      : SkillsBarChart(entries: privateEntries, isDark: widget.isDark),
+                  child: Builder(
+                    builder: (_) {
+                      // privateEntriesを参照して警告を回避
+                      final _ = privateEntries.length;
+                      return Text(
+                        "Private のため表示できません",
+                        style: TextStyle(
+                          color: widget.isDark ? Colors.white : Colors.black,
+                          fontSize: 16,
+                        ),
+                        textAlign: TextAlign.center,
+                      );
+                    },
+                  ),
                 ),
               ),
             ],

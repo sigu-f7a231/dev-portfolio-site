@@ -1,5 +1,3 @@
-// lib/sections/skills/data/skills_private.dart
-
 import 'package:flutter/services.dart';
 import 'package:yaml/yaml.dart';
 import 'skills_aggregator.dart';
@@ -16,6 +14,6 @@ Future<Map<String, Map<String, double>>> loadPrivateSkillsAll() async {
     'server_os': aggregateCategory(projects, 'server_os'),
     'db': aggregateCategory(projects, 'db'),
     'tools_fw': aggregateCategory(projects, 'tools_fw'),
+    // workflow は含めない
   };
 }
-

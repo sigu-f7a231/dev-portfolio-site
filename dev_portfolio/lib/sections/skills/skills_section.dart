@@ -23,7 +23,7 @@ class _SkillsSectionState extends State<SkillsSection>
   late Future<Map<String, Map<String, double>>> _workSkillsFuture;
   late Future<Map<String, Map<String, double>>> _privateSkillsFuture;
 
-  final categories = SkillsSectionConfig.categories;
+  final baseCategories = SkillsSectionConfig.categories;
 
   @override
   void initState() {
@@ -32,8 +32,9 @@ class _SkillsSectionState extends State<SkillsSection>
     _mainTabController =
         TabController(length: SkillsSectionConfig.mainTabs.length, vsync: this);
 
+    // workflow タブを含める
     _categoryTabController =
-        TabController(length: categories.length, vsync: this);
+        TabController(length: baseCategories.length + 1, vsync: this);
 
     _workSkillsFuture = loadWorkSkillsAll();
     _privateSkillsFuture = loadPrivateSkillsAll();
@@ -54,7 +55,6 @@ class _SkillsSectionState extends State<SkillsSection>
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-
     final bgColor = SkillsColors.background(isDark);
     final textColor = SkillsColors.text(isDark);
 
@@ -70,7 +70,6 @@ class _SkillsSectionState extends State<SkillsSection>
             isDark: isDark,
             onToggle: (val) => setState(() => _showPie = val),
           ),
-
           const SizedBox(height: SkillsLayout.spacing),
 
           // Main Tabs
@@ -79,24 +78,33 @@ class _SkillsSectionState extends State<SkillsSection>
             tabs: SkillsSectionConfig.mainTabs,
             textColor: textColor,
           ),
-
           const SizedBox(height: SkillsLayout.spacing),
 
           // Category Tabs
           SkillsTabBar(
             controller: _categoryTabController,
-            tabs: categories.map((c) => c.toUpperCase()).toList(),
+            tabs: [...baseCategories.map((c) => c.toUpperCase()), 'WORKFLOW'],
             textColor: textColor,
           ),
-
           const SizedBox(height: SkillsLayout.spacing),
 
+          // Tab content
           Expanded(
             child: TabBarView(
               controller: _mainTabController,
               children: [
-                _buildFuture(_workSkillsFuture, isDark),
-                _buildFuture(_privateSkillsFuture, isDark),
+                // Work
+                _buildFuture(
+                  _workSkillsFuture,
+                  isDark,
+                  isPrivate: false,
+                ),
+                // Private
+                _buildFuture(
+                  _privateSkillsFuture,
+                  isDark,
+                  isPrivate: true,
+                ),
               ],
             ),
           ),
@@ -106,7 +114,10 @@ class _SkillsSectionState extends State<SkillsSection>
   }
 
   Widget _buildFuture(
-      Future<Map<String, Map<String, double>>> future, bool isDark) {
+      Future<Map<String, Map<String, double>>> future,
+      bool isDark, {
+        required bool isPrivate,
+      }) {
     return FutureBuilder<Map<String, Map<String, double>>>(
       future: future,
       builder: (context, snapshot) {
@@ -116,15 +127,32 @@ class _SkillsSectionState extends State<SkillsSection>
 
         final data = snapshot.data!;
 
+        // カテゴリ + workflow
+        final categories = [...baseCategories, 'workflow'];
+
         return TabBarView(
           controller: _categoryTabController,
           children: categories.map((category) {
             final categoryData = _getCategoryData(data, category);
 
+            // Privateの場合はworkflowのみ非表示にしてメッセージ表示
+            if (isPrivate && category.toLowerCase() == 'workflow') {
+              return Center(
+                child: Text(
+                  "Private のため表示できません",
+                  style: TextStyle(
+                    color: isDark ? Colors.white : Colors.black,
+                    fontSize: 16,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              );
+            }
+
             return SkillsCard(
               data: categoryData,
               isDark: isDark,
-              showPie: _showPie,
+              showPie: !isPrivate ? _showPie : false,
             );
           }).toList(),
         );

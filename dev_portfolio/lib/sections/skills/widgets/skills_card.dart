@@ -1,7 +1,9 @@
+// lib/sections/skills/widgets/skills_card.dart
 import 'package:flutter/material.dart';
-import '../../config/skills_section_config.dart';
 import '../charts/skills_bar_chart.dart';
 import '../charts/skills_pie_chart.dart';
+import '../../../utils/language_utils.dart';
+import '../../config/skills_card_config.dart';
 
 class SkillsCard extends StatelessWidget {
   final Map<String, double> data;
@@ -17,34 +19,34 @@ class SkillsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cardColor = SkillsColors.card(isDark);
+    final cardColor = SkillsCardConfig.background(isDark);
 
-    // Map -> List<MapEntry に変換
-    final entries = data.entries.toList();
+    // workflow データなら日本語化
+    final displayData = data.keys.any((k) =>
+            LanguageUtils.workflowLabels['ja']!.containsKey(k))
+        ? LanguageUtils.translateWorkflowData(data)
+        : data;
 
     return Center(
       child: Container(
-        width: SkillsLayout.cardWidth,
-        height: SkillsLayout.cardHeight,
-        padding: const EdgeInsets.all(SkillsLayout.cardPadding),
+        width: SkillsCardConfig.width,
+        height: SkillsCardConfig.height,
+        padding: const EdgeInsets.all(SkillsCardConfig.padding),
         decoration: BoxDecoration(
           color: cardColor,
-          borderRadius: BorderRadius.circular(SkillsLayout.borderRadius),
+          borderRadius: BorderRadius.circular(SkillsCardConfig.borderRadius),
           boxShadow: [
             if (!isDark)
               BoxShadow(
-                color: Colors.black.withOpacity(SkillsLayout.shadowOpacity),
-                blurRadius: SkillsLayout.shadowBlur,
-                offset: SkillsLayout.shadowOffset,
+                color: Colors.black.withOpacity(SkillsCardConfig.shadowOpacity),
+                blurRadius: SkillsCardConfig.shadowBlur,
+                offset: SkillsCardConfig.shadowOffset,
               ),
           ],
         ),
         child: showPie
-            ? SkillsPieChart(data: data, isDark: isDark)
-            : SkillsBarChart(
-                entries: entries,
-                isDark: isDark, // hover と touchedIndex は SkillsBarChart 内で管理
-              ),
+            ? SkillsPieChart(data: displayData, isDark: isDark)
+            : SkillsBarChart(entries: displayData.entries.toList(), isDark: isDark),
       ),
     );
   }

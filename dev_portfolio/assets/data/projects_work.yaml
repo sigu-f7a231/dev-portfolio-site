@@ -7,6 +7,14 @@ projects:
     tools_fw: Flutter, Firebase, Git
     skills: Dart, Firebase, UI設計
     period: 2023-01 ~ 2023-04
+    workflow:
+      requirements: true
+      basic_design: true
+      detailed_design: true
+      implementation_unit_test: true
+      integration_test: true
+      system_test: false
+      maintenance_operation: false
 
   - title: ECサイト構築
     description: WordPressで開発
@@ -16,3 +24,11 @@ projects:
     tools_fw: WordPress, PHP
     skills: PHP, HTML, CSS
     period: 2022-08 ~ 2022-12
+    workflow:
+      requirements: true
+      basic_design: true
+      detailed_design: true
+      implementation_unit_test: true
+      integration_test: true
+      system_test: false
+      maintenance_operation: false
