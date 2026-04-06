@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
-import '../../config/chart_config.dart';
+import '../../config/skills_chart_config.dart';
 import 'package:flutter/gestures.dart';
 import '../../../../utils/graph_utils.dart';
 

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../config/chart_config.dart';
+import '../config/skills_chart_config.dart';
 import 'bar_chart/bar_graph.dart';
 import 'bar_chart/bar_legend.dart';
 
