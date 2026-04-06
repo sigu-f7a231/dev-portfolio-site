@@ -32,7 +32,7 @@ class _SkillsSectionState extends State<SkillsSection>
     _mainTabController =
         TabController(length: SkillsSectionConfig.mainTabs.length, vsync: this);
 
-    // workflow タブを含める
+    // カテゴリ + workflow 用
     _categoryTabController =
         TabController(length: baseCategories.length + 1, vsync: this);
 
@@ -56,7 +56,6 @@ class _SkillsSectionState extends State<SkillsSection>
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final bgColor = SkillsColors.background(isDark);
-    final textColor = SkillsColors.text(isDark);
 
     return Container(
       color: bgColor,
@@ -76,7 +75,7 @@ class _SkillsSectionState extends State<SkillsSection>
           SkillsTabBar(
             controller: _mainTabController,
             tabs: SkillsSectionConfig.mainTabs,
-            textColor: textColor,
+            isDark: isDark,
           ),
           const SizedBox(height: SkillsLayout.spacing),
 
@@ -84,7 +83,7 @@ class _SkillsSectionState extends State<SkillsSection>
           SkillsTabBar(
             controller: _categoryTabController,
             tabs: [...baseCategories.map((c) => c.toUpperCase()), 'WORKFLOW'],
-            textColor: textColor,
+            isDark: isDark,
           ),
           const SizedBox(height: SkillsLayout.spacing),
 
@@ -135,7 +134,7 @@ class _SkillsSectionState extends State<SkillsSection>
           children: categories.map((category) {
             final categoryData = _getCategoryData(data, category);
 
-            // Privateの場合はworkflowのみ非表示にしてメッセージ表示
+            // Private の workflow のみ非表示
             if (isPrivate && category.toLowerCase() == 'workflow') {
               return Center(
                 child: Text(
@@ -152,7 +151,10 @@ class _SkillsSectionState extends State<SkillsSection>
             return SkillsCard(
               data: categoryData,
               isDark: isDark,
-              showPie: !isPrivate ? _showPie : false,
+              // workflow 以外はスイッチ反映
+              showPie: category.toLowerCase() == 'workflow' && isPrivate
+                  ? false
+                  : _showPie,
             );
           }).toList(),
         );

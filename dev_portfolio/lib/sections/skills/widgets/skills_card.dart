@@ -1,9 +1,8 @@
-// lib/sections/skills/widgets/skills_card.dart
 import 'package:flutter/material.dart';
 import '../charts/skills_bar_chart.dart';
 import '../charts/skills_pie_chart.dart';
 import '../../../utils/language_utils.dart';
-import '../../config/skills_card_config.dart';
+import '../../config/skills_widgets_card_config.dart';
 
 class SkillsCard extends StatelessWidget {
   final Map<String, double> data;
@@ -19,11 +18,11 @@ class SkillsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cardColor = SkillsCardConfig.background(isDark);
+    final cardColor = SkillsCardConfig.cardColor(isDark);
 
     // workflow データなら日本語化
-    final displayData = data.keys.any((k) =>
-            LanguageUtils.workflowLabels['ja']!.containsKey(k))
+    final displayData = data.keys.any(
+            (k) => LanguageUtils.workflowLabels['ja']?.containsKey(k) ?? false)
         ? LanguageUtils.translateWorkflowData(data)
         : data;
 

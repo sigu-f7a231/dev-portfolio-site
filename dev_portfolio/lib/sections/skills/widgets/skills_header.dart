@@ -1,5 +1,6 @@
+// lib/sections/skills/widgets/skills_header.dart
 import 'package:flutter/material.dart';
-import '../../config/skills_section_config.dart';
+import '../../config/skills_widgets_header_config.dart';
 
 class SkillsHeader extends StatelessWidget {
   final bool showPie;
@@ -15,31 +16,41 @@ class SkillsHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        // タイトル
-        Text(
-          'Skills',
-          style: SkillsTextStyle.title(isDark),
-        ),
-
-        const Spacer(),
-
-        // Pie切り替え
-        Row(
-          children: [
-            Text(
-              'Pie',
-              style: SkillsTextStyle.label(isDark),
+    return Padding(
+      padding: SkillsHeaderConfig.rowPadding,
+      child: Row(
+        children: [
+          // タイトル
+          Text(
+            'Skills',
+            style: TextStyle(
+              fontSize: SkillsHeaderConfig.titleFontSize,
+              fontWeight: SkillsHeaderConfig.titleFontWeight,
+              color: SkillsHeaderConfig.titleColor(isDark),
             ),
-            Switch(
-              value: showPie,
-              onChanged: onToggle,
-              activeColor: SkillsColors.accent,
-            ),
-          ],
-        ),
-      ],
+          ),
+
+          const Spacer(),
+
+          // Pie切り替え
+          Row(
+            children: [
+              Text(
+                'Pie',
+                style: TextStyle(
+                  fontSize: SkillsHeaderConfig.labelFontSize,
+                  color: SkillsHeaderConfig.labelColor(isDark),
+                ),
+              ),
+              Switch(
+                value: showPie,
+                onChanged: onToggle,
+                activeColor: SkillsHeaderConfig.switchActiveColor,
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }

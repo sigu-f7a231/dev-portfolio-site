@@ -20,4 +20,9 @@ class SkillsCardConfig {
 
   /// 背景色
   static Color background(bool isDark) => isDark ? Colors.grey[850]! : Colors.white;
+
+  // static メソッドで定義
+  static Color cardColor(bool isDark) =>
+      isDark ? Colors.grey[850]! : Colors.white;
 }
+
