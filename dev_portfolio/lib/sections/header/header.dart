@@ -1,5 +1,5 @@
-// lib/sections/header/header.dart
 import 'package:flutter/material.dart';
+import '../config/header_config.dart';
 import 'desktop_header.dart';
 import 'mobile_header.dart';
 
@@ -25,7 +25,7 @@ class Header extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        if (constraints.maxWidth < 600) {
+        if (constraints.maxWidth < HeaderConfig.mobileBreakpoint) {
           return MobileHeader(
             onHomePressed: onHomePressed,
             onAboutPressed: onAboutPressed,

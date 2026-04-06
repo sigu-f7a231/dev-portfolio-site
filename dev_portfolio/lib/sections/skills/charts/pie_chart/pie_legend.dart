@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../config/skills_chart_config.dart';
+import '../../../config/skills_chart_config.dart';
 import '../../../../utils/graph_utils.dart'; // ← 追加
 
 class PieLegend extends StatelessWidget {

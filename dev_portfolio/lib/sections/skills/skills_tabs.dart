@@ -1,10 +1,9 @@
-// lib/sections/skills/skills_tabs.dart
 import 'package:flutter/material.dart';
 import 'charts/skills_bar_chart.dart';
 import 'charts/skills_pie_chart.dart';
 import 'data/skills_work.dart';
 import 'data/skills_private.dart';
-import 'config/skills_tabs_config.dart'; // ← 追加
+import '../config/skills_tabs_config.dart';
 
 class SkillsTabs extends StatefulWidget {
   final TabController tabController;
@@ -56,6 +55,10 @@ class _SkillsTabsState extends State<SkillsTabs> {
       return const Center(child: CircularProgressIndicator());
     }
 
+    // Map -> List<MapEntry> に変換
+    final workEntries = workSkills!.entries.toList();
+    final privateEntries = privateSkills!.entries.toList();
+
     return Column(
       children: [
         TabBar(
@@ -76,7 +79,7 @@ class _SkillsTabsState extends State<SkillsTabs> {
                   height: SkillsTabsConfig.cardHeight,
                   child: widget.showPie
                       ? SkillsPieChart(data: workSkills!, isDark: widget.isDark)
-                      : SkillsBarChart(data: workSkills!, isDark: widget.isDark),
+                      : SkillsBarChart(entries: workEntries, isDark: widget.isDark),
                 ),
               ),
               Center(
@@ -85,7 +88,7 @@ class _SkillsTabsState extends State<SkillsTabs> {
                   height: SkillsTabsConfig.cardHeight,
                   child: widget.showPie
                       ? SkillsPieChart(data: privateSkills!, isDark: widget.isDark)
-                      : SkillsBarChart(data: privateSkills!, isDark: widget.isDark),
+                      : SkillsBarChart(entries: privateEntries, isDark: widget.isDark),
                 ),
               ),
             ],

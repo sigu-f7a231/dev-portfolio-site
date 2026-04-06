@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../config/skills_section_config.dart';
+import '../../config/skills_section_config.dart';
 
 class SkillsTabBar extends StatelessWidget {
   final TabController controller;

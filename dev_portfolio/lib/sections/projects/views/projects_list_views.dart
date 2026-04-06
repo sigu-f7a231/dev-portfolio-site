@@ -1,7 +1,7 @@
 // lib/sections/projects/views/project_list.dart
 import 'package:flutter/material.dart';
 import '../models/projects_model.dart';
-import '../config/projects_views_list_config.dart';
+import '../../config/projects_views_list_config.dart';
 
 class ProjectList extends StatelessWidget {
   final Future<List<Project>> future;

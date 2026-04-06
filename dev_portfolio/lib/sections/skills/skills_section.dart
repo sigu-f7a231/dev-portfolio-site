@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'data/skills_work.dart';
 import 'data/skills_private.dart';
-import 'config/skills_section_config.dart';
+import '../config/skills_section_config.dart';
 import 'widgets/skills_header.dart';
 import 'widgets/skills_tab_bar.dart';
 import 'widgets/skills_card.dart';

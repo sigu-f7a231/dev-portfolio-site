@@ -1,18 +1,24 @@
 import 'package:flutter/material.dart';
+import 'config/hero_section_config.dart';
 
 class HeroSection extends StatelessWidget {
   const HeroSection({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Container(
-      height: MediaQuery.of(context).size.height,
-      color: Theme.of(context).brightness == Brightness.dark ? Colors.grey[900] : Colors.blueAccent,
+      height: HeroSectionConfig.height(context),
+      color: HeroSectionConfig.backgroundColor(isDark),
       child: const Center(
         child: Text(
           'Welcome to My Portfolio',
-          textAlign: TextAlign.center,
-          style: TextStyle(fontSize: 36, color: Colors.white),
+          textAlign: HeroSectionConfig.titleAlign,
+          style: TextStyle(
+            fontSize: HeroSectionConfig.titleFontSize,
+            color: HeroSectionConfig.titleColor,
+          ),
         ),
       ),
     );

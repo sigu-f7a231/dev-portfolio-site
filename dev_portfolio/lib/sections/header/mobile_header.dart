@@ -1,5 +1,5 @@
-// lib/sections/header/mobile_header.dart
 import 'package:flutter/material.dart';
+import '../config/header_config.dart';
 
 class MobileHeader extends StatelessWidget {
   final VoidCallback onHomePressed;
@@ -23,17 +23,17 @@ class MobileHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return AppBar(
       title: const Text('DevPortfolio'),
-      actions: [
-        Row(
-          children: [
-            const Text('Dark Mode'),
-            Switch(
-              value: themeMode == ThemeMode.dark,
-              onChanged: onThemeChanged,
-            ),
-          ],
-        ),
-      ],
+      backgroundColor: HeaderConfig.mobileBackgroundColor(context),
+      iconTheme: IconThemeData(color: HeaderConfig.mobileTextColor(context)),
+      actions: [],
+      leading: Builder(
+        builder: (context) {
+          return IconButton(
+            icon: const Icon(Icons.menu),
+            onPressed: () => Scaffold.of(context).openDrawer(),
+          );
+        },
+      ),
     );
   }
 }

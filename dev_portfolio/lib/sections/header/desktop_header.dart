@@ -1,5 +1,5 @@
-// lib/sections/header/desktop_header.dart
 import 'package:flutter/material.dart';
+import '../config/header_config.dart';
 
 class DesktopHeader extends StatelessWidget {
   final VoidCallback onHomePressed;
@@ -21,23 +21,38 @@ class DesktopHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bgColor = HeaderConfig.backgroundColor(context);
+    final txtColor = HeaderConfig.textColor(context);
+
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 20),
-      color: Theme.of(context).scaffoldBackgroundColor,
+      padding: HeaderConfig.desktopPadding,
+      color: bgColor,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Row(
             children: [
-              TextButton(onPressed: onHomePressed, child: const Text('Home')),
-              TextButton(onPressed: onAboutPressed, child: const Text('About')),
-              TextButton(onPressed: onSkillsPressed, child: const Text('Skills')),
-              TextButton(onPressed: onProjectsPressed, child: const Text('Projects')),
+              TextButton(
+                onPressed: onHomePressed,
+                child: Text('Home', style: TextStyle(color: txtColor)),
+              ),
+              TextButton(
+                onPressed: onAboutPressed,
+                child: Text('About', style: TextStyle(color: txtColor)),
+              ),
+              TextButton(
+                onPressed: onSkillsPressed,
+                child: Text('Skills', style: TextStyle(color: txtColor)),
+              ),
+              TextButton(
+                onPressed: onProjectsPressed,
+                child: Text('Projects', style: TextStyle(color: txtColor)),
+              ),
             ],
           ),
           Row(
             children: [
-              const Text('Dark Mode'),
+              const Text('Dark Mode', style: TextStyle(color: Colors.white70)),
               Switch(
                 value: themeMode == ThemeMode.dark,
                 onChanged: onThemeChanged,

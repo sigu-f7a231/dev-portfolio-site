@@ -1,13 +1,14 @@
+// lib/sections/skills/charts/skills_bar_chart.dart
 import 'package:flutter/material.dart';
-import '../config/skills_chart_config.dart';
 import 'bar_chart/bar_graph.dart';
 import 'bar_chart/bar_legend.dart';
+import '../../config/skills_chart_config.dart';
 
 class SkillsBarChart extends StatefulWidget {
-  final Map<String, double> data;
+  final List<MapEntry<String, double>> entries;
   final bool isDark;
 
-  const SkillsBarChart({super.key, required this.data, required this.isDark});
+  const SkillsBarChart({super.key, required this.entries, required this.isDark});
 
   @override
   State<SkillsBarChart> createState() => _SkillsBarChartState();
@@ -16,28 +17,35 @@ class SkillsBarChart extends StatefulWidget {
 class _SkillsBarChartState extends State<SkillsBarChart> {
   int? touchedIndex;
 
+  void _onHover(int? index) {
+    setState(() {
+      touchedIndex = index;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    final entries = widget.data.entries.toList()
-      ..sort((a, b) => b.value.compareTo(a.value));
-
     return Row(
       children: [
+        // BarGraph
         Expanded(
-         flex: ChartLayout.barGraphFlex,
+          flex: ChartLayout.barGraphFlex,
           child: BarGraph(
-            entries: entries,
-            touchedIndex: touchedIndex,
+            entries: widget.entries,
             isDark: widget.isDark,
+            touchedIndex: touchedIndex,
+            onHover: _onHover,
           ),
         ),
-        SizedBox(width: ChartLayout.barSpacing),
+        const SizedBox(width: ChartLayout.barSpacing),
+        // BarLegend
         Expanded(
           flex: ChartLayout.barLegendFlex,
           child: BarLegend(
-            entries: entries,
-            touchedIndex: touchedIndex,
+            entries: widget.entries,
             isDark: widget.isDark,
+            touchedIndex: touchedIndex,
+            onHover: _onHover,
           ),
         ),
       ],

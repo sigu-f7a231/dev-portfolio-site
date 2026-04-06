@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../config/skills_section_config.dart';
+import '../../config/skills_section_config.dart';
 
 class SkillsHeader extends StatelessWidget {
   final bool showPie;

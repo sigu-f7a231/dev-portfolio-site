@@ -1,7 +1,7 @@
 // lib/sections/projects/views/projects_tab_view.dart
 import 'package:flutter/material.dart';
 import '../models/projects_model.dart';
-import '../config/projects_views_tab_config.dart';
+import '../../config/projects_views_tab_config.dart';
 import 'projects_list_views.dart';
 import 'projects_collection_view.dart';
 

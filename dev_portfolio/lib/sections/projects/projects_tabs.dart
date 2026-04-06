@@ -2,7 +2,7 @@
 import 'package:flutter/material.dart';
 import 'views/projects_tab_view.dart';
 import 'models/projects_model.dart';
-import 'config/projects_tab_config.dart'; 
+import '../config/projects_tab_config.dart'; 
 
 class ProjectsTabs extends StatefulWidget {
   final Future<List<Project>> workFuture;
