@@ -1,6 +1,6 @@
 // lib/sections/projects/projects_header.dart
 import 'package:flutter/material.dart';
-import '../config/projects_header_config.dart';
+import '../config/projects/projects_header_config.dart';
 
 class ProjectsHeader extends StatelessWidget {
   final bool showCollectionView;

@@ -5,7 +5,7 @@ import 'data/projects_private.dart';
 import 'models/projects_model.dart';
 import 'views/projects_tab_view.dart';
 import 'projects_header.dart';
-import '../config/projects_section_config.dart';
+import '../config/projects/projects_section_config.dart';
 
 class ProjectsSection extends StatefulWidget {
   const ProjectsSection({super.key});

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'bar_chart/bar_graph.dart';
 import 'bar_chart/bar_legend.dart';
-import '../../config/skills_bar_chart_config.dart';
+import '../../config/skills/skills_bar_chart_config.dart';
 
 class SkillsBarChart extends StatefulWidget {
   final List<MapEntry<String, double>> entries;

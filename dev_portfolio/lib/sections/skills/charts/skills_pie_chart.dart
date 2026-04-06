@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'pie_chart/pie_graph.dart';
 import 'pie_chart/pie_legend.dart';
-import '../../config/skills_pie_chart_config.dart';
+import '../../config/skills/skills_pie_chart_config.dart';
 
 class SkillsPieChart extends StatefulWidget {
   final Map<String, double> data;

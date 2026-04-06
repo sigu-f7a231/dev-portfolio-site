@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../config/skills_bar_chart_config.dart';
+import '../../../config/skills/skills_bar_chart_config.dart';
 
 class BarGraph extends StatelessWidget {
   final List<MapEntry<String, double>> entries;

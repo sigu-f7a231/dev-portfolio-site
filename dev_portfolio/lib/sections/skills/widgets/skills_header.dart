@@ -1,6 +1,7 @@
 // lib/sections/skills/widgets/skills_header.dart
 import 'package:flutter/material.dart';
-import '../../config/skills_widgets_header_config.dart';
+import '../../config/skills/skills_widgets_header_config.dart';
+import 'skills_chart_switch.dart';
 
 class SkillsHeader extends StatelessWidget {
   final bool showPie;
@@ -29,25 +30,13 @@ class SkillsHeader extends StatelessWidget {
               color: SkillsHeaderConfig.titleColor(isDark),
             ),
           ),
+          const SizedBox(width: SkillsHeaderConfig.spacingBetweenTitleAndSwitch),
 
-          const Spacer(),
-
-          // Pie切り替え
-          Row(
-            children: [
-              Text(
-                'Pie',
-                style: TextStyle(
-                  fontSize: SkillsHeaderConfig.labelFontSize,
-                  color: SkillsHeaderConfig.labelColor(isDark),
-                ),
-              ),
-              Switch(
-                value: showPie,
-                onChanged: onToggle,
-                activeColor: SkillsHeaderConfig.switchActiveColor,
-              ),
-            ],
+          // Pie/Bar 切り替えボタン
+          SkillsChartSwitch(
+            showPie: showPie,
+            isDark: isDark,
+            onToggle: onToggle,
           ),
         ],
       ),

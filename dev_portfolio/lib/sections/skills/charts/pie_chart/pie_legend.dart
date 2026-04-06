@@ -1,6 +1,6 @@
 // lib/sections/skills/charts/pie_chart/pie_legend.dart
 import 'package:flutter/material.dart';
-import '../../../config/skills_pie_chart_config.dart';
+import '../../../config/skills/skills_pie_chart_config.dart';
 import '../../../../utils/graph_utils.dart';
 
 class PieLegend extends StatelessWidget {

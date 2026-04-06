@@ -3,7 +3,7 @@ import 'charts/skills_bar_chart.dart';
 import 'charts/skills_pie_chart.dart';
 import 'data/skills_work.dart';
 import 'data/skills_private.dart';
-import '../config/skills_tabs_config.dart';
+import '../config/skills/skills_tabs_config.dart';
 
 class SkillsTabs extends StatefulWidget {
   final TabController tabController;

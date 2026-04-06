@@ -1,6 +1,4 @@
-// lib/sections/skills/widgets/skills_tab_bar.dart
 import 'package:flutter/material.dart';
-import '../../config/skills_widgets_tab_bar_config.dart';
 
 class SkillsTabBar extends StatelessWidget {
   final TabController controller;
@@ -18,22 +16,10 @@ class SkillsTabBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return TabBar(
       controller: controller,
-      labelColor: SkillsTabBarConfig.selectedLabelColor,
-      unselectedLabelColor: SkillsTabBarConfig.labelColor(isDark),
-      indicatorColor: SkillsTabBarConfig.indicatorColor,
-      tabs: tabs
-          .map(
-            (t) => Tab(
-              child: Text(
-                t,
-                style: TextStyle(
-                  fontSize: SkillsTabBarConfig.labelFontSize,
-                  color: SkillsTabBarConfig.labelColor(isDark),
-                ),
-              ),
-            ),
-          )
-          .toList(),
+      isScrollable: true,
+      labelColor: isDark ? Colors.white : Colors.black,
+      unselectedLabelColor: isDark ? Colors.white54 : Colors.black54,
+      tabs: tabs.map((t) => Tab(text: t)).toList(),
     );
   }
 }

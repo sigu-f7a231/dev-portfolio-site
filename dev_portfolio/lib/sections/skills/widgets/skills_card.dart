@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../charts/skills_bar_chart.dart';
 import '../charts/skills_pie_chart.dart';
 import '../../../utils/language_utils.dart';
-import '../../config/skills_widgets_card_config.dart';
+import '../../config/skills/skills_widgets_card_config.dart';
 
 class SkillsCard extends StatelessWidget {
   final Map<String, double> data;

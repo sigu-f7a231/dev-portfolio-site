@@ -1,7 +1,7 @@
 // lib/sections/projects/views/project_collection_view.dart
 import 'package:flutter/material.dart';
 import '../models/projects_model.dart';
-import '../../config/projects_views_collection_config.dart';
+import '../../config/projects/projects_views_collection_config.dart';
 
 class ProjectCollectionView extends StatelessWidget {
   final List<Project> projects;
