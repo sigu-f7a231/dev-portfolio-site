@@ -1,6 +1,7 @@
 // lib/sections/projects/views/projects_tab_view.dart
 import 'package:flutter/material.dart';
 import '../models/projects_model.dart';
+import '../config/projects_views_tab_config.dart';
 import 'projects_list_views.dart';
 import 'projects_collection_view.dart';
 
@@ -26,15 +27,13 @@ class ProjectsTabView extends StatelessWidget {
       children: [
         TabBar(
           controller: tabController,
-          labelColor: Colors.orangeAccent,
-          unselectedLabelColor: isDark ? Colors.white : Colors.white,
-          indicatorColor: Colors.orangeAccent,
-          tabs: const [
-            Tab(text: 'Work'),
-            Tab(text: 'Private'),
-          ],
+          labelColor: ProjectsTabConfig.activeColor,
+          unselectedLabelColor:
+              ProjectsTabConfig.unselectedColor(isDark),
+          indicatorColor: ProjectsTabConfig.activeColor,
+          tabs: ProjectsTabConfig.tabs,
         ),
-        const SizedBox(height: 16),
+        ProjectsTabConfig.spacing,
         Expanded(
           child: TabBarView(
             controller: tabController,
@@ -53,16 +52,24 @@ class ProjectsTabView extends StatelessWidget {
       future: future,
       builder: (context, snapshot) {
         if (snapshot.connectionState != ConnectionState.done) {
-          return const Center(child: CircularProgressIndicator());
+          return ProjectsTabConfig.loading;
         }
+
         if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return const Center(child: Text('No projects'));
+          return ProjectsTabConfig.empty;
         }
 
         final projects = snapshot.data!;
+
         return showCollectionView
-            ? ProjectCollectionView(projects: projects, isDark: isDark)
-            : ProjectList(future: Future.value(projects), isDark: isDark);
+            ? ProjectCollectionView(
+                projects: projects,
+                isDark: isDark,
+              )
+            : ProjectList(
+                future: Future.value(projects),
+                isDark: isDark,
+              );
       },
     );
   }

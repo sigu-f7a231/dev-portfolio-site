@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'views/projects_tab_view.dart';
 import 'models/projects_model.dart';
+import 'config/projects_tab_config.dart'; 
 
 class ProjectsTabs extends StatefulWidget {
   final Future<List<Project>> workFuture;
@@ -28,7 +29,11 @@ class _ProjectsTabsState extends State<ProjectsTabs>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
+    // ← TabControllerのlengthを config から取得
+    _tabController = TabController(
+      length: ProjectsTabConfig.tabs.length,
+      vsync: this,
+    );
   }
 
   @override

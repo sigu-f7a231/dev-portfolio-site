@@ -1,5 +1,6 @@
 // lib/sections/projects/projects_header.dart
 import 'package:flutter/material.dart';
+import 'config/projects_header_config.dart';
 
 class ProjectsHeader extends StatelessWidget {
   final bool showCollectionView;
@@ -15,16 +16,23 @@ class ProjectsHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textColor = isDark ? Colors.white : Colors.black;
-
     return Row(
       children: [
-        Text('Projects', style: TextStyle(fontSize: 28, color: textColor)),
+        Text(
+          ProjectsHeaderConfig.title,
+          style: ProjectsHeaderConfig.titleStyle(isDark),
+        ),
         const Spacer(),
         Row(
           children: [
-            Text('Collection View', style: TextStyle(color: textColor)),
-            Switch(value: showCollectionView, onChanged: onToggle),
+            Text(
+              ProjectsHeaderConfig.toggleLabel,
+              style: ProjectsHeaderConfig.labelStyle(isDark),
+            ),
+            Switch(
+              value: showCollectionView,
+              onChanged: onToggle,
+            ),
           ],
         ),
       ],

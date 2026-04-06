@@ -4,6 +4,8 @@ import 'data/projects_work.dart';
 import 'data/projects_private.dart';
 import 'models/projects_model.dart';
 import 'views/projects_tab_view.dart';
+import 'projects_header.dart';
+import 'config/projects_section_config.dart';
 
 class ProjectsSection extends StatefulWidget {
   const ProjectsSection({super.key});
@@ -44,34 +46,22 @@ class _ProjectsSectionState extends State<ProjectsSection>
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final bgColor = isDark ? Colors.black : Colors.indigo;
-    final textColor = Colors.white;
 
     return Container(
-      color: bgColor,
-      padding: const EdgeInsets.all(24),
+      color: ProjectsSectionConfig.backgroundColor(isDark),
+      padding: ProjectsSectionConfig.padding,
       height: MediaQuery.of(context).size.height,
       child: Column(
         children: [
           // ヘッダー＋表示切替スイッチ
-          Row(
-            children: [
-              Text('Projects', style: TextStyle(fontSize: 28, color: textColor)),
-              const Spacer(),
-              Row(
-                children: [
-                  Text('Collection View', style: TextStyle(color: textColor)),
-                  Switch(
-                    value: showCollectionView,
-                    onChanged: toggleView,
-                  ),
-                ],
-              ),
-            ],
+          ProjectsHeader(
+            showCollectionView: showCollectionView,
+            onToggle: toggleView,
+            isDark: isDark,
           ),
-          const SizedBox(height: 16),
+          ProjectsSectionConfig.headerSpacing,
 
-          // タブバー＋タブビューは別コンポーネントへ
+          // タブバー＋タブビュー
           Expanded(
             child: ProjectsTabView(
               tabController: _tabController,
