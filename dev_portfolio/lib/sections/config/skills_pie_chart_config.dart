@@ -1,4 +1,3 @@
-// lib/sections/config/skills_pie_chart_config.dart
 import 'package:flutter/material.dart';
 
 /// ========================================
@@ -18,12 +17,36 @@ class PieChartColors {
 
   static const Color highlightBorder = Colors.orangeAccent;
 
-  static Color pieColor(Color base, bool isActive) {
-    if (!isActive) return base;
+  /// 非アクティブ色の opacity
+  static const double inactiveOpacityDark = 0.6;
+  static const double inactiveOpacityLight = 0.35;
 
-    return HSLColor.fromColor(base)
-        .withLightness(PieChartLayout.pieHighlightLightness)
-        .toColor();
+  /// ホバー時の opacity
+  static const double hoverOpacityDark = 0.75;
+  static const double hoverOpacityLight = 0.55;
+
+  /// 選択時の opacity
+  static const double selectedOpacityDark = 1.0;
+  static const double selectedOpacityLight = 1.0;
+
+  /// PieChart 色（非アクティブ・ホバー・選択で変化）
+  static Color pieColor(
+    Color base, {
+    required bool isDark,
+    required bool isHovered,
+    required bool isSelected,
+  }) {
+    double opacity;
+
+    if (isSelected) {
+      opacity = isDark ? selectedOpacityDark : selectedOpacityLight;
+    } else if (isHovered) {
+      opacity = isDark ? hoverOpacityDark : hoverOpacityLight;
+    } else {
+      opacity = isDark ? inactiveOpacityDark : inactiveOpacityLight;
+    }
+
+    return base.withOpacity(opacity);
   }
 
   static BorderSide pieBorder(bool isActive) {
@@ -44,6 +67,14 @@ class PieChartColors {
 /// ========================================
 class PieChartLayout {
   // ===== サイズ =====
+
+  /// 🔥 ここが追加分
+  static const EdgeInsets padding = EdgeInsets.all(16.0);
+
+  /// 🔥 overflow防止用の最小サイズ
+  static const double minWidth = 400.0;
+  static const double minHeight = 300.0;
+
   static const double pieSize = 300.0;
 
   // ===== 円 =====
@@ -56,19 +87,12 @@ class PieChartLayout {
   static const double pieInactiveBorderWidth = 0.0;
   static const double pieActiveBorderWidth = 3.0;
 
-  // ===== 明るさ =====
+  // ===== 明るさ（選択時ハイライト用）=====
   static const double pieHighlightLightness = 0.7;
 
   // ===== Padding =====
   static const double pieTopPadding = 24.0;
   static const double pieLeftPadding = 32.0;
-
-  /// 🔥 ここが追加分
-  static const EdgeInsets padding = EdgeInsets.all(16.0);
-
-  /// 🔥 overflow防止用の最小サイズ
-  static const double minWidth = 400.0;
-  static const double minHeight = 300.0;
 
   // ===== Row間隔 =====
   static const double pieLegendSpacingRow = 100.0;
@@ -82,7 +106,7 @@ class PieChartLayout {
 }
 
 /// ========================================
-/// テキストスタイル
+/// PieChart テキストスタイル
 /// ========================================
 class PieChartTextStyle {
   static TextStyle label({

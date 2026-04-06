@@ -34,11 +34,9 @@ class PieGraph extends StatelessWidget {
           pieTouchData: PieTouchData(
             touchCallback: (event, pieTouchResponse) {
               final idx = pieTouchResponse?.touchedSection?.touchedSectionIndex;
-
               if (event is PointerDownEvent) {
                 onSelect(idx);
-              } else if (event is! PointerExitEvent &&
-                  event is! PointerUpEvent) {
+              } else if (event is! PointerExitEvent && event is! PointerUpEvent) {
                 onHover(idx);
               } else {
                 onHover(null);
@@ -46,19 +44,39 @@ class PieGraph extends StatelessWidget {
             },
           ),
           sections: data.entries.mapIndexed((entry, index) {
-            final isActive =
-                index == hoveredIndex || index == selectedIndex;
+            final isHovered = index == hoveredIndex;
+            final isSelected = index == selectedIndex;
+            final baseColor = PieChartColors.mainColors[index % PieChartColors.mainColors.length];
 
-            final baseColor = PieChartColors.mainColors[
-                index % PieChartColors.mainColors.length];
+          Color sectionColor = PieChartColors.pieColor(
+            baseColor,
+            isDark: isDark,
+            isHovered: isHovered,
+            isSelected: isSelected,
+          );
+
+            // 選択時は常に明るめで強調
+            if (isSelected) {
+              sectionColor = HSLColor.fromColor(baseColor)
+                  .withLightness(PieChartLayout.pieHighlightLightness)
+                  .toColor();
+            }
 
             return PieChartSectionData(
               value: entry.value,
-              color: PieChartColors.pieColor(baseColor, isActive),
-              radius: isActive
+              color: sectionColor,
+              radius: isSelected
                   ? PieChartLayout.pieActiveRadius
                   : PieChartLayout.pieRadius,
-              borderSide: PieChartColors.pieBorder(isActive),
+              borderSide: isSelected
+                  ? BorderSide(
+                      color: PieChartColors.highlightBorder,
+                      width: PieChartLayout.pieActiveBorderWidth,
+                    )
+                  : BorderSide(
+                      color: Colors.transparent,
+                      width: PieChartLayout.pieInactiveBorderWidth,
+                    ),
               showTitle: false,
             );
           }).toList(),
