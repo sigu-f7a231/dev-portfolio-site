@@ -1,6 +1,7 @@
+// lib/sections/skills/charts/pie_chart/pie_legend.dart
 import 'package:flutter/material.dart';
-import '../../../config/skills_chart_config.dart';
-import '../../../../utils/graph_utils.dart'; // ← 追加
+import '../../../config/skills_pie_chart_config.dart';
+import '../../../../utils/graph_utils.dart';
 
 class PieLegend extends StatelessWidget {
   final Map<String, double> data;
@@ -22,11 +23,11 @@ class PieLegend extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: data.entries.mapIndexed((entry, index) {
         final isActive = index == hoveredIndex || index == selectedIndex;
+
         return MouseRegion(
           cursor: SystemMouseCursors.click,
           onEnter: (_) => onHover(index),
@@ -34,30 +35,56 @@ class PieLegend extends StatelessWidget {
           child: GestureDetector(
             onTap: () => onSelect(index),
             child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 4.0),
+              padding: const EdgeInsets.symmetric(
+                vertical: PieChartLayout.pieLegendItemSpacing,
+              ),
               child: Row(
                 children: [
+                  /// ■ カラーボックス
                   Container(
-                    width: ChartLayout.pieLegendColorSize,
-                    height: ChartLayout.pieLegendColorSize,
+                    width: PieChartLayout.pieLegendColorSize,
+                    height: PieChartLayout.pieLegendColorSize,
                     decoration: BoxDecoration(
-                      color: ChartColors.mainColors[index % ChartColors.mainColors.length],
-                      borderRadius: BorderRadius.circular(ChartLayout.pieLegendColorRadius),
+                      color: PieChartColors.mainColors[
+                          index % PieChartColors.mainColors.length],
+                      borderRadius: BorderRadius.circular(
+                        PieChartLayout.pieLegendColorRadius,
+                      ),
                       border: isActive
-                          ? Border.all(color: ChartColors.highlightBorder, width: ChartLayout.pieActiveBorderWidth)
+                          ? Border.all(
+                              color: PieChartColors.highlightBorder,
+                              width: PieChartLayout.pieActiveBorderWidth,
+                            )
                           : null,
                     ),
                   ),
-                  const SizedBox(width: ChartLayout.pieLegendSpacingItem),
+
+                  const SizedBox(
+                    width: PieChartLayout.pieLegendSpacingItem,
+                  ),
+
+                  /// ■ ラベル
                   Expanded(
                     child: Text(
                       entry.key,
-                      style: ChartTextStyle.label(isDark: isDark, isActive: isActive),
+                      style: PieChartTextStyle.label(
+                        isDark: isDark,
+                        isActive: isActive,
+                      ),
                     ),
                   ),
-                  Text(
-                    '${entry.value.toInt()}%',
-                    style: ChartTextStyle.value(isDark: isDark, isActive: isActive),
+
+                  /// ■ 値
+                  SizedBox(
+                    width: PieChartLayout.pieLegendValueWidth,
+                    child: Text(
+                      '${entry.value.toStringAsFixed(1)}%',
+                      textAlign: TextAlign.right,
+                      style: PieChartTextStyle.value(
+                        isDark: isDark,
+                        isActive: isActive,
+                      ),
+                    ),
                   ),
                 ],
               ),

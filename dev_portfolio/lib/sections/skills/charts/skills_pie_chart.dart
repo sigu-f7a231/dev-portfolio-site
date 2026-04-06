@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'pie_chart/pie_graph.dart';
 import 'pie_chart/pie_legend.dart';
-import '../../config/skills_chart_config.dart';
+import '../../config/skills_pie_chart_config.dart';
 
 class SkillsPieChart extends StatefulWidget {
   final Map<String, double> data;
@@ -35,39 +35,59 @@ class _SkillsPieChartState extends State<SkillsPieChart> {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // ■ Pie グラフ
-        Padding(
-          padding: const EdgeInsets.only(
-            top: ChartLayout.pieTopPadding,
-            left: ChartLayout.pieLeftPadding,
-          ),
-          child: PieGraph(
-            data: widget.data,
-            isDark: widget.isDark,
-            hoveredIndex: hoveredIndex,
-            selectedIndex: selectedIndex,
-            onHover: _handleHover,
-            onSelect: _handleSelect,
-          ),
-        ),
+    return Container(
+      padding: PieChartLayout.padding,
 
-        SizedBox(width: ChartLayout.pieLegendSpacingRow),
+      /// 🔥 これ超重要（エラー防止）
+      constraints: const BoxConstraints(
+        minWidth: PieChartLayout.minWidth,
+        minHeight: PieChartLayout.minHeight,
+      ),
 
-        // ■ Legend
-        Expanded(
-          child: PieLegend(
-            data: widget.data,
-            isDark: widget.isDark,
-            hoveredIndex: hoveredIndex,
-            selectedIndex: selectedIndex,
-            onHover: _handleHover,
-            onSelect: _handleSelect,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          /// =========================
+          /// Pie グラフ
+          /// =========================
+          Padding(
+            padding: const EdgeInsets.only(
+              top: PieChartLayout.pieTopPadding,
+              left: PieChartLayout.pieLeftPadding,
+            ),
+
+            /// 🔥 サイズ固定（overflow防止）
+            child: SizedBox(
+              width: PieChartLayout.pieSize,
+              height: PieChartLayout.pieSize,
+              child: PieGraph(
+                data: widget.data,
+                isDark: widget.isDark,
+                hoveredIndex: hoveredIndex,
+                selectedIndex: selectedIndex,
+                onHover: _handleHover,
+                onSelect: _handleSelect,
+              ),
+            ),
           ),
-        ),
-      ],
+
+          SizedBox(width: PieChartLayout.pieLegendSpacingRow),
+
+          /// =========================
+          /// Legend
+          /// =========================
+          Expanded(
+            child: PieLegend(
+              data: widget.data,
+              isDark: widget.isDark,
+              hoveredIndex: hoveredIndex,
+              selectedIndex: selectedIndex,
+              onHover: _handleHover,
+              onSelect: _handleSelect,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

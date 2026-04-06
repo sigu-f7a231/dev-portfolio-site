@@ -1,6 +1,5 @@
-// lib/sections/skills/charts/bar_chart/bar_legend.dart
 import 'package:flutter/material.dart';
-import '../../../config/skills_chart_config.dart';
+import '../../../config/skills_bar_chart_config.dart';
 
 class BarLegend extends StatelessWidget {
   final List<MapEntry<String, double>> entries;
@@ -28,35 +27,52 @@ class BarLegend extends StatelessWidget {
           onEnter: (_) => onHover?.call(i),
           onExit: (_) => onHover?.call(null),
           child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: ChartLayout.barItemSpacing),
+            padding: const EdgeInsets.symmetric(
+              vertical: BarChartLayout.barItemSpacing,
+            ),
             child: Row(
               children: [
+                // カラーボックス
                 Container(
-                  width: ChartLayout.barLegendColorSize,
-                  height: ChartLayout.barLegendColorSize,
+                  width: BarChartLayout.barLegendColorSize,
+                  height: BarChartLayout.barLegendColorSize,
                   decoration: BoxDecoration(
-                    color: ChartColors.mainColors[i % ChartColors.mainColors.length],
-                    borderRadius:
-                        BorderRadius.circular(ChartLayout.barLegendColorRadius),
+                    color: BarChartColors
+                        .mainColors[i % BarChartColors.mainColors.length],
+                    borderRadius: BorderRadius.circular(
+                      BarChartLayout.barLegendColorRadius,
+                    ),
                     border: isActive
                         ? Border.all(
-                            color: ChartColors.highlightBorder,
-                            width: ChartLayout.barActiveBorderWidth)
+                            color: BarChartColors.highlightBorder,
+                            width: BarChartLayout.barActiveBorderWidth,
+                          )
                         : null,
                   ),
                 ),
-                const SizedBox(width: ChartLayout.barLegendSpacingItem),
+
+                const SizedBox(width: BarChartLayout.barLegendSpacingItem),
+
+                // ラベル
                 Expanded(
                   child: Text(
                     e.key,
-                    style: ChartTextStyle.label(isDark: isDark, isActive: isActive),
+                    style: BarChartTextStyle.label(
+                      isDark: isDark,
+                      isActive: isActive,
+                    ),
                   ),
                 ),
+
+                // 値
                 SizedBox(
-                  width: ChartLayout.barValueWidth,
+                  width: BarChartLayout.barValueWidth,
                   child: Text(
                     '${e.value.toStringAsFixed(1)}%',
-                    style: ChartTextStyle.value(isDark: isDark, isActive: isActive),
+                    style: BarChartTextStyle.value(
+                      isDark: isDark,
+                      isActive: isActive,
+                    ),
                   ),
                 ),
               ],

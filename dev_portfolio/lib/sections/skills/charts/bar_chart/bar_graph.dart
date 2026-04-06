@@ -1,6 +1,5 @@
-// lib/sections/skills/charts/bar_chart/bar_graph.dart
 import 'package:flutter/material.dart';
-import '../../../config/skills_chart_config.dart';
+import '../../../config/skills_bar_chart_config.dart';
 
 class BarGraph extends StatelessWidget {
   final List<MapEntry<String, double>> entries;
@@ -28,34 +27,43 @@ class BarGraph extends StatelessWidget {
           onEnter: (_) => onHover?.call(i),
           onExit: (_) => onHover?.call(null),
           child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: ChartLayout.barItemSpacing),
+            padding: const EdgeInsets.symmetric(
+              vertical: BarChartLayout.barItemSpacing,
+            ),
             child: Row(
               children: [
                 Expanded(
                   child: Stack(
                     children: [
                       Container(
-                        height: ChartLayout.barHeight,
+                        height: BarChartLayout.barHeight,
                         decoration: BoxDecoration(
-                          color: ChartColors.bgBarColor(isDark),
-                          borderRadius: BorderRadius.circular(ChartLayout.barBorderRadius),
+                          color: BarChartColors.bgBarColor(isDark),
+                          borderRadius: BorderRadius.circular(
+                            BarChartLayout.barBorderRadius,
+                          ),
                         ),
                       ),
                       FractionallySizedBox(
                         alignment: Alignment.centerLeft,
                         widthFactor: e.value / 100,
                         child: Container(
-                          height: ChartLayout.barHeight,
+                          height: BarChartLayout.barHeight,
                           decoration: BoxDecoration(
-                            color: ChartColors.mainColors[i % ChartColors.mainColors.length]
-                                .withOpacity(isActive
-                                    ? ChartLayout.barActiveOpacity
-                                    : ChartLayout.barInactiveOpacity),
-                            borderRadius: BorderRadius.circular(ChartLayout.barBorderRadius),
+                            color: BarChartColors
+                                .mainColors[i % BarChartColors.mainColors.length]
+                                .withOpacity(
+                                  isActive
+                                      ? BarChartLayout.barActiveOpacity
+                                      : BarChartLayout.barInactiveOpacity,
+                                ),
+                            borderRadius: BorderRadius.circular(
+                              BarChartLayout.barBorderRadius,
+                            ),
                             border: isActive
                                 ? Border.all(
-                                    color: ChartColors.highlightBorder,
-                                    width: ChartLayout.barActiveBorderWidth,
+                                    color: BarChartColors.highlightBorder,
+                                    width: BarChartLayout.barActiveBorderWidth,
                                   )
                                 : null,
                           ),
@@ -64,12 +72,15 @@ class BarGraph extends StatelessWidget {
                     ],
                   ),
                 ),
-                const SizedBox(width: ChartLayout.barValueSpacing),
+                const SizedBox(width: BarChartLayout.barValueSpacing),
                 SizedBox(
-                  width: ChartLayout.barValueWidth,
+                  width: BarChartLayout.barValueWidth,
                   child: Text(
                     '${e.value.toStringAsFixed(1)}%',
-                    style: ChartTextStyle.value(isDark: isDark, isActive: isActive),
+                    style: BarChartTextStyle.value(
+                      isDark: isDark,
+                      isActive: isActive,
+                    ),
                   ),
                 ),
               ],

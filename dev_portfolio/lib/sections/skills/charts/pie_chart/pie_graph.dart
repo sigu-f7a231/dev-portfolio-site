@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
-import '../../../config/skills_chart_config.dart';
+import '../../../config/skills_pie_chart_config.dart';
 import 'package:flutter/gestures.dart';
 import '../../../../utils/graph_utils.dart';
 
@@ -25,12 +25,12 @@ class PieGraph extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: ChartLayout.pieSize,
-      height: ChartLayout.pieSize,
+      width: PieChartLayout.pieSize,
+      height: PieChartLayout.pieSize,
       child: PieChart(
         PieChartData(
-          sectionsSpace: ChartLayout.pieSectionsSpace,
-          centerSpaceRadius: ChartLayout.pieCenterRadius,
+          sectionsSpace: PieChartLayout.pieSectionsSpace,
+          centerSpaceRadius: PieChartLayout.pieCenterRadius,
           pieTouchData: PieTouchData(
             touchCallback: (event, pieTouchResponse) {
               final idx = pieTouchResponse?.touchedSection?.touchedSectionIndex;
@@ -49,16 +49,16 @@ class PieGraph extends StatelessWidget {
             final isActive =
                 index == hoveredIndex || index == selectedIndex;
 
-            final baseColor = ChartColors.mainColors[
-                index % ChartColors.mainColors.length];
+            final baseColor = PieChartColors.mainColors[
+                index % PieChartColors.mainColors.length];
 
             return PieChartSectionData(
               value: entry.value,
-              color: ChartColors.pieColor(baseColor, isActive),
+              color: PieChartColors.pieColor(baseColor, isActive),
               radius: isActive
-                  ? ChartLayout.pieActiveRadius
-                  : ChartLayout.pieRadius,
-              borderSide: ChartColors.pieBorder(isActive),
+                  ? PieChartLayout.pieActiveRadius
+                  : PieChartLayout.pieRadius,
+              borderSide: PieChartColors.pieBorder(isActive),
               showTitle: false,
             );
           }).toList(),
