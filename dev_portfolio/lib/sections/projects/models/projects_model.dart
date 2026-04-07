@@ -34,5 +34,37 @@ class Project {
         link: json['link'] ?? '', // ← 追加
       );
 
+     /// periodの開始日をDateTimeとして取得
+  DateTime get periodStart {
+    try {
+      final startString = period.split('~').first.trim();
+      final parts = startString.split('-');
+      if (parts.length != 2) return DateTime(1970, 1);
+      final year = int.parse(parts[0]);
+      final month = int.parse(parts[1]);
+      return DateTime(year, month);
+    } catch (_) {
+      return DateTime(1970, 1);
+    }
+  }
+
+  /// periodの終了日をDateTimeとして取得（現在進行中ならDateTime.now()）
+  DateTime get periodEnd {
+    try {
+      final endString = period.split('~').last.trim();
+      if (endString.contains('現在') || endString.toLowerCase().contains('present')) {
+        return DateTime.now();
+      }
+      final parts = endString.split('-');
+      if (parts.length != 2) return DateTime.now();
+      final year = int.parse(parts[0]);
+      final month = int.parse(parts[1]);
+      return DateTime(year, month);
+    } catch (_) {
+      return DateTime.now();
+    }
+  }
+
+
   factory Project.fromMap(Map<String, dynamic> map) => Project.fromJson(map);
 }

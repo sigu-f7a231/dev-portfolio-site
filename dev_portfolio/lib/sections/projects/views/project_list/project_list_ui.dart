@@ -3,16 +3,17 @@ import 'package:flutter/material.dart';
 import '../../models/projects_model.dart';
 import '../../../config/projects/projects_views_list_config.dart';
 import '../../../../utils/string_utils.dart';
-import '../project_list/project_list_modal_function.dart'; // モーダル関数
 
 class ProjectListUI extends StatelessWidget {
   final List<Project> projects;
   final bool isDark;
+  final void Function(Project) onProjectTap;
 
   const ProjectListUI({
     super.key,
     required this.projects,
     required this.isDark,
+    required this.onProjectTap,
   });
 
   @override
@@ -26,39 +27,33 @@ class ProjectListUI extends StatelessWidget {
             p.period.toLowerCase().contains('present');
 
         return GestureDetector(
-          onTap: () => showProjectDetailModal(context, p, isDark: isDark),
+          onTap: () => onProjectTap(p),
           child: Card(
             color: ProjectsListConfig.cardColor(isDark),
             shape: RoundedRectangleBorder(
-              borderRadius:
-                  BorderRadius.circular(ProjectsListConfig.cardBorderRadius),
+              borderRadius: BorderRadius.circular(
+                  ProjectsListConfig.cardBorderRadius),
             ),
             child: Padding(
               padding: ProjectsListConfig.cardPadding,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    p.title,
-                    style: ProjectsListConfig.titleStyle(isDark),
-                  ),
+                  Text(p.title, style: ProjectsListConfig.titleStyle(isDark)),
                   ProjectsListConfig.smallSpacing,
-                  Text(
-                    p.description,
-                    style: ProjectsListConfig.subtitleStyle(isDark),
-                  ),
+                  Text(p.description,
+                      style: ProjectsListConfig.subtitleStyle(isDark)),
                   ProjectsListConfig.smallSpacing,
                   Row(
                     children: [
-                      Icon(
-                        Icons.schedule,
-                        size: ProjectsListConfig.scheduleIconSize,
-                        color: ProjectsListConfig.periodTextColor(isDark),
-                      ),
+                      Icon(Icons.schedule,
+                          size: ProjectsListConfig.scheduleIconSize,
+                          color: ProjectsListConfig.periodTextColor(isDark)),
                       SizedBox(width: ProjectsListConfig.periodIconSpacing),
                       Text(
                         p.period,
-                        style: ProjectsListConfig.subtitleStyle(isDark).copyWith(
+                        style: ProjectsListConfig.subtitleStyle(isDark)
+                            .copyWith(
                           fontSize: ProjectsListConfig.periodFontSize,
                           color: ProjectsListConfig.periodTextColor(isDark),
                         ),
@@ -83,7 +78,6 @@ class ProjectListUI extends StatelessWidget {
                       ),
                     ),
                   ProjectsListConfig.smallSpacing,
-                  // 🔹 スキル一覧表示
                   if (p.skills.isNotEmpty)
                     Wrap(
                       spacing: ProjectsListConfig.skillButtonSpacing,
@@ -92,7 +86,8 @@ class ProjectListUI extends StatelessWidget {
                         return Container(
                           padding: ProjectsListConfig.skillButtonPadding,
                           decoration: BoxDecoration(
-                            color: ProjectsListConfig.skillButtonColor(isDark),
+                            color:
+                                ProjectsListConfig.skillButtonColor(isDark),
                             borderRadius: BorderRadius.circular(
                                 ProjectsListConfig.skillButtonBorderRadius),
                           ),
@@ -113,12 +108,8 @@ class ProjectListUI extends StatelessWidget {
                   Align(
                     alignment: Alignment.centerRight,
                     child: TextButton(
-                      style: TextButton.styleFrom(
-                        foregroundColor: isDark ? Colors.white : Colors.black87,
-                      ),
-                      onPressed: () =>
-                          showProjectDetailModal(context, p, isDark: isDark),
-                      child: Text('詳細を見る'),
+                      onPressed: () => onProjectTap(p),
+                      child: const Text('詳細を見る'),
                     ),
                   ),
                 ],

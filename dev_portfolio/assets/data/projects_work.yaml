@@ -42,3 +42,204 @@ projects:
       integration_test: true
       system_test: false
       maintenance_operation: false
+  - title: 社内管理システム 1
+    description: Flutter Webで制作
+    details: |
+      画面設計やバックエンド連携まで担当。  
+      ユーザー管理機能やダッシュボードの実装、認証連携を含む。  
+      各画面のUI/UX改善提案を行い、Flutterでの状態管理やレスポンシブ対応も実施。  
+      Firebaseを用いた認証・データ管理を担当し、単体テスト・結合テストを実施済み。
+    server_os: Ubuntu, Windows Server
+    db: MySQL, PostgreSQL
+    tools_fw: Flutter, Firebase, Git
+    skills: Dart, Firebase, UI設計
+    period: 2023-01 ~ 2023-04
+    link: ""
+    workflow:
+      requirements: true
+      basic_design: true
+      detailed_design: true
+      implementation_unit_test: true
+      integration_test: true
+      system_test: false
+      maintenance_operation: false
+
+  - title: ECサイト構築 2
+    description: WordPressで開発
+    details: |
+      プラグイン選定とデザイン調整を実施。  
+      WooCommerceでのカート・決済処理を構築し、ユーザー登録や商品管理機能も実装。  
+      HTML/CSS/JavaScriptを用いてレスポンシブデザインを適用。  
+      サイト公開前にブラウザテスト・機能確認を行い、最終調整を完了。
+    server_os: Linux
+    db: MySQL
+    tools_fw: WordPress, PHP
+    skills: PHP, HTML, CSS
+    period: 2022-08 ~ 2022-12
+    link: ""
+    workflow:
+      requirements: true
+      basic_design: true
+      detailed_design: true
+      implementation_unit_test: true
+      integration_test: true
+      system_test: false
+      maintenance_operation: false
+
+  - title: 社内管理システム 3
+    description: Flutter Webで制作
+    details: |
+      バックエンドAPI連携と画面設計を担当。  
+      Flutterの状態管理やテスト対応も実施。
+    server_os: Ubuntu
+    db: PostgreSQL
+    tools_fw: Flutter, Firebase
+    skills: Dart, UI設計
+    period: 2023-02 ~ 2023-05
+    link: ""
+    workflow:
+      requirements: true
+      basic_design: true
+      detailed_design: true
+      implementation_unit_test: true
+      integration_test: true
+      system_test: false
+      maintenance_operation: false
+
+  - title: ECサイト構築 4
+    description: WordPressで開発
+    details: |
+      デザインカスタマイズとプラグイン実装を担当。  
+      SEO対応やブラウザ互換性テストも実施。
+    server_os: Linux
+    db: MySQL
+    tools_fw: WordPress, PHP
+    skills: PHP, HTML, CSS
+    period: 2022-09 ~ 2022-12
+    link: ""
+    workflow:
+      requirements: true
+      basic_design: true
+      detailed_design: true
+      implementation_unit_test: true
+      integration_test: true
+      system_test: false
+      maintenance_operation: false
+
+  - title: 社内管理システム 5
+    description: Flutter Webで制作
+    details: |
+      ダッシュボードや管理画面をFlutterで実装。  
+      単体テスト・結合テストを実施済み。
+    server_os: Windows Server
+    db: MySQL
+    tools_fw: Flutter, Git
+    skills: Dart, UI設計
+    period: 2023-03 ~ 2023-06
+    link: ""
+    workflow:
+      requirements: true
+      basic_design: true
+      detailed_design: true
+      implementation_unit_test: true
+      integration_test: true
+      system_test: false
+      maintenance_operation: false
+
+  - title: ECサイト構築 6
+    description: WordPressで開発
+    details: |
+      WooCommerceで商品管理機能を実装。  
+      レスポンシブデザイン対応済み。
+    server_os: Linux
+    db: MySQL
+    tools_fw: WordPress, PHP
+    skills: PHP, HTML, CSS
+    period: 2022-10 ~ 2022-12
+    link: ""
+    workflow:
+      requirements: true
+      basic_design: true
+      detailed_design: true
+      implementation_unit_test: true
+      integration_test: true
+      system_test: false
+      maintenance_operation: false
+
+  - title: 社内管理システム 7
+    description: Flutter Webで制作
+    details: |
+      ユーザー認証とダッシュボード実装。  
+      状態管理とテスト対応も実施。
+    server_os: Ubuntu, Windows Server
+    db: PostgreSQL
+    tools_fw: Flutter, Firebase
+    skills: Dart, Firebase
+    period: 2023-04 ~ 2023-07
+    link: ""
+    workflow:
+      requirements: true
+      basic_design: true
+      detailed_design: true
+      implementation_unit_test: true
+      integration_test: true
+      system_test: false
+      maintenance_operation: false
+
+  - title: ECサイト構築 8
+    description: WordPressで開発
+    details: |
+      デザインカスタマイズとSEO調整を担当。  
+      ブラウザテスト済み。
+    server_os: Linux
+    db: MySQL
+    tools_fw: WordPress, PHP
+    skills: PHP, HTML, CSS
+    period: 2022-11 ~ 2023-01
+    link: ""
+    workflow:
+      requirements: true
+      basic_design: true
+      detailed_design: true
+      implementation_unit_test: true
+      integration_test: true
+      system_test: false
+      maintenance_operation: false
+
+  - title: 社内管理システム 9
+    description: Flutter Webで制作
+    details: |
+      バックエンドAPIとFlutter状態管理を担当。
+    server_os: Ubuntu
+    db: MySQL, PostgreSQL
+    tools_fw: Flutter, Git
+    skills: Dart, UI設計
+    period: 2023-05 ~ 2023-08
+    link: ""
+    workflow:
+      requirements: true
+      basic_design: true
+      detailed_design: true
+      implementation_unit_test: true
+      integration_test: true
+      system_test: false
+      maintenance_operation: false
+
+  - title: ECサイト構築 10
+    description: WordPressで開発
+    details: |
+      WooCommerceで決済・カート機能を構築。
+    server_os: Linux
+    db: MySQL
+    tools_fw: WordPress, PHP
+    skills: PHP, HTML, CSS
+    period: 2022-12 ~ 2023-02
+    link: ""
+    workflow:
+      requirements: true
+      basic_design: true
+      detailed_design: true
+      implementation_unit_test: true
+      integration_test: true
+      system_test: false
+      maintenance_operation: false
