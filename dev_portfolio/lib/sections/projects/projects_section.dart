@@ -17,7 +17,10 @@ class ProjectsSection extends StatefulWidget {
 class _ProjectsSectionState extends State<ProjectsSection>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  bool showCollectionView = false;
+
+  // 🔽 変更：ValueNotifier
+  final ValueNotifier<bool> showCollectionNotifier =
+      ValueNotifier(false);
 
   late Future<List<Project>> workFuture;
   late Future<List<Project>> privateFuture;
@@ -34,13 +37,8 @@ class _ProjectsSectionState extends State<ProjectsSection>
   @override
   void dispose() {
     _tabController.dispose();
+    showCollectionNotifier.dispose(); // 忘れずに
     super.dispose();
-  }
-
-  void toggleView(bool value) {
-    setState(() {
-      showCollectionView = value;
-    });
   }
 
   @override
@@ -53,21 +51,20 @@ class _ProjectsSectionState extends State<ProjectsSection>
       height: MediaQuery.of(context).size.height,
       child: Column(
         children: [
-          // ヘッダー＋表示切替スイッチ
+          // 🔽 Header（Notifier渡す）
           ProjectsHeader(
-            showCollectionView: showCollectionView,
-            onToggle: toggleView,
+            showCollectionNotifier: showCollectionNotifier,
             isDark: isDark,
           ),
           ProjectsSectionConfig.headerSpacing,
 
-          // タブバー＋タブビュー
+          // 🔽 TabView（Notifier渡す）
           Expanded(
             child: ProjectsTabView(
               tabController: _tabController,
               workFuture: workFuture,
               privateFuture: privateFuture,
-              showCollectionView: showCollectionView,
+              showCollectionNotifier: showCollectionNotifier,
               isDark: isDark,
             ),
           ),

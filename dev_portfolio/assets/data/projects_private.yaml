@@ -1,18 +1,25 @@
 projects:
-  - title: ポートフォリオサイト
+  - title: 社内管理システム
     description: Flutter Webで制作
-    details: UI/UX設計とデプロイまで担当
-    server_os: Ubuntu
-    db: Firebase
-    tools_fw: Flutter, Firebase
+    details: |
+      画面設計やバックエンド連携まで担当。長文テスト。
+      UI設計やFlutter特有の画面遷移、状態管理までカバー。
+      複数行テキストとして詳細を記載可能。
+    server_os: Ubuntu, Windows Server
+    db: MySQL, PostgreSQL
+    tools_fw: Flutter, Firebase, Git
     skills: Dart, Firebase, UI設計
-    period: 2023-03 ~ 2023-05
+    period: 2023-01 ~ 2023-04
+    link: https://sigu-f7a231.github.io/my-portfolio/works/
 
-  - title: ゲーム開発
-    description: Unityで2Dゲーム制作
-    details: キャラクター・ステージ制作
-    server_os: Windows
-    db: SQLite
-    tools_fw: Unity, Git
-    skills: C#, Unity
-    period: 2022-11 ~ 2023-01
+  - title: ECサイト構築
+    description: WordPressで開発
+    details: |
+      プラグイン選定とデザイン調整を実施。長文テスト。
+      デザインやテーマカスタマイズ、SEO対応まで担当。
+    server_os: Linux
+    db: MySQL
+    tools_fw: WordPress, PHP
+    skills: PHP, HTML, CSS
+    period: 2022-08 ~ 2022-12
+    link: ""

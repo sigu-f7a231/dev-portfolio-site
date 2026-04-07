@@ -1,41 +1,51 @@
-// lib/sections/projects/projects_header.dart
 import 'package:flutter/material.dart';
+import 'projects_view_switch.dart';
 import '../config/projects/projects_header_config.dart';
 
+/// Projects セクションのヘッダー
+/// タイトル + List/Collection 切替スイッチ（左側に配置）
 class ProjectsHeader extends StatelessWidget {
-  final bool showCollectionView;
-  final ValueChanged<bool> onToggle;
+  final ValueNotifier<bool> showCollectionNotifier;
   final bool isDark;
 
   const ProjectsHeader({
     super.key,
-    required this.showCollectionView,
-    required this.onToggle,
+    required this.showCollectionNotifier,
     required this.isDark,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Text(
-          ProjectsHeaderConfig.title,
-          style: ProjectsHeaderConfig.titleStyle(isDark),
-        ),
-        const Spacer(),
-        Row(
-          children: [
-            Text(
-              ProjectsHeaderConfig.toggleLabel,
-              style: ProjectsHeaderConfig.labelStyle(isDark),
-            ),
-            Switch(
-              value: showCollectionView,
-              onChanged: onToggle,
-            ),
-          ],
-        ),
-      ],
+    return Padding(
+      padding: ProjectsWidgetsHeaderConfig.titlePadding,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.start, // 左揃え
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          // セクションタイトル
+          Text(
+            'Projects',
+            style: ProjectsWidgetsHeaderConfig.titleStyle(isDark),
+          ),
+
+          const SizedBox(width: 12), // タイトルとスイッチの間隔
+
+          // List / Collection スイッチ
+          ValueListenableBuilder<bool>(
+            valueListenable: showCollectionNotifier,
+            builder: (context, showCollection, _) {
+              return ProjectsViewSwitch(
+                showCollection: showCollection,
+                isDark: isDark,
+                onToggle: (val) {
+                  showCollectionNotifier.value = val;
+                },
+                reverseOrder: true, // 左右反転
+              );
+            },
+          ),
+        ],
+      ),
     );
   }
 }

@@ -1,15 +1,14 @@
-// lib/sections/projects/views/projects_tab_view.dart
 import 'package:flutter/material.dart';
 import '../models/projects_model.dart';
 import '../../config/projects/projects_views_tab_config.dart';
-import 'projects_list_views.dart';
+import '../views/project_list/project_list_view.dart';
 import 'projects_collection_view.dart';
 
 class ProjectsTabView extends StatelessWidget {
   final TabController tabController;
   final Future<List<Project>> workFuture;
   final Future<List<Project>> privateFuture;
-  final bool showCollectionView;
+  final ValueNotifier<bool> showCollectionNotifier; // 🔽変更
   final bool isDark;
 
   const ProjectsTabView({
@@ -17,7 +16,7 @@ class ProjectsTabView extends StatelessWidget {
     required this.tabController,
     required this.workFuture,
     required this.privateFuture,
-    required this.showCollectionView,
+    required this.showCollectionNotifier,
     required this.isDark,
   });
 
@@ -61,15 +60,21 @@ class ProjectsTabView extends StatelessWidget {
 
         final projects = snapshot.data!;
 
-        return showCollectionView
-            ? ProjectCollectionView(
-                projects: projects,
-                isDark: isDark,
-              )
-            : ProjectList(
-                future: Future.value(projects),
-                isDark: isDark,
-              );
+        // 🔽 ここが重要（チラつき防止）
+        return ValueListenableBuilder<bool>(
+          valueListenable: showCollectionNotifier,
+          builder: (_, showCollection, __) {
+            return showCollection
+                ? ProjectCollectionView(
+                    projects: projects,
+                    isDark: isDark,
+                  )
+                : ProjectList(
+                    future: Future.value(projects),
+                    isDark: isDark,
+                  );
+          },
+        );
       },
     );
   }

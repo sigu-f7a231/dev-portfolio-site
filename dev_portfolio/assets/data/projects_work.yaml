@@ -1,12 +1,17 @@
 projects:
   - title: 社内管理システム
     description: Flutter Webで制作
-    details: 画面設計やバックエンド連携まで担当
+    details: |
+      画面設計やバックエンド連携まで担当。  
+      ユーザー管理機能やダッシュボードの実装、認証連携を含む。  
+      各画面のUI/UX改善提案を行い、Flutterでの状態管理やレスポンシブ対応も実施。  
+      Firebaseを用いた認証・データ管理を担当し、単体テスト・結合テストを実施済み。
     server_os: Ubuntu, Windows Server
     db: MySQL, PostgreSQL
     tools_fw: Flutter, Firebase, Git
     skills: Dart, Firebase, UI設計
     period: 2023-01 ~ 2023-04
+    link: ""
     workflow:
       requirements: true
       basic_design: true
@@ -18,12 +23,17 @@ projects:
 
   - title: ECサイト構築
     description: WordPressで開発
-    details: プラグイン選定とデザイン調整
+    details: |
+      プラグイン選定とデザイン調整を実施。  
+      WooCommerceでのカート・決済処理を構築し、ユーザー登録や商品管理機能も実装。  
+      HTML/CSS/JavaScriptを用いてレスポンシブデザインを適用。  
+      サイト公開前にブラウザテスト・機能確認を行い、最終調整を完了。
     server_os: Linux
     db: MySQL
     tools_fw: WordPress, PHP
     skills: PHP, HTML, CSS
     period: 2022-08 ~ 2022-12
+    link: ""
     workflow:
       requirements: true
       basic_design: true
