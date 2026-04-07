@@ -51,6 +51,19 @@ class ProjectsListConfig {
         fontSize: fontSize,
       );
 
+  // 🔹 モーダル用ダークモード対応ラベルスタイル
+static TextStyle fieldLabelStyleDark(double fontSize, bool isDark) => TextStyle(
+      fontWeight: FontWeight.bold,
+      color: isDark ? Colors.white70 : Colors.blueGrey,
+      fontSize: fontSize,
+    );
+
+// 🔹 モーダル用ダークモード対応値スタイル
+static TextStyle fieldValueStyleDark(bool isBold, bool isDark) => TextStyle(
+      fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
+      color: isDark ? Colors.white : Colors.black87,
+    );
+
   static TextStyle fieldValueStyle(bool isBold) => TextStyle(
         fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
         color: Colors.black87,
@@ -103,4 +116,20 @@ class ProjectsListConfig {
   // 🔽 Card / Container用 BorderRadius
   // =========================
   static const cardBorderRadius = 4.0;
+
+
+  // dev_portfolio/lib/sections/config/projects/projects_views_list_config.dart
+// 🔹 スキルボタン用設定
+static Color skillButtonColor(bool isDark) =>
+    isDark ? Colors.blueGrey.shade700 : Colors.blue.shade100;
+
+static Color skillButtonTextColor(bool isDark) =>
+    isDark ? Colors.white : Colors.black87;
+
+static const skillButtonPadding = EdgeInsets.symmetric(horizontal: 8, vertical: 4);
+static const skillButtonBorderRadius = 12.0;
+static const skillButtonFontSize = 12.0;
+static const skillButtonFontWeight = FontWeight.bold;
+static const skillButtonSpacing = 6.0;
+static const skillButtonRunSpacing = 4.0;
 }

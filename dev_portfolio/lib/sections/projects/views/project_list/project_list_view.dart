@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import '../../models/projects_model.dart';
 import '../../../config/projects/projects_views_list_config.dart';
 import 'project_list_ui.dart';
-import 'project_list_modal_function.dart';
 import 'project_list_sort.dart';
 
 class ProjectList extends StatelessWidget {
@@ -21,9 +20,12 @@ class ProjectList extends StatelessWidget {
     return FutureBuilder<List<Project>>(
       future: future,
       builder: (context, snapshot) {
+        // ローディング中
         if (snapshot.connectionState != ConnectionState.done) {
           return ProjectsListConfig.loading;
         }
+
+        // データなし
         if (!snapshot.hasData || snapshot.data!.isEmpty) {
           return ProjectsListConfig.empty;
         }
@@ -33,11 +35,10 @@ class ProjectList extends StatelessWidget {
         // ソート
         projects.sort(sortProjects);
 
-        // UI表示
+        // UI表示（ProjectListUI 内で直接モーダルを呼ぶ）
         return ProjectListUI(
           projects: projects,
           isDark: isDark,
-          onProjectTap: (project) => showProjectDetailModal(context, project),
         );
       },
     );

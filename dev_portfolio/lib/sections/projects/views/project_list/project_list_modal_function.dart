@@ -4,7 +4,7 @@ import '../../models/projects_model.dart';
 import '../../project_modal_format.dart';
 import '../../../config/projects/projects_views_list_config.dart';
 
-void showProjectDetailModal(BuildContext context, Project project) {
+void showProjectDetailModal(BuildContext context, Project project, {bool isDark = false}) {
   showDialog(
     context: context,
     barrierDismissible: true,
@@ -39,11 +39,13 @@ void showProjectDetailModal(BuildContext context, Project project) {
                       child: RichText(
                         text: TextSpan(
                           text: '${field.label}: ',
-                          style: ProjectsListConfig.fieldLabelStyle(field.fontSize),
+                          style: ProjectsListConfig.fieldLabelStyleDark(
+                              field.fontSize, isDark),
                           children: [
                             TextSpan(
                               text: value,
-                              style: ProjectsListConfig.fieldValueStyle(field.isBold),
+                              style: ProjectsListConfig.fieldValueStyleDark(
+                                  field.isBold, isDark),
                             ),
                           ],
                         ),
