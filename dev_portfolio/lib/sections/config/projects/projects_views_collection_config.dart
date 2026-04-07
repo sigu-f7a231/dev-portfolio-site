@@ -6,7 +6,7 @@ class ProjectsCollectionConfig {
   static const padding = EdgeInsets.all(3);
   static const gridDelegate = SliverGridDelegateWithFixedCrossAxisCount(
     crossAxisCount: 2,
-    childAspectRatio: 4,
+    childAspectRatio: 3.6,
     crossAxisSpacing: 4,
     mainAxisSpacing: 4,
   );
