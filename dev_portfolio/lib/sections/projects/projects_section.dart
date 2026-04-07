@@ -6,6 +6,7 @@ import 'models/projects_model.dart';
 import 'views/projects_tab_view.dart';
 import 'projects_header.dart';
 import '../config/projects/projects_section_config.dart';
+import '../../utils/theme_colors.dart';
 
 class ProjectsSection extends StatefulWidget {
   const ProjectsSection({super.key});
@@ -18,10 +19,10 @@ class _ProjectsSectionState extends State<ProjectsSection>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
-  // 🔽 変更：ValueNotifier
-  final ValueNotifier<bool> showCollectionNotifier =
-      ValueNotifier(false);
+  // コレクションモード切替
+  final ValueNotifier<bool> showCollectionNotifier = ValueNotifier(false);
 
+  // Future は initState で保持 → build 内で再生成しない
   late Future<List<Project>> workFuture;
   late Future<List<Project>> privateFuture;
 
@@ -37,7 +38,7 @@ class _ProjectsSectionState extends State<ProjectsSection>
   @override
   void dispose() {
     _tabController.dispose();
-    showCollectionNotifier.dispose(); // 忘れずに
+    showCollectionNotifier.dispose();
     super.dispose();
   }
 
@@ -46,19 +47,16 @@ class _ProjectsSectionState extends State<ProjectsSection>
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
-      color: ProjectsSectionConfig.backgroundColor(isDark),
+      color: AppColors.background(isDark),
       padding: ProjectsSectionConfig.padding,
       height: MediaQuery.of(context).size.height,
       child: Column(
         children: [
-          // 🔽 Header（Notifier渡す）
           ProjectsHeader(
             showCollectionNotifier: showCollectionNotifier,
             isDark: isDark,
           ),
           ProjectsSectionConfig.headerSpacing,
-
-          // 🔽 TabView（Notifier渡す）
           Expanded(
             child: ProjectsTabView(
               tabController: _tabController,
