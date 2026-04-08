@@ -5,7 +5,8 @@ import 'data/projects_private.dart';
 import 'models/projects_model.dart';
 import 'views/projects_tab_view.dart';
 import 'projects_header.dart';
-import 'projects_filter.dart';
+import 'filters/ui/project_filter_panel.dart';
+import 'filters/state/project_filter_state.dart'; // ← 追加
 import '../config/projects/projects_section_config.dart';
 import '../../utils/theme_colors.dart';
 
@@ -26,6 +27,9 @@ class _ProjectsSectionState extends State<ProjectsSection>
   late Future<List<Project>> privateFuture;
 
   int currentTabIndex = 0; // 0: work, 1: private
+
+  // ★ 追加：フィルタ状態
+  ProjectFilterState filterState = ProjectFilterState.initial();
 
   @override
   void initState() {
@@ -64,6 +68,8 @@ class _ProjectsSectionState extends State<ProjectsSection>
             isDark: isDark,
           ),
           ProjectsSectionConfig.headerSpacing,
+
+          // ★ Filter UI
           FutureBuilder<List<Project>>(
             future: currentTabIndex == 0 ? workFuture : privateFuture,
             builder: (context, snapshot) {
@@ -72,9 +78,16 @@ class _ProjectsSectionState extends State<ProjectsSection>
                 projects: projects,
                 tabIndex: currentTabIndex,
                 isDark: isDark,
+                onApply: (filtersMap) {
+                  setState(() {
+                    filterState = ProjectFilterState(selectedFilters: filtersMap);
+                  });
+                },
               );
             },
           ),
+
+          // ★ View（ここにフィルタ渡す）
           Expanded(
             child: ProjectsTabView(
               tabController: _tabController,
@@ -82,6 +95,7 @@ class _ProjectsSectionState extends State<ProjectsSection>
               privateFuture: privateFuture,
               showCollectionNotifier: showCollectionNotifier,
               isDark: isDark,
+              filterState: filterState, // ← 追加
             ),
           ),
         ],

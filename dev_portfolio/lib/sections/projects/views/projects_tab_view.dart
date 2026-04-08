@@ -7,6 +7,8 @@ import '../views/project_list/project_list_ui.dart';
 import '../views/projects_collection_view.dart';
 import '../views/project_list/project_list_modal_function.dart';
 import '../../../utils/theme_colors.dart';
+import '../filters/state/project_filter_state.dart';
+import '../filters/logic/project_filter_logic.dart';
 
 class ProjectsTabView extends StatefulWidget {
   final TabController tabController;
@@ -14,6 +16,7 @@ class ProjectsTabView extends StatefulWidget {
   final Future<List<Project>> privateFuture;
   final ValueNotifier<bool> showCollectionNotifier;
   final bool isDark;
+  final ProjectFilterState? filterState;
 
   const ProjectsTabView({
     super.key,
@@ -22,6 +25,7 @@ class ProjectsTabView extends StatefulWidget {
     required this.privateFuture,
     required this.showCollectionNotifier,
     required this.isDark,
+    this.filterState,
   });
 
   @override
@@ -81,13 +85,21 @@ class _ProjectsTabViewState extends State<ProjectsTabView> {
           return const Center(child: Text('No projects'));
         }
 
-        final projects = snapshot.data!;
-        projects.sort((a, b) => a.periodStart.compareTo(b.periodStart));
+        // フィルター適用
+        final filteredProjects = widget.filterState != null
+            ? ProjectFilterLogic.apply(snapshot.data!, widget.filterState!)
+            : snapshot.data!;
 
-        final totalPages = ProjectsPaginationLogic.getTotalPages(projects);
+        if (filteredProjects.isEmpty) {
+          return const Center(child: Text('ヒットしませんでした'));
+        }
+
+        filteredProjects.sort((a, b) => a.periodStart.compareTo(b.periodStart));
+
+        final totalPages = ProjectsPaginationLogic.getTotalPages(filteredProjects);
         final currentPage = currentPages[tabIndex] ?? 1;
         final paginatedProjects =
-            ProjectsPaginationLogic.getPaginatedProjects(projects, currentPage);
+            ProjectsPaginationLogic.getPaginatedProjects(filteredProjects, currentPage);
 
         return ValueListenableBuilder<bool>(
           valueListenable: widget.showCollectionNotifier,

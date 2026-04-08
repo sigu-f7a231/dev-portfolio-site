@@ -1,8 +1,9 @@
 // lib/sections/projects/projects_filter.dart
 import 'package:flutter/material.dart';
-import 'filter_chips_section.dart';
-import 'models/projects_model.dart';
-import '../../utils/language_utils.dart';
+import 'project_filter_chips.dart';
+import '../../models/projects_model.dart';
+import '../../../../utils/language_utils.dart';
+import '../../../../utils/string_utils.dart'; // ← 追加
 
 class ProjectsFilter extends StatefulWidget {
   final List<Project> projects;
@@ -46,13 +47,30 @@ class _ProjectsFilterState extends State<ProjectsFilter> {
   Widget build(BuildContext context) {
     final showWorkflow = widget.tabIndex == 0;
 
-    final serverOSItems =
-        _uniqueItems(widget.projects.map((e) => e.serverOS).toList());
-    final dbItems = _uniqueItems(widget.projects.map((e) => e.db).toList());
-    final toolsFWItems =
-        _uniqueItems(widget.projects.map((e) => e.toolsFW).toList());
-    final skillsItems =
-        _uniqueItems(widget.projects.map((e) => e.skills).toList());
+    final serverOSItems = _uniqueItems(
+      widget.projects
+          .expand((e) => splitSkills(e.serverOS)) // ← 修正
+          .toList(),
+    );
+
+    final dbItems = _uniqueItems(
+      widget.projects
+          .expand((e) => splitSkills(e.db)) // ← 修正
+          .toList(),
+    );
+
+    final toolsFWItems = _uniqueItems(
+      widget.projects
+          .expand((e) => splitSkills(e.toolsFW)) // ← 修正
+          .toList(),
+    );
+
+    final skillsItems = _uniqueItems(
+      widget.projects
+          .expand((e) => splitSkills(e.skills)) // ← 修正
+          .toList(),
+    );
+
     final workflowItems = showWorkflow
         ? _uniqueItems(widget.projects
             .expand((e) => e.workflow.entries
