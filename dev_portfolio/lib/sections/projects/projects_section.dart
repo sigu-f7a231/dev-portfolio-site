@@ -5,6 +5,7 @@ import 'data/projects_private.dart';
 import 'models/projects_model.dart';
 import 'views/projects_tab_view.dart';
 import 'projects_header.dart';
+import 'projects_filter.dart';
 import '../config/projects/projects_section_config.dart';
 import '../../utils/theme_colors.dart';
 
@@ -19,17 +20,23 @@ class _ProjectsSectionState extends State<ProjectsSection>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
-  // コレクションモード切替
   final ValueNotifier<bool> showCollectionNotifier = ValueNotifier(false);
 
-  // Future は initState で保持 → build 内で再生成しない
   late Future<List<Project>> workFuture;
   late Future<List<Project>> privateFuture;
+
+  int currentTabIndex = 0; // 0: work, 1: private
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+    _tabController.addListener(() {
+      if (_tabController.indexIsChanging) return;
+      setState(() {
+        currentTabIndex = _tabController.index;
+      });
+    });
 
     workFuture = loadWorkProjects();
     privateFuture = loadPrivateProjects();
@@ -57,6 +64,17 @@ class _ProjectsSectionState extends State<ProjectsSection>
             isDark: isDark,
           ),
           ProjectsSectionConfig.headerSpacing,
+          FutureBuilder<List<Project>>(
+            future: currentTabIndex == 0 ? workFuture : privateFuture,
+            builder: (context, snapshot) {
+              final projects = snapshot.data ?? [];
+              return ProjectsFilter(
+                projects: projects,
+                tabIndex: currentTabIndex,
+                isDark: isDark,
+              );
+            },
+          ),
           Expanded(
             child: ProjectsTabView(
               tabController: _tabController,
