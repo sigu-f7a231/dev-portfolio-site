@@ -8,7 +8,7 @@ class LanguageUtils {
       'detailed_design': '詳細設計',
       'implementation_unit_test': '実装・単体テスト',
       'integration_test': '結合テスト',
-      'system_test': 'システムテスト',
+      'system_test': '総合テスト',
       'maintenance_operation': '保守・運用',
     },
   };

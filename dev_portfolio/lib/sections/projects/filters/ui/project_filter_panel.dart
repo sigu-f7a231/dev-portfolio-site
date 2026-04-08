@@ -72,13 +72,11 @@ class _ProjectsFilterState extends State<ProjectsFilter> {
     );
 
     final workflowItems = showWorkflow
-        ? _uniqueItems(widget.projects
-            .expand((e) => e.workflow.entries
-                .where((entry) => entry.value)
-                .map((entry) =>
-                    LanguageUtils.workflowLabels['ja']?[entry.key] ?? entry.key))
-            .toList())
-        : <String>[];
+    ? _uniqueItems(widget.projects
+        .expand((e) => e.workflow.keys) // ← すべてのキーを取得
+        .map((key) => LanguageUtils.workflowLabels['ja']?[key] ?? key)
+        .toList())
+    : <String>[];
 
     return Align(
       alignment: Alignment.topLeft, // 全体右寄せ

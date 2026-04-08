@@ -6,7 +6,7 @@ import 'models/projects_model.dart';
 import 'views/projects_tab_view.dart';
 import 'projects_header.dart';
 import 'filters/ui/project_filter_panel.dart';
-import 'filters/state/project_filter_state.dart'; // ← 追加
+import 'filters/state/project_filter_state.dart';
 import '../config/projects/projects_section_config.dart';
 import '../../utils/theme_colors.dart';
 
@@ -28,7 +28,7 @@ class _ProjectsSectionState extends State<ProjectsSection>
 
   int currentTabIndex = 0; // 0: work, 1: private
 
-  // ★ 追加：フィルタ状態
+  // ★ フィルター状態
   ProjectFilterState filterState = ProjectFilterState.initial();
 
   @override
@@ -56,49 +56,55 @@ class _ProjectsSectionState extends State<ProjectsSection>
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final screenHeight = MediaQuery.of(context).size.height;
 
     return Container(
       color: AppColors.background(isDark),
       padding: ProjectsSectionConfig.padding,
-      height: MediaQuery.of(context).size.height,
-      child: Column(
-        children: [
-          ProjectsHeader(
-            showCollectionNotifier: showCollectionNotifier,
-            isDark: isDark,
-          ),
-          ProjectsSectionConfig.headerSpacing,
-
-          // ★ Filter UI
-          FutureBuilder<List<Project>>(
-            future: currentTabIndex == 0 ? workFuture : privateFuture,
-            builder: (context, snapshot) {
-              final projects = snapshot.data ?? [];
-              return ProjectsFilter(
-                projects: projects,
-                tabIndex: currentTabIndex,
-                isDark: isDark,
-                onApply: (filtersMap) {
-                  setState(() {
-                    filterState = ProjectFilterState(selectedFilters: filtersMap);
-                  });
-                },
-              );
-            },
-          ),
-
-          // ★ View（ここにフィルタ渡す）
-          Expanded(
-            child: ProjectsTabView(
-              tabController: _tabController,
-              workFuture: workFuture,
-              privateFuture: privateFuture,
+      height: screenHeight,
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ProjectsHeader(
               showCollectionNotifier: showCollectionNotifier,
               isDark: isDark,
-              filterState: filterState, // ← 追加
             ),
-          ),
-        ],
+            ProjectsSectionConfig.headerSpacing,
+
+            // ★ Filter UI
+            FutureBuilder<List<Project>>(
+              future: currentTabIndex == 0 ? workFuture : privateFuture,
+              builder: (context, snapshot) {
+                final projects = snapshot.data ?? [];
+                return ProjectsFilter(
+                  projects: projects,
+                  tabIndex: currentTabIndex,
+                  isDark: isDark,
+                  onApply: (filtersMap) {
+                    setState(() {
+                      filterState =
+                          ProjectFilterState(selectedFilters: filtersMap);
+                    });
+                  },
+                );
+              },
+            ),
+
+            // ★ TabView（高さを画面の70%に固定）
+            SizedBox(
+              height: screenHeight * 0.7,
+              child: ProjectsTabView(
+                tabController: _tabController,
+                workFuture: workFuture,
+                privateFuture: privateFuture,
+                showCollectionNotifier: showCollectionNotifier,
+                isDark: isDark,
+                filterState: filterState,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
