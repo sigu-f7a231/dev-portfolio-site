@@ -4,7 +4,12 @@ import '../../models/projects_model.dart';
 import '../../project_modal_format.dart';
 import '../../../config/projects/projects_views_list_config.dart';
 
-void showProjectDetailModal(BuildContext context, Project project, {bool isDark = false}) {
+void showProjectDetailModal(
+  BuildContext context,
+  Project project, {
+  bool isDark = false,
+  bool showWorkflow = false, // ← 追加
+}) {
   showDialog(
     context: context,
     barrierDismissible: true,
@@ -32,7 +37,7 @@ void showProjectDetailModal(BuildContext context, Project project, {bool isDark 
                     ),
                   ),
                   // プロジェクト詳細フィールド
-                  ...ProjectModalFormat.fields.map((field) {
+                  ...ProjectModalFormat.fields(showWorkflow: showWorkflow).map((field) {
                     final value = field.valueGetter(project);
                     return Padding(
                       padding: ProjectsListConfig.fieldPadding,

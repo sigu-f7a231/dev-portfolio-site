@@ -1,9 +1,9 @@
-// lib/sections/projects/projects_filter.dart
+// lib/sections/projects/filters/projects_filter.dart
 import 'package:flutter/material.dart';
 import 'project_filter_chips.dart';
 import '../../models/projects_model.dart';
 import '../../../../utils/language_utils.dart';
-import '../../../../utils/string_utils.dart'; // ← 追加
+import '../../../../utils/string_utils.dart'; // splitSkills など
 
 class ProjectsFilter extends StatefulWidget {
   final List<Project> projects;
@@ -47,39 +47,32 @@ class _ProjectsFilterState extends State<ProjectsFilter> {
   Widget build(BuildContext context) {
     final showWorkflow = widget.tabIndex == 0;
 
+    // ★ UI 用のフィルター候補リストを作成
     final serverOSItems = _uniqueItems(
-      widget.projects
-          .expand((e) => splitSkills(e.serverOS)) // ← 修正
-          .toList(),
+      widget.projects.expand((e) => splitSkills(e.serverOS)).toList(),
     );
 
     final dbItems = _uniqueItems(
-      widget.projects
-          .expand((e) => splitSkills(e.db)) // ← 修正
-          .toList(),
+      widget.projects.expand((e) => splitSkills(e.db)).toList(),
     );
 
     final toolsFWItems = _uniqueItems(
-      widget.projects
-          .expand((e) => splitSkills(e.toolsFW)) // ← 修正
-          .toList(),
+      widget.projects.expand((e) => splitSkills(e.toolsFW)).toList(),
     );
 
     final skillsItems = _uniqueItems(
-      widget.projects
-          .expand((e) => splitSkills(e.skills)) // ← 修正
-          .toList(),
+      widget.projects.expand((e) => splitSkills(e.skills)).toList(),
     );
 
     final workflowItems = showWorkflow
-    ? _uniqueItems(widget.projects
-        .expand((e) => e.workflow.keys) // ← すべてのキーを取得
-        .map((key) => LanguageUtils.workflowLabels['ja']?[key] ?? key)
-        .toList())
-    : <String>[];
+        ? _uniqueItems(widget.projects
+            .expand((e) => e.workflow.keys)
+            .map((key) => LanguageUtils.workflowLabels['ja']?[key] ?? key)
+            .toList())
+        : <String>[];
 
     return Align(
-      alignment: Alignment.topLeft, // 全体右寄せ
+      alignment: Alignment.topLeft,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -93,6 +86,7 @@ class _ProjectsFilterState extends State<ProjectsFilter> {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // Server OS
                 if (serverOSItems.isNotEmpty)
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 4.0),
@@ -110,6 +104,7 @@ class _ProjectsFilterState extends State<ProjectsFilter> {
                       title: 'Server OS',
                     ),
                   ),
+                // Database
                 if (dbItems.isNotEmpty)
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 4.0),
@@ -127,6 +122,7 @@ class _ProjectsFilterState extends State<ProjectsFilter> {
                       title: 'Database',
                     ),
                   ),
+                // Tools / Frameworks
                 if (toolsFWItems.isNotEmpty)
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 4.0),
@@ -144,6 +140,7 @@ class _ProjectsFilterState extends State<ProjectsFilter> {
                       title: 'Tools / Frameworks',
                     ),
                   ),
+                // Skills
                 if (skillsItems.isNotEmpty)
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 4.0),
@@ -161,6 +158,7 @@ class _ProjectsFilterState extends State<ProjectsFilter> {
                       title: 'Skills',
                     ),
                   ),
+                // Workflow
                 if (showWorkflow && workflowItems.isNotEmpty)
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 4.0),
@@ -182,11 +180,27 @@ class _ProjectsFilterState extends State<ProjectsFilter> {
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 8),
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.start, // ボタン右寄せ
+                    mainAxisAlignment: MainAxisAlignment.start,
                     children: [
                       ElevatedButton(
                         onPressed: () {
-                          widget.onApply?.call(_selectedFilters);
+                          // 日本語ラベル → 英語キーに変換
+                          final workflowSelectedJa = _selectedFilters['workflow']!;
+                          final workflowSelectedEn = workflowSelectedJa.map((ja) {
+                            return LanguageUtils.workflowLabels['ja']?.entries
+                                    .firstWhere(
+                                      (entry) => entry.value == ja,
+                                      orElse: () => MapEntry(ja, ja),
+                                    )
+                                    .key ??
+                                ja;
+                          }).toList();
+
+                          // コピーして workflow を英語キーに変換
+                          final appliedFilters = Map<String, List<String>>.from(_selectedFilters);
+                          appliedFilters['workflow'] = workflowSelectedEn;
+
+                          widget.onApply?.call(appliedFilters);
                           setState(() => _expanded = false);
                         },
                         child: const Text('反映'),

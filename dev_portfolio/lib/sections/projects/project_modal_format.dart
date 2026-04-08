@@ -1,4 +1,5 @@
 import 'models/projects_model.dart';
+import '../../utils/language_utils.dart';
 
 typedef ValueGetterFunc = String Function(Project project);
 
@@ -19,14 +20,34 @@ class ProjectModalField {
 
 /// モーダル内で表示するフィールド一覧
 class ProjectModalFormat {
-  static final List<ProjectModalField> fields = [
-    ProjectModalField(label: 'タイトル', valueGetter: (p) => p.title, isBold: true),
-    ProjectModalField(label: '説明', valueGetter: (p) => p.description),
-    ProjectModalField(label: '詳細', valueGetter: (p) => p.details),
-    ProjectModalField(label: 'サーバーOS', valueGetter: (p) => p.serverOS),
-    ProjectModalField(label: 'DB', valueGetter: (p) => p.db),
-    ProjectModalField(label: 'ツール/フレームワーク', valueGetter: (p) => p.toolsFW),
-    ProjectModalField(label: 'スキル', valueGetter: (p) => p.skills),
-    ProjectModalField(label: '期間', valueGetter: (p) => p.period),
-  ];
+  /// workflow を表示するかどうかでフィールドを返す
+  static List<ProjectModalField> fields({bool showWorkflow = false}) {
+    final baseFields = [
+      ProjectModalField(label: 'タイトル', valueGetter: (p) => '\n${p.title.split(',').map((s) => s.trim()).join(', ')}', isBold: true),
+      ProjectModalField(label: '説明', valueGetter: (p) => '\n${p.description.split(',').map((s) => s.trim()).join(', ')}',),
+      ProjectModalField(label: '詳細', valueGetter: (p) => '\n${p.details}'),
+      ProjectModalField(label: 'サーバーOS',valueGetter: (p) => '\n${p.serverOS.split(',').map((s) => s.trim()).join(', ')}',),
+      ProjectModalField(label: 'DB',valueGetter: (p) => '\n${p.db.split(',').map((s) => s.trim()).join(', ')}',),
+      ProjectModalField(label: 'ツール/フレームワーク',valueGetter: (p) => '\n${p.toolsFW.split(',').map((s) => s.trim()).join(', ')}',),
+      ProjectModalField(label: 'スキル',valueGetter: (p) => '\n${p.skills.split(',').map((s) => s.trim()).join(', ')}',),
+      ProjectModalField(label: '期間', valueGetter: (p) => '\n${p.period.split(',').map((s) => s.trim()).join(', ')}',),
+    ];
+
+    if (showWorkflow) {
+      baseFields.add(
+        ProjectModalField(
+          label: 'Workflow',
+          valueGetter: (p) {
+            final workflowLines = p.workflow.entries.map((e) {
+            final jaLabel = LanguageUtils.workflowLabels['ja']?[e.key] ?? e.key;
+            return '$jaLabel: ${e.value ? '✅' : '❌'}';
+        }).join('\n');
+      return '\n$workflowLines'; // interpolation を使って先頭改行
+    } 
+),
+      );
+    }
+
+    return baseFields;
+  }
 }

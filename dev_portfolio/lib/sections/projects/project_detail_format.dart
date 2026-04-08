@@ -2,52 +2,70 @@
 import '../projects/models/projects_model.dart';
 
 /// Project モーダル表示用のフィールド定義
+/// Project モーダル表示用のフィールド定義
 class ProjectDetailFormat {
   /// 表示順のリスト
-  static List<ProjectField> fields = [
-    ProjectField(
-      label: 'Title',
-      valueGetter: (p) => p.title,
-      isBold: true,
-      fontSize: 20,
-    ),
-    ProjectField(
-      label: 'Details',
+  static List<ProjectField> fields({bool showWorkflow = false}) {
+    final baseFields = [
+      ProjectField(
+        label: 'Title',
+        valueGetter: (p) => p.title,
+        isBold: true,
+        fontSize: 20,
+      ),
+      ProjectField(
+        label: 'Details',
       valueGetter: (p) => p.details,
-      isBold: false,
-      fontSize: 14,
-    ),
-    ProjectField(
-      label: 'Server OS',
-      valueGetter: (p) => p.serverOS,
-      isBold: false,
-      fontSize: 14,
-    ),
-    ProjectField(
-      label: 'DB',
-      valueGetter: (p) => p.db,
-      isBold: false,
-      fontSize: 14,
-    ),
-    ProjectField(
-      label: 'Tools/Framework',
-      valueGetter: (p) => p.toolsFW,
-      isBold: false,
-      fontSize: 14,
-    ),
-    ProjectField(
-      label: 'Skills',
-      valueGetter: (p) => p.skills,
-      isBold: false,
-      fontSize: 14,
-    ),
-    ProjectField(
-      label: 'Period',
-      valueGetter: (p) => p.period,
-      isBold: false,
-      fontSize: 12,
-    ),
-  ];
+        isBold: false,
+        fontSize: 14,
+      ),
+      ProjectField(
+        label: 'Server OS',
+        valueGetter: (p) => p.serverOS,
+        isBold: false,
+        fontSize: 14,
+      ),
+      ProjectField(
+        label: 'DB',
+        valueGetter: (p) => p.db,
+        isBold: false,
+        fontSize: 14,
+      ),
+      ProjectField(
+        label: 'Tools/Framework',
+        valueGetter: (p) => p.toolsFW,
+        isBold: false,
+        fontSize: 14,
+      ),
+      ProjectField(
+        label: 'Skills',
+        valueGetter: (p) => p.skills,
+        isBold: false,
+        fontSize: 14,
+      ),
+      ProjectField(
+        label: 'Period',
+        valueGetter: (p) => p.period,
+        isBold: false,
+        fontSize: 12,
+      ),
+    ];
+
+    if (showWorkflow) {
+      baseFields.add(
+        ProjectField(
+          label: 'Workflow',
+          valueGetter: (p) => p.workflow.entries
+              .map((e) => '${e.key}: ${e.value ? "✅" : "❌"}')
+              .join(', '),
+          isBold: false,
+          fontSize: 14,
+        ),
+      );
+    }
+
+    return baseFields;
+  }
 }
 
 /// 1項目の定義
