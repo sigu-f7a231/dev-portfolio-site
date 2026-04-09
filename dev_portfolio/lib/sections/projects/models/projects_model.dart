@@ -6,7 +6,7 @@ class Project {
   final String db;
   final String toolsFW;
   final String skills;
-  final Map<String, bool> workflow; // 🔽 ここがポイント
+  final Map<String, bool> workflow;
   final String period;
   final String link;
 
@@ -23,21 +23,43 @@ class Project {
     required this.link,
   });
 
+  // =========================
+  // 🔽 追加（ここだけ）
+  // =========================
+
+  static String _toCsvString(dynamic value) {
+    if (value is List) {
+      return value.map((e) => e.toString()).join(', ');
+    } else if (value is String) {
+      return value;
+    }
+    return '';
+  }
+
+  static String _toPeriodString(dynamic value) {
+    if (value is List && value.length == 2) {
+      return '${value[0]} ~ ${value[1]}';
+    } else if (value is String) {
+      return value;
+    }
+    return '';
+  }
+
   factory Project.fromJson(Map<String, dynamic> json) => Project(
         title: json['title'] ?? '',
         description: json['description'] ?? '',
         details: json['details'] ?? '',
-        serverOS: json['server_os'] ?? '',
-        db: json['db'] ?? '',
-        toolsFW: json['tools_fw'] ?? '',
-        skills: json['skills'] ?? '',
-        workflow: Map<String, bool>.from(json['workflow'] ?? {}), // 🔽 重要
-        period: json['period'] ?? '',
+        serverOS: _toCsvString(json['server_os']),
+        db: _toCsvString(json['db']),
+        toolsFW: _toCsvString(json['tools_fw']),
+        skills: _toCsvString(json['skills']),
+        workflow: Map<String, bool>.from(json['workflow'] ?? {}),
+        period: _toPeriodString(json['period']),
         link: json['link'] ?? '',
       );
 
   // =========================
-  // 🔽 フィルター用
+  // 🔽 既存そのまま
   // =========================
 
   List<String> _split(String value) {
@@ -53,17 +75,12 @@ class Project {
   List<String> get dbList => _split(db);
   List<String> get toolsFWList => _split(toolsFW);
 
-  /// 🔽 true の workflow だけ返す
   List<String> get workflowList {
     return workflow.entries
         .where((e) => e.value == true)
         .map((e) => e.key)
         .toList();
   }
-
-  // =========================
-  // period系（そのまま）
-  // =========================
 
   DateTime get periodStart {
     try {

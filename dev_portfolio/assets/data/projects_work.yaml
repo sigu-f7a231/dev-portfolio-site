@@ -6,11 +6,24 @@ projects:
       単体テスト作成（Coverage100%）、開発ルールに沿ったソースコード品質管理
       不具合確認、画面仕様書作成、テスト項目書作成
       チームメンバーと連携し、2週間サイクルのスクラム開発を実施
-    server_os: Linux, Windows
-    db: PostgreSQL
-    tools_fw: Django2,Boostrap,RedMine,Git,GitLab,teraterm,adobeXD
-    skills: Python3
-    period: 2019-07 ~ 2019-12
+    server_os:
+      - Linux
+      - Windows
+    db: 
+     - PostgreSQL
+    tools_fw: 
+      - Django2
+      - Boostrap
+      - RedMine
+      - Git
+      - GitLab
+      - Teraterm
+      - AdobeXD
+    skills:
+     - Python3
+    period:
+     - 2019-07
+     - 2019-12
     link: ""
     workflow:
       requirements: false
@@ -26,11 +39,17 @@ projects:
     details: |
       操作マニュアルに従い、適正な学習データの作成
       既存ソースや処理実行ログを分析し、不具合調査および対応
-    server_os: Windows
-    db: PostgreSQL
-    tools_fw: 独自ツール
-    skills: Python
-    period: 2020-01 ~ 2020-03
+    server_os: 
+      - Windows
+    db:
+      - PostgreSQL
+    tools_fw:
+      - 独自ツール
+    skills:
+      - Python
+    period:
+      - 2020-01
+      - 2020-03
     link: ""
     workflow:
       requirements: false
@@ -40,16 +59,22 @@ projects:
       integration_test: false
       system_test: false
       maintenance_operation: true
+
   - title: 美容系システムのAPIの設計(土日に稼働)
     description: 美容系システムにおける API 設計とデータ作成・製造に関する開発対応
     details: |
       API 設計およびデータ作成・製造
       スクレイピングによるデータ収集およびデータ整備
-    server_os: Windows
+    server_os:
+      - Windows
     db: 
-    tools_fw: Beautiful Soup
-    skills: Python
-    period: 2020-01 ~ 2020-03
+    tools_fw:
+      - BeautifulSoup
+    skills:
+      - Python
+    period:
+      - 2020-01
+      - 2020-03
     link: ""
     workflow:
       requirements: false
@@ -69,11 +94,19 @@ projects:
       ・フロントエンド画面の改修（Template、CSS、JavaScript）
       ・データ取得・更新処理における Vue.js を用いた API 呼び出し実装
       ・チームメンバーと連携しながら画面改修・調査・修正を実施
-    server_os: Windows
-    db: PostgreSQL
-    tools_fw: Git,Vue.js
-    skills: Flutter,JavaScript
-    period: 2020-04 ~ 2020-05
+    server_os:
+      - Windows
+    db:
+      - PostgreSQL
+    tools_fw:
+      - Git
+      - Vue.js
+    skills:
+      - Flutter
+      - JavaScript
+    period:
+      - 2020-04
+      - 2020-05
     link: ""
     workflow:
       requirements: false
@@ -94,11 +127,31 @@ projects:
       ・Web接客ツールを活用した広告画面の設計・開発
       ・録音音声をAWS Elemental MediaConvertで変換しAmazon S3に保存、AWS Lambdaで形式チェックと振り分けを実施
       ・AWS EC2上のClamAV**でウイルススキャンし、不正ファイルは削除・正常ファイルのみ最終ディレクトリへ格納
-    server_os: Windows
-    db: MongoDB
-    tools_fw: S3,Cloud9,Lambda,EC2,MediaConvert,Vue.js,KARTE,Git,jira,backlog,sourceTree,ClamAV
-    skills: Python,JavaScript,HTML,CSS
-    period: 2020-11 ~ 2021-03
+    server_os:
+      - Windows
+    db:
+      - MongoDB
+    tools_fw:
+      - S3
+      - Cloud9
+      - Lambda
+      - EC2
+      - MediaConvert
+      - Vue.js
+      - KARTE
+      - Git
+      - Jira
+      - Backlog
+      - SourceTree
+      - ClamAV
+    skills:
+      - Python
+      - JavaScript
+      - HTML
+      - CSS
+    period:
+      - 2020-11
+      - 2021-03
     link: ""
     workflow:
       requirements: false
@@ -119,11 +172,24 @@ projects:
       ・FastAPIによるAPI設計・実装およびフロントエンド連携の構築
       ・グラフ描画機能（折れ線・円グラフ）の設計および実装対応
 
-    server_os: Windows
-    db: PostgreSQL
-    tools_fw: Git,BitBacket,Docker,FastAPI
-    skills: Python,JavaScript,HTML,CSS,React
-    period: 2021-04 ~ 2022-03
+    server_os:
+      - Windows
+    db:
+      - PostgreSQL
+    tools_fw:
+      - Git
+      - BitBacket
+      - Docker
+      - FastAPI
+    skills:
+      - Python
+      - JavaScript
+      - HTML
+      - CSS
+      - React
+    period:
+      - 2021-04
+      - 2022-03
     link: ""
     workflow:
       requirements: true
@@ -139,11 +205,22 @@ projects:
     details: |
       独自システム環境でのAPI開発における設計・実装支援
       開発に伴う課題や技術的問題への対応およびサポート提供
-    server_os: Windows
-    db: PostgreSQL
-    tools_fw: GitHub,独自SDK
-    skills: Python,JavaScript,HTML,CSS,yml
-    period: 2022-04 ~ 2022-09
+    server_os:
+      - Windows
+    db:
+      - PostgreSQL
+    tools_fw:
+      - GitHub
+      - 独自SDK
+    skills:
+      - Python
+      - JavaScript
+      - HTML
+      - CSS
+      - yml
+    period:
+      - 2022-04
+      - 2022-09
     link: ""
     workflow:
       requirements: false
@@ -160,11 +237,26 @@ projects:
       ・Next.js を用いたフロントエンド機能の設計・実装支援
       ・実装に必要な Microsoft Graph API の機能調査およびドキュメント作成
       ・システム開発に関連する情報の収集・整理および資料化
-    server_os: Windows
-    db: 利用なし
-    tools_fw: Jira,BitBacket,React,Django,Next.js,VSCODE
-    skills: Python,JavaScript,HTML,CSS,yml
-    period: 2022-10 ~ 2023-03
+    server_os:
+      - Windows
+    db:
+      - 利用なし
+    tools_fw:
+      - Jira
+      - BitBacket
+      - React
+      - Django
+      - Next.js
+      - VSCODE
+    skills:
+      - Python
+      - JavaScript
+      - HTML
+      - CSS
+      - yml
+    period:
+      - 2022-10
+      - 2023-03
     link: ""
     workflow:
       requirements: false
@@ -180,11 +272,22 @@ projects:
     details: |
       既存ドキュメントの内容を解析し、必要なデータ抽出用SQLの設計・構築
       Streamlitを用いたデータ可視化および操作画面の設計・開発
-    server_os: Windows
-    db: PostgreSQL
-    tools_fw: VSCODE,Streamlit
-    skills: Python,JavaScript,HTML,CSS,yml
-    period: 2023-04 ~ 2023-06
+    server_os:
+      - Windows
+    db:
+      - PostgreSQL
+    tools_fw:
+      - VSCODE
+      - Streamlit
+    skills:
+      - Python
+      - JavaScript
+      - HTML
+      - CSS
+      - yml
+    period:
+      - 2023-04
+      - 2023-06
     link: ""
     workflow:
       requirements: false
@@ -199,11 +302,18 @@ projects:
     description: データ反映作業に関する運用対応
     details: |
       納品データの本番環境への反映作業
-    server_os: Windows
-    db: 
-    tools_fw: Github,Zira
+    server_os:
+      - Windows
+    db:
+      - 利用なし
+    tools_fw:
+      - Github
+      - Zira
     skills: 
-    period: 2023-06 ~ 2023-08
+      - 利用なし
+    period:
+      - 2023-06
+      - 2023-08
     link: ""
     workflow:
       requirements: false
@@ -220,11 +330,25 @@ projects:
       担当範囲の開発期間見積もり・技術要素の整理を行い、Web画面・API開発に向けた設計支援
       デザインデータを基にHTML構成を調査・検討し、実装準備を実施
       データ蓄積・外部連携用APIの設計および実装支援を担当
-    server_os: Windows
-    db: PostgreSQL
-    tools_fw: Github,VSCODE,Box,Bizer,A5/SQL,FastAPI
-    skills: Python,JavaScript,TypeScript,HTML			
-    period: 2023-09 ~ 2024-01
+    server_os:
+      - Windows
+    db:
+      - PostgreSQL
+    tools_fw:
+      - Github
+      - VSCODE
+      - Box
+      - Bizer
+      - A5/SQL
+      - FastAPI
+    skills:
+      - Python
+      - JavaScript
+      - TypeScript
+      - HTML			
+    period:
+      - 2023-09
+      - 2024-01
     link: ""
     workflow:
       requirements: true
@@ -241,11 +365,25 @@ projects:
       ・Pythonを用いたデータ処理ロジックの設計・実装
       ・サーバレス環境における動作検証および実行確認
       ・pytestを用いた単体テストの実施およびカバレッジ測定による品質担保対応
-    server_os: Windows
-    db: PostgreSQL
-    tools_fw: Github,VSCODE,Box,Bizer,A5/SQL,FastAPI
-    skills: Python,JavaScript,TypeScript,HTML	
-    period: 2024-02 ~ 2024-04
+    server_os:
+      - Windows
+    db:
+      - PostgreSQL
+    tools_fw:
+      - Github
+      - VSCODE
+      - Box
+      - Bizer
+      - A5/SQL
+      - FastAPI
+    skills:
+      - Python
+      - JavaScript
+      - TypeScript
+      - HTML	
+    period:
+      - 2024-02
+      - 2024-04
     link: ""
     workflow:
       requirements: false
@@ -262,10 +400,19 @@ projects:
       ・複数クラウドサービスとAWS間の連携によるログ収集機能の設計・開発
       ・クラウド間データ連携処理の実装および動作検証
       ・pytestを用いた単体テストの実施およびカバレッジ測定による品質担保対応
-    server_os: Windows
-    db: PostgreSQL
-    tools_fw: Github,VSCODE,Zira
-    skills: Python3,EC2,Docker,OpenSearch
+    server_os:
+      - Windows
+    db:
+      - PostgreSQL
+    tools_fw:
+      - Github
+      - VSCODE
+      - Zira
+    skills:
+      - Python3
+      - EC2
+      - Docker
+      - OpenSearch
     period: 2024-05 ~ 2024-07
     link: ""
     workflow:
@@ -283,10 +430,24 @@ projects:
       ・データ投入およびデータ調査対応
       ・Web画面におけるバリデーション処理の追加および機能追加
       ・定期検証環境へのリリース作業
-    server_os: Windows
-    db: MySQL
-    tools_fw: Github,Zira,VSCODE,Vue.js,Docker,S3,EC2,Azure,Flask
-    skills: Python3,TypeScript,Python
+    server_os:
+      - Windows
+    db: 
+      - MySQL
+    tools_fw:
+      - Github
+      - Zira
+      - VSCODE
+      - Vue.js
+      - Docker
+      - S3
+      - EC2
+      - Azure
+      - Flask
+    skills:
+      - Python3
+      - TypeScript
+      - Python
     period: 2024-08 ~ 2024-10
     link: ""
     workflow:
@@ -304,11 +465,22 @@ projects:
       ・社外向け管理画面の改修（APIの修正、クライアント機能の追加・改修、サーバサイド機能の修正、UI調整）
       ・単位変換機能に関する改修（影響範囲の調査、実装、テストコードおよびテスト仕様書の作成）
       ・可読性および保守性向上を目的としたコードのリファクタリング対応
-    server_os: Windows
-    db: MySQL
-    tools_fw: Github,VSCODE,NodeJS
-    skills: Angular,TypeScript,Docker,S3
-    period: 2024-11 ~ 2025-03
+    server_os:
+      - Windows
+    db:
+      - MySQL
+    tools_fw:
+      - Github
+      - VSCODE
+      - NodeJS
+    skills:
+      - Angular
+      - TypeScript
+      - Docker
+      - S3
+    period:
+      - 2024-11
+      - 2025-03
     link: ""
     workflow:
       requirements: false
@@ -327,11 +499,24 @@ projects:
       ・API仕様書およびドキュメントの作成
       ・単体テストの実施およびpytestによるテスト自動化対応
       ・実装APIに対するパフォーマンスチューニングおよび改善対応
-    server_os: Mac
-    db: PostgreSQL
-    tools_fw: Github,VSCODE,NodeJS
-    skills: Python,FastAPI,Docker,Lamba,ECR,CloudWatch
-    period: 2025-04 ~ 2025-10
+    server_os:
+      - Mac
+    db:
+      - PostgreSQL
+    tools_fw:
+      - Github
+      - VSCODE
+      - NodeJS
+    skills:
+      - Python
+      - FastAPI
+      - Docker
+      - Lamba
+      - ECR
+      - CloudWatch
+    period:
+      - 2025-04
+      - 2025-10
     link: ""
     workflow:
       requirements: false
@@ -347,11 +532,23 @@ projects:
     details: |
       ・バックエンド側の一部機能に対する改修対応
       ・Vue.jsからReactへの移行に伴う、既存フロントエンド機能の不具合修正および動作改善
-    server_os: Windows
-    db: PostgreSQL
-    tools_fw: Github,VSCODE,WSL,NodeJS,MochaTest,Vue.js
-    skills: TypeScript,JavaScript
-    period: 2025-10 ~ 2025-12
+    server_os:
+      - Windows
+    db:
+      - PostgreSQL
+    tools_fw:
+      - Github
+      - VSCODE
+      - WSL
+      - NodeJS
+      - MochaTest
+      - Vue.js
+    skills:
+      - TypeScript
+      - JavaScript
+    period:
+      - 2025-10
+      - 2025-12
     link: ""
     workflow:
       requirements: false
@@ -368,11 +565,21 @@ projects:
       ・OpenShift Container Platform（OCP）4.12 から 4.20 への移行に伴う影響範囲の洗い出し
       ・OCP 4.20 環境における各種コマンドおよび動作の検証
       ・バージョンアップに伴う PostgreSQL の仕様変更および影響の調査
-    server_os: Windows
-    db: PostgreSQL
-    tools_fw: Teams,RedMine,Box,teraterm
-    skills: K8s,OpenShift
-    period: 2026-01 ~ 2026-03
+    server_os:
+      - Windows
+    db:
+      - PostgreSQL
+    tools_fw:
+      - Teams
+      - RedMine
+      - Box
+      - Teraterm
+    skills:
+      - K8s
+      - OpenShift
+    period:
+      - 2026-01
+      - 2026-03
     link: ""
     workflow:
       requirements: false
