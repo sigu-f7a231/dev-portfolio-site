@@ -120,8 +120,8 @@ projects:
       ・グラフ描画機能（折れ線・円グラフ）の設計および実装対応
 
     server_os: Windows
-    db: postgresSQL
-    tools_fw: Git,bitBacket,Docker,FastAPI
+    db: PostgreSQL
+    tools_fw: Git,BitBacket,Docker,FastAPI
     skills: Python,JavaScript,HTML,CSS,React
     period: 2021-04 ~ 2022-03
     link: ""
@@ -134,56 +134,97 @@ projects:
       system_test: false
       maintenance_operation: false
 
-  - title: 社内管理システム 5
-    description: Flutter Webで制作
+  - title: API開発支援
+    description: 独自システムを活用したAPI開発プロジェクトにおいて、設計・実装の支援および技術サポートを実施
     details: |
-      ダッシュボードや管理画面をFlutterで実装。  
-      単体テスト・結合テストを実施済み。
-    server_os: Windows Server
-    db: MySQL
-    tools_fw: Flutter, Git
-    skills: Dart, UI設計
-    period: 2023-03 ~ 2023-06
-    link: ""
-    workflow:
-      requirements: true
-      basic_design: true
-      detailed_design: true
-      implementation_unit_test: true
-      integration_test: true
-      system_test: false
-      maintenance_operation: false
-
-  - title: ECサイト構築 6
-    description: WordPressで開発
-    details: |
-      WooCommerceで商品管理機能を実装。  
-      レスポンシブデザイン対応済み。
-    server_os: Linux
-    db: MySQL
-    tools_fw: WordPress, PHP
-    skills: PHP, HTML, CSS
-    period: 2022-10 ~ 2022-12
-    link: ""
-    workflow:
-      requirements: true
-      basic_design: true
-      detailed_design: true
-      implementation_unit_test: true
-      integration_test: true
-      system_test: false
-      maintenance_operation: false
-
-  - title: 社内管理システム 7
-    description: Flutter Webで制作
-    details: |
-      ユーザー認証とダッシュボード実装。  
-      状態管理とテスト対応も実施。
-    server_os: Ubuntu, Windows Server
+      独自システム環境でのAPI開発における設計・実装支援
+      開発に伴う課題や技術的問題への対応およびサポート提供
+    server_os: Windows
     db: PostgreSQL
-    tools_fw: Flutter, Firebase
-    skills: Dart, Firebase
-    period: 2023-04 ~ 2023-07
+    tools_fw: GitHub,独自SDK
+    skills: Python,JavaScript,HTML,CSS,yml
+    period: 2022-04 ~ 2022-09
+    link: ""
+    workflow:
+      requirements: false
+      basic_design: false
+      detailed_design: true
+      implementation_unit_test: true
+      integration_test: false
+      system_test: false
+      maintenance_operation: true
+
+  - title: WEBアプリケーションにおける技術調査
+    description: フロントエンド開発の支援と、開発に必要な外部APIや関連情報の調査・資料化を実施
+    details: |
+      ・Next.js を用いたフロントエンド機能の設計・実装支援
+      ・実装に必要な Microsoft Graph API の機能調査およびドキュメント作成
+      ・システム開発に関連する情報の収集・整理および資料化
+    server_os: Windows
+    db: 利用なし
+    tools_fw: Jira,BitBacket,React,Django,Next.js,VSCODE
+    skills: Python,JavaScript,HTML,CSS,yml
+    period: 2022-10 ~ 2023-03
+    link: ""
+    workflow:
+      requirements: false
+      basic_design: false
+      detailed_design: true
+      implementation_unit_test: true
+      integration_test: false
+      system_test: false
+      maintenance_operation: false
+
+  - title: SQLを利用したシナリオの作成
+    description: 既存資料をもとにデータ抽出処理の設計および可視化用Web画面の開発を実施
+    details: |
+      既存ドキュメントの内容を解析し、必要なデータ抽出用SQLの設計・構築
+      Streamlitを用いたデータ可視化および操作画面の設計・開発
+    server_os: Windows
+    db: PostgreSQL
+    tools_fw: VSCODE,Streamlit
+    skills: Python,JavaScript,HTML,CSS,yml
+    period: 2023-04 ~ 2023-06
+    link: ""
+    workflow:
+      requirements: false
+      basic_design: false
+      detailed_design: true
+      implementation_unit_test: true
+      integration_test: false
+      system_test: false
+      maintenance_operation: false
+
+  - title: 保守作業
+    description: データ反映作業に関する運用対応
+    details: |
+      納品データの本番環境への反映作業
+    server_os: Windows
+    db: 
+    tools_fw: Github,Zira
+    skills: 
+    period: 2023-06 ~ 2023-08
+    link: ""
+    workflow:
+      requirements: false
+      basic_design: false
+      detailed_design: false
+      implementation_unit_test: false
+      integration_test: false
+      system_test: false
+      maintenance_operation: true
+
+  - title: 監視システムの移行開発
+    description: センサー端末および外部データを対象としたデータ収集・蓄積基盤において、WebアプリケーションおよびAPIの設計・開発を実施
+    details: |
+      担当範囲の開発期間見積もり・技術要素の整理を行い、Web画面・API開発に向けた設計支援
+      デザインデータを基にHTML構成を調査・検討し、実装準備を実施
+      データ蓄積・外部連携用APIの設計および実装支援を担当
+    server_os: Windows
+    db: PostgreSQL
+    tools_fw: Github,VSCODE,Box,Bizer,A5/SQL,FastAPI
+    skills: Python,JavaScript,TypeScript,HTML			
+    period: 2023-09 ~ 2024-01
     link: ""
     workflow:
       requirements: true
@@ -194,60 +235,150 @@ projects:
       system_test: false
       maintenance_operation: false
 
-  - title: ECサイト構築 8
-    description: WordPressで開発
+  - title: データ取込処理バリデーション開発
+    description: インプット情報の自動化を目的とした処理の開発および品質向上対応を実施
     details: |
-      デザインカスタマイズとSEO調整を担当。  
-      ブラウザテスト済み。
-    server_os: Linux
+      ・Pythonを用いたデータ処理ロジックの設計・実装
+      ・サーバレス環境における動作検証および実行確認
+      ・pytestを用いた単体テストの実施およびカバレッジ測定による品質担保対応
+    server_os: Windows
+    db: PostgreSQL
+    tools_fw: Github,VSCODE,Box,Bizer,A5/SQL,FastAPI
+    skills: Python,JavaScript,TypeScript,HTML	
+    period: 2024-02 ~ 2024-04
+    link: ""
+    workflow:
+      requirements: false
+      basic_design: false
+      detailed_design: true
+      implementation_unit_test: true
+      integration_test: true
+      system_test: false
+      maintenance_operation: false
+
+  - title: マネージドセキュリティサービス開発
+    description: マネージドセキュリティサービスの開発において、複数クラウド環境と連携したログ収集基盤の構築および品質向上対応を実施
+    details: |
+      ・複数クラウドサービスとAWS間の連携によるログ収集機能の設計・開発
+      ・クラウド間データ連携処理の実装および動作検証
+      ・pytestを用いた単体テストの実施およびカバレッジ測定による品質担保対応
+    server_os: Windows
+    db: PostgreSQL
+    tools_fw: Github,VSCODE,Zira
+    skills: Python3,EC2,Docker,OpenSearch
+    period: 2024-05 ~ 2024-07
+    link: ""
+    workflow:
+      requirements: false
+      basic_design: false
+      detailed_design: true
+      implementation_unit_test: true
+      integration_test: false
+      system_test: false
+      maintenance_operation: false
+
+  - title: 顧客Webアプリ開発支援
+    description: Webアプリケーションの入力画面におけるバリデーション強化および関連対応
+    details: |
+      ・データ投入およびデータ調査対応
+      ・Web画面におけるバリデーション処理の追加および機能追加
+      ・定期検証環境へのリリース作業
+    server_os: Windows
     db: MySQL
-    tools_fw: WordPress, PHP
-    skills: PHP, HTML, CSS
-    period: 2022-11 ~ 2023-01
+    tools_fw: Github,Zira,VSCODE,Vue.js,Docker,S3,EC2,Azure,Flask
+    skills: Python3,TypeScript,Python
+    period: 2024-08 ~ 2024-10
     link: ""
     workflow:
-      requirements: true
-      basic_design: true
-      detailed_design: true
+      requirements: false
+      basic_design: false
+      detailed_design: false
       implementation_unit_test: true
       integration_test: true
       system_test: false
-      maintenance_operation: false
+      maintenance_operation: true
 
-  - title: 社内管理システム 9
-    description: Flutter Webで制作
+  - title: 新聞社向け図表作成ツール改修
+    description: 図表作成ツールの改修プロジェクトにおいて、機能改善および品質向上を目的とした開発対応を実施
     details: |
-      バックエンドAPIとFlutter状態管理を担当。
-    server_os: Ubuntu
-    db: MySQL, PostgreSQL
-    tools_fw: Flutter, Git
-    skills: Dart, UI設計
-    period: 2023-05 ~ 2023-08
-    link: ""
-    workflow:
-      requirements: true
-      basic_design: true
-      detailed_design: true
-      implementation_unit_test: true
-      integration_test: true
-      system_test: false
-      maintenance_operation: false
-
-  - title: ECサイト構築 10
-    description: WordPressで開発
-    details: |
-      WooCommerceで決済・カート機能を構築。
-    server_os: Linux
+      ・社外向け管理画面の改修（APIの修正、クライアント機能の追加・改修、サーバサイド機能の修正、UI調整）
+      ・単位変換機能に関する改修（影響範囲の調査、実装、テストコードおよびテスト仕様書の作成）
+      ・可読性および保守性向上を目的としたコードのリファクタリング対応
+    server_os: Windows
     db: MySQL
-    tools_fw: WordPress, PHP
-    skills: PHP, HTML, CSS
-    period: 2022-12 ~ 2023-02
+    tools_fw: Github,VSCODE,NodeJS
+    skills: Angular,TypeScript,Docker,S3
+    period: 2024-11 ~ 2025-03
     link: ""
     workflow:
-      requirements: true
-      basic_design: true
+      requirements: false
+      basic_design: false
+      detailed_design: false
+      implementation_unit_test: true
+      integration_test: true
+      system_test: false
+      maintenance_operation: true
+
+  - title: AWS/GoogleCloudをメインとしたクラウド環境での開発
+    description: データ受信基盤の改修プロジェクトにおいて、API開発からテスト、性能改善まで一連の対応を実施
+    details: |
+      ・複数の通信事業者に対応した設定変更APIの設計・開発
+      ・データ一括登録処理用APIの設計・開発
+      ・API仕様書およびドキュメントの作成
+      ・単体テストの実施およびpytestによるテスト自動化対応
+      ・実装APIに対するパフォーマンスチューニングおよび改善対応
+    server_os: Mac
+    db: PostgreSQL
+    tools_fw: Github,VSCODE,NodeJS
+    skills: Python,FastAPI,Docker,Lamba,ECR,CloudWatch
+    period: 2025-04 ~ 2025-10
+    link: ""
+    workflow:
+      requirements: false
+      basic_design: false
       detailed_design: true
       implementation_unit_test: true
+      integration_test: true
+      system_test: false
+      maintenance_operation: true
+
+  - title: セキュリティ製品ユーザ管理システム開発
+    description: フロントエンド基盤のVue.jsからReactへの移行に伴い、関連する改修対応および不具合修正を実施
+    details: |
+      ・バックエンド側の一部機能に対する改修対応
+      ・Vue.jsからReactへの移行に伴う、既存フロントエンド機能の不具合修正および動作改善
+    server_os: Windows
+    db: PostgreSQL
+    tools_fw: Github,VSCODE,WSL,NodeJS,MochaTest,Vue.js
+    skills: TypeScript,JavaScript
+    period: 2025-10 ~ 2025-12
+    link: ""
+    workflow:
+      requirements: false
+      basic_design: false
+      detailed_design: true
+      implementation_unit_test: true
+      integration_test: true
+      system_test: false
+      maintenance_operation: false
+
+  - title: セキュリティ製品ユーザ管理システム開発
+    description: コンテナ基盤（OpenShift）のバージョンアップに伴い、アプリケーションへの影響調査、必要な改修対応、およびレグレッション試験を実施
+    details: |
+      ・OpenShift Container Platform（OCP）4.12 から 4.20 への移行に伴う影響範囲の洗い出し
+      ・OCP 4.20 環境における各種コマンドおよび動作の検証
+      ・バージョンアップに伴う PostgreSQL の仕様変更および影響の調査
+    server_os: Windows
+    db: PostgreSQL
+    tools_fw: Teams,RedMine,Box,teraterm
+    skills: K8s,OpenShift
+    period: 2026-01 ~ 2026-03
+    link: ""
+    workflow:
+      requirements: false
+      basic_design: false
+      detailed_design: false
+      implementation_unit_test: false
       integration_test: true
       system_test: false
       maintenance_operation: false
