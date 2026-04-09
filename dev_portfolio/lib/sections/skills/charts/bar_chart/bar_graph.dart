@@ -6,6 +6,7 @@ class BarGraph extends StatelessWidget {
   final int? touchedIndex;
   final bool isDark;
   final Function(int?)? onHover;
+  final int topN;
 
   const BarGraph({
     super.key,
@@ -13,14 +14,29 @@ class BarGraph extends StatelessWidget {
     required this.isDark,
     this.touchedIndex,
     this.onHover,
+    this.topN = 10,
   });
 
   @override
   Widget build(BuildContext context) {
+    // 値で降順ソート
+    final sortedEntries = entries.toList()
+      ..sort((a, b) => b.value.compareTo(a.value));
+
+    // 上位 N 件
+    final topEntries = sortedEntries.take(topN).toList();
+    final otherEntries = sortedEntries.skip(topN).toList();
+
+    // その他を追加
+    if (otherEntries.isNotEmpty) {
+      final otherValue = otherEntries.fold<double>(0, (sum, e) => sum + e.value);
+      topEntries.add(MapEntry('その他', otherValue));
+    }
+
     return ListView.builder(
-      itemCount: entries.length,
+      itemCount: topEntries.length,
       itemBuilder: (context, i) {
-        final e = entries[i];
+        final e = topEntries[i];
         final isActive = i == touchedIndex;
 
         return MouseRegion(

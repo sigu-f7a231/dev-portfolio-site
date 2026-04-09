@@ -1,4 +1,3 @@
-// lib/sections/skills/charts/pie_chart/pie_legend.dart
 import 'package:flutter/material.dart';
 import '../../../config/skills/skills_pie_chart_config.dart';
 import '../../../../utils/graph_utils.dart';
@@ -6,6 +5,7 @@ import '../../../../utils/graph_utils.dart';
 class PieLegend extends StatelessWidget {
   final Map<String, double> data;
   final bool isDark;
+  final int topN;
   final int? hoveredIndex;
   final int? selectedIndex;
   final Function(int) onHover;
@@ -15,17 +15,30 @@ class PieLegend extends StatelessWidget {
     super.key,
     required this.data,
     required this.isDark,
-    this.hoveredIndex,
-    this.selectedIndex,
     required this.onHover,
     required this.onSelect,
+    this.topN = 10,
+    this.hoveredIndex,
+    this.selectedIndex,
   });
 
   @override
   Widget build(BuildContext context) {
+    // データを値順にソート
+    final sortedEntries = data.entries.toList()
+      ..sort((a, b) => b.value.compareTo(a.value));
+
+    // 上位N件 + その他
+    final topEntries = sortedEntries.take(topN).toList();
+    final otherEntries = sortedEntries.skip(topN).toList();
+    if (otherEntries.isNotEmpty) {
+      final otherValue = otherEntries.fold<double>(0, (sum, e) => sum + e.value);
+      topEntries.add(MapEntry('その他', otherValue));
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: data.entries.mapIndexed((entry, index) {
+      children: topEntries.mapIndexed((entry, index) {
         final isActive = index == hoveredIndex || index == selectedIndex;
 
         return MouseRegion(
@@ -36,11 +49,9 @@ class PieLegend extends StatelessWidget {
             onTap: () => onSelect(index),
             child: Padding(
               padding: const EdgeInsets.symmetric(
-                vertical: PieChartLayout.pieLegendItemSpacing,
-              ),
+                  vertical: PieChartLayout.pieLegendItemSpacing),
               child: Row(
                 children: [
-                  /// ■ カラーボックス
                   Container(
                     width: PieChartLayout.pieLegendColorSize,
                     height: PieChartLayout.pieLegendColorSize,
@@ -48,8 +59,7 @@ class PieLegend extends StatelessWidget {
                       color: PieChartColors.mainColors[
                           index % PieChartColors.mainColors.length],
                       borderRadius: BorderRadius.circular(
-                        PieChartLayout.pieLegendColorRadius,
-                      ),
+                          PieChartLayout.pieLegendColorRadius),
                       border: isActive
                           ? Border.all(
                               color: PieChartColors.highlightBorder,
@@ -58,12 +68,7 @@ class PieLegend extends StatelessWidget {
                           : null,
                     ),
                   ),
-
-                  const SizedBox(
-                    width: PieChartLayout.pieLegendSpacingItem,
-                  ),
-
-                  /// ■ ラベル
+                  const SizedBox(width: PieChartLayout.pieLegendSpacingItem),
                   Expanded(
                     child: Text(
                       entry.key,
@@ -73,8 +78,6 @@ class PieLegend extends StatelessWidget {
                       ),
                     ),
                   ),
-
-                  /// ■ 値
                   SizedBox(
                     width: PieChartLayout.pieLegendValueWidth,
                     child: Text(

@@ -6,6 +6,7 @@ class BarLegend extends StatelessWidget {
   final int? touchedIndex;
   final bool isDark;
   final Function(int?)? onHover;
+  final int topN;
 
   const BarLegend({
     super.key,
@@ -13,14 +14,26 @@ class BarLegend extends StatelessWidget {
     required this.isDark,
     this.touchedIndex,
     this.onHover,
+    this.topN = 10,
   });
 
   @override
   Widget build(BuildContext context) {
+    // 値で降順ソート
+    final sortedEntries = entries.toList()
+      ..sort((a, b) => b.value.compareTo(a.value));
+
+    final topEntries = sortedEntries.take(topN).toList();
+    final otherEntries = sortedEntries.skip(topN).toList();
+    if (otherEntries.isNotEmpty) {
+      final otherValue = otherEntries.fold<double>(0, (sum, e) => sum + e.value);
+      topEntries.add(MapEntry('その他', otherValue));
+    }
+
     return ListView.builder(
-      itemCount: entries.length,
+      itemCount: topEntries.length,
       itemBuilder: (context, i) {
-        final e = entries[i];
+        final e = topEntries[i];
         final isActive = i == touchedIndex;
 
         return MouseRegion(
@@ -32,7 +45,6 @@ class BarLegend extends StatelessWidget {
             ),
             child: Row(
               children: [
-                // カラーボックス
                 Container(
                   width: BarChartLayout.barLegendColorSize,
                   height: BarChartLayout.barLegendColorSize,
@@ -50,10 +62,7 @@ class BarLegend extends StatelessWidget {
                         : null,
                   ),
                 ),
-
                 const SizedBox(width: BarChartLayout.barLegendSpacingItem),
-
-                // ラベル
                 Expanded(
                   child: Text(
                     e.key,
@@ -63,8 +72,6 @@ class BarLegend extends StatelessWidget {
                     ),
                   ),
                 ),
-
-                // 値
                 SizedBox(
                   width: BarChartLayout.barValueWidth,
                   child: Text(

@@ -11,6 +11,7 @@ class PieGraph extends StatelessWidget {
   final int? selectedIndex;
   final Function(int?) onHover;
   final Function(int?) onSelect;
+  final int topN;
 
   const PieGraph({
     super.key,
@@ -20,10 +21,24 @@ class PieGraph extends StatelessWidget {
     this.selectedIndex,
     required this.onHover,
     required this.onSelect,
+    this.topN = 10,
   });
 
   @override
   Widget build(BuildContext context) {
+    // データを値順にソート
+    final sortedEntries = data.entries.toList()
+      ..sort((a, b) => b.value.compareTo(a.value));
+
+    // 上位N件とその他
+    final topEntries = sortedEntries.take(topN).toList();
+    final otherEntries = sortedEntries.skip(topN).toList();
+    if (otherEntries.isNotEmpty) {
+      final otherValue =
+          otherEntries.fold<double>(0, (sum, e) => sum + e.value);
+      topEntries.add(MapEntry('その他', otherValue));
+    }
+
     return SizedBox(
       width: PieChartLayout.pieSize,
       height: PieChartLayout.pieSize,
@@ -43,19 +58,19 @@ class PieGraph extends StatelessWidget {
               }
             },
           ),
-          sections: data.entries.mapIndexed((entry, index) {
+          sections: topEntries.mapIndexed((entry, index) {
             final isHovered = index == hoveredIndex;
             final isSelected = index == selectedIndex;
-            final baseColor = PieChartColors.mainColors[index % PieChartColors.mainColors.length];
+            final baseColor =
+                PieChartColors.mainColors[index % PieChartColors.mainColors.length];
 
-          Color sectionColor = PieChartColors.pieColor(
-            baseColor,
-            isDark: isDark,
-            isHovered: isHovered,
-            isSelected: isSelected,
-          );
+            Color sectionColor = PieChartColors.pieColor(
+              baseColor,
+              isDark: isDark,
+              isHovered: isHovered,
+              isSelected: isSelected,
+            );
 
-            // 選択時は常に明るめで強調
             if (isSelected) {
               sectionColor = HSLColor.fromColor(baseColor)
                   .withLightness(PieChartLayout.pieHighlightLightness)

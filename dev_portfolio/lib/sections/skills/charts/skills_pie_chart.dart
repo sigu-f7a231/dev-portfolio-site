@@ -37,26 +37,18 @@ class _SkillsPieChartState extends State<SkillsPieChart> {
   Widget build(BuildContext context) {
     return Container(
       padding: PieChartLayout.padding,
-
-      /// 🔥 これ超重要（エラー防止）
       constraints: const BoxConstraints(
         minWidth: PieChartLayout.minWidth,
         minHeight: PieChartLayout.minHeight,
       ),
-
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          /// =========================
-          /// Pie グラフ
-          /// =========================
           Padding(
             padding: const EdgeInsets.only(
               top: PieChartLayout.pieTopPadding,
               left: PieChartLayout.pieLeftPadding,
             ),
-
-            /// 🔥 サイズ固定（overflow防止）
             child: SizedBox(
               width: PieChartLayout.pieSize,
               height: PieChartLayout.pieSize,
@@ -70,19 +62,16 @@ class _SkillsPieChartState extends State<SkillsPieChart> {
               ),
             ),
           ),
-
           SizedBox(width: PieChartLayout.pieLegendSpacingRow),
-
-          /// =========================
-          /// Legend
-          /// =========================
           Expanded(
             child: PieLegend(
               data: widget.data,
               isDark: widget.isDark,
               hoveredIndex: hoveredIndex,
               selectedIndex: selectedIndex,
-              onHover: _handleHover,
+              onHover: (idx) {
+                _handleHover(idx == -1 ? null : idx);
+              },
               onSelect: _handleSelect,
             ),
           ),

@@ -6,14 +6,14 @@ projects:
       単体テスト作成（Coverage100%）、開発ルールに沿ったソースコード品質管理
       不具合確認、画面仕様書作成、テスト項目書作成
       チームメンバーと連携し、2週間サイクルのスクラム開発を実施
-    server_os: Linux, Windows Server
+    server_os: Linux, Windows
     db: PostgreSQL
     tools_fw: Django2,Boostrap,RedMine,Git,GitLab,teraterm,adobeXD
     skills: Python3
     period: 2019-07 ~ 2019-12
     link: ""
     workflow:
-      requirements: true
+      requirements: false
       basic_design: true
       detailed_design: true
       implementation_unit_test: true
@@ -21,101 +21,109 @@ projects:
       system_test: false
       maintenance_operation: false
 
-  - title: ECサイト構築
-    description: WordPressで開発
+  - title: NW管理システムのデータ作成
+    description: ネットワーク管理システム向け学習データの作成および不具合調査対応を実施
     details: |
-      プラグイン選定とデザイン調整を実施。  
-      WooCommerceでのカート・決済処理を構築し、ユーザー登録や商品管理機能も実装。  
-      HTML/CSS/JavaScriptを用いてレスポンシブデザインを適用。  
-      サイト公開前にブラウザテスト・機能確認を行い、最終調整を完了。
-    server_os: Linux
-    db: MySQL
-    tools_fw: WordPress, PHP
-    skills: PHP, HTML, CSS
-    period: 2022-08 ~ 2022-12
-    link: ""
-    workflow:
-      requirements: true
-      basic_design: true
-      detailed_design: true
-      implementation_unit_test: true
-      integration_test: true
-      system_test: false
-      maintenance_operation: false
-  - title: 社内管理システム 1
-    description: Flutter Webで制作
-    details: |
-      画面設計やバックエンド連携まで担当。  
-      ユーザー管理機能やダッシュボードの実装、認証連携を含む。  
-      各画面のUI/UX改善提案を行い、Flutterでの状態管理やレスポンシブ対応も実施。  
-      Firebaseを用いた認証・データ管理を担当し、単体テスト・結合テストを実施済み。
-    server_os: Ubuntu, Windows Server
-    db: MySQL, PostgreSQL
-    tools_fw: Flutter, Firebase, Git
-    skills: Dart, Firebase, UI設計
-    period: 2023-01 ~ 2023-04
-    link: ""
-    workflow:
-      requirements: true
-      basic_design: true
-      detailed_design: true
-      implementation_unit_test: true
-      integration_test: true
-      system_test: false
-      maintenance_operation: false
-
-  - title: ECサイト構築 2
-    description: WordPressで開発
-    details: |
-      プラグイン選定とデザイン調整を実施。  
-      WooCommerceでのカート・決済処理を構築し、ユーザー登録や商品管理機能も実装。  
-      HTML/CSS/JavaScriptを用いてレスポンシブデザインを適用。  
-      サイト公開前にブラウザテスト・機能確認を行い、最終調整を完了。
-    server_os: Linux
-    db: MySQL
-    tools_fw: WordPress, PHP
-    skills: PHP, HTML, CSS
-    period: 2022-08 ~ 2022-12
-    link: ""
-    workflow:
-      requirements: true
-      basic_design: true
-      detailed_design: true
-      implementation_unit_test: true
-      integration_test: true
-      system_test: false
-      maintenance_operation: false
-
-  - title: 社内管理システム 3
-    description: Flutter Webで制作
-    details: |
-      バックエンドAPI連携と画面設計を担当。  
-      Flutterの状態管理やテスト対応も実施。
-    server_os: Ubuntu
+      操作マニュアルに従い、適正な学習データの作成
+      既存ソースや処理実行ログを分析し、不具合調査および対応
+    server_os: Windows
     db: PostgreSQL
-    tools_fw: Flutter, Firebase
-    skills: Dart, UI設計
-    period: 2023-02 ~ 2023-05
+    tools_fw: 独自ツール
+    skills: Python
+    period: 2020-01 ~ 2020-03
     link: ""
     workflow:
-      requirements: true
-      basic_design: true
+      requirements: false
+      basic_design: false
+      detailed_design: false
+      implementation_unit_test: false
+      integration_test: false
+      system_test: false
+      maintenance_operation: true
+  - title: 美容系システムのAPIの設計(土日に稼働)
+    description: 美容系システムにおける API 設計とデータ作成・製造に関する開発対応
+    details: |
+      API 設計およびデータ作成・製造
+      スクレイピングによるデータ収集およびデータ整備
+    server_os: Windows
+    db: 
+    tools_fw: Beautiful Soup
+    skills: Python
+    period: 2020-01 ~ 2020-03
+    link: ""
+    workflow:
+      requirements: false
+      basic_design: false
+      detailed_design: false
+      implementation_unit_test: true
+      integration_test: false
+      system_test: false
+      maintenance_operation: false
+
+  - title: 留守電サービスアプリの開発
+    description: Flutter およびフロントエンド技術を用いた画面追加・機能修正および操作マニュアル作成
+    details: |
+      ・Dart（Flutter）を用いた既存画面の追加・機能修正
+      ・デザインデータ（XD）を参照した画面修正およびCSS調整
+      ・Android APK を端末にダウンロードし、アプリ画面・PC 管理画面の操作検証および操作説明書作成
+      ・フロントエンド画面の改修（Template、CSS、JavaScript）
+      ・データ取得・更新処理における Vue.js を用いた API 呼び出し実装
+      ・チームメンバーと連携しながら画面改修・調査・修正を実施
+    server_os: Windows
+    db: PostgreSQL
+    tools_fw: Git,Vue.js
+    skills: Flutter,JavaScript
+    period: 2020-04 ~ 2020-05
+    link: ""
+    workflow:
+      requirements: false
+      basic_design: false
       detailed_design: true
       implementation_unit_test: true
       integration_test: true
       system_test: false
       maintenance_operation: false
 
-  - title: ECサイト構築 4
-    description: WordPressで開発
+  - title: 音声基盤開発プロジェクト・プロジェクト支援
+    description: Webシステムの開発・テスト・運用支援および広告画面開発に関する一連の業務を実施
     details: |
-      デザインカスタマイズとプラグイン実装を担当。  
-      SEO対応やブラウザ互換性テストも実施。
-    server_os: Linux
-    db: MySQL
-    tools_fw: WordPress, PHP
-    skills: PHP, HTML, CSS
-    period: 2022-09 ~ 2022-12
+      ・開発担当が実装した画面に対する確認および単体・結合テスト仕様書の作成、動作テストの実施
+      ・実装プログラムに基づいた操作マニュアルの作成
+      ・既存プログラムのUI修正・機能追加など残開発対応および動作確認
+      ・運用プロジェクトにおけるデプロイ作業およびリリース作業の実施
+      ・Web接客ツールを活用した広告画面の設計・開発
+      ・録音音声をAWS Elemental MediaConvertで変換しAmazon S3に保存、AWS Lambdaで形式チェックと振り分けを実施
+      ・AWS EC2上のClamAV**でウイルススキャンし、不正ファイルは削除・正常ファイルのみ最終ディレクトリへ格納
+    server_os: Windows
+    db: MongoDB
+    tools_fw: S3,Cloud9,Lambda,EC2,MediaConvert,Vue.js,KARTE,Git,jira,backlog,sourceTree,ClamAV
+    skills: Python,JavaScript,HTML,CSS
+    period: 2020-11 ~ 2021-03
+    link: ""
+    workflow:
+      requirements: false
+      basic_design: false
+      detailed_design: true
+      implementation_unit_test: true
+      integration_test: true
+      system_test: true
+      maintenance_operation: true
+
+  - title: WEBシステム開発・プロジェクト支援
+    description: Webシステム開発プロジェクトにおいて、設計確認・データ分析・要件定義・テスト・開発支援まで幅広く対応
+    details: |
+      ・基本設計書を確認し、Webシステム開発業務の設計・実装支援
+      ・ゲームタイトルの各種プラットフォーム動画閲覧数をGAなどで分析し、要件定義に反映
+      ・Webゲームに対する単体・結合・疎通テストの実施支援
+      ・既存の静的Web画面をReactベースのSPA構成へ改修（設計・実装支援）
+      ・FastAPIによるAPI設計・実装およびフロントエンド連携の構築
+      ・グラフ描画機能（折れ線・円グラフ）の設計および実装対応
+
+    server_os: Windows
+    db: postgresSQL
+    tools_fw: Git,bitBacket,Docker,FastAPI
+    skills: Python,JavaScript,HTML,CSS,React
+    period: 2021-04 ~ 2022-03
     link: ""
     workflow:
       requirements: true
