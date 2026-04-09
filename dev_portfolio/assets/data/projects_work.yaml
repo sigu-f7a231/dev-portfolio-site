@@ -1,16 +1,16 @@
 projects:
-  - title: 社内管理システム
-    description: Flutter Webで制作
+  - title: 電力制御システム開発
+    description: Webシステム開発において、DB設計からフロントエンド・バックエンド・モデル・UI・テストまで一貫して担当し、チームで協力してアジャイル開発を実施
     details: |
-      画面設計やバックエンド連携まで担当。  
-      ユーザー管理機能やダッシュボードの実装、認証連携を含む。  
-      各画面のUI/UX改善提案を行い、Flutterでの状態管理やレスポンシブ対応も実施。  
-      Firebaseを用いた認証・データ管理を担当し、単体テスト・結合テストを実施済み。
-    server_os: Ubuntu, Windows Server
-    db: MySQL, PostgreSQL
-    tools_fw: Flutter, Firebase, Git
-    skills: Dart, Firebase, UI設計
-    period: 2023-01 ~ 2023-04
+      DB設計、モデル・フォーム作成、画面表示に必要なバックエンド処理の実装一覧画面を中心としたフロントエンド開発、CSS修正、デザイン照合によるUI改善
+      単体テスト作成（Coverage100%）、開発ルールに沿ったソースコード品質管理
+      不具合確認、画面仕様書作成、テスト項目書作成
+      チームメンバーと連携し、2週間サイクルのスクラム開発を実施
+    server_os: Linux, Windows Server
+    db: PostgreSQL
+    tools_fw: Django2,Boostrap,RedMine,Git,GitLab,teraterm,adobeXD
+    skills: Python3
+    period: 2019-07 ~ 2019-12
     link: ""
     workflow:
       requirements: true
