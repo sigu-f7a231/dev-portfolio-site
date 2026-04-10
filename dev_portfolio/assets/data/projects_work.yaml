@@ -894,7 +894,8 @@ projects:
     container_orchestration:
       - 利用なし
     ai_services:
-      - 利用なし
+      - ChatGpt
+      - Gemini
     skills:
       - TypeScript
       - JavaScript
@@ -948,7 +949,7 @@ projects:
       - Kubernetes
       - OpenShift
     ai_services:
-      - 利用なし
+      - Microsoft Copilot
     skills:
       - 利用なし
     period:
