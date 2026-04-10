@@ -1,5 +1,3 @@
-// lib/sections/skills/data/skills_aggregator.dart
-
 import 'package:yaml/yaml.dart';
 import '../../../utils/string_utils.dart';
 
@@ -11,11 +9,10 @@ Map<String, double> aggregateCategory(
 
   for (var project in projects) {
     final raw = project[key];
-
     final items = parseToList(raw);
 
     for (var item in items) {
-      if (item.isEmpty) continue;
+      if (item.isEmpty || item == '利用なし') continue;
       countMap[item] = (countMap[item] ?? 0) + 1;
     }
   }
@@ -30,7 +27,7 @@ Map<String, double> aggregateCategory(
   );
 }
 
-// workflow は true の割合を % で返す
+/// workflow（true率）
 Map<String, double> aggregateWorkflow(YamlList projects) {
   final Map<String, int> trueCount = {};
   final Map<String, int> totalCount = {};

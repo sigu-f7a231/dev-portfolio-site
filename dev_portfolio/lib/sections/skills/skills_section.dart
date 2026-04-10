@@ -23,18 +23,37 @@ class _SkillsSectionState extends State<SkillsSection>
   late Future<Map<String, Map<String, double>>> _workSkillsFuture;
   late Future<Map<String, Map<String, double>>> _privateSkillsFuture;
 
-  final baseCategories = SkillsSectionConfig.categories;
+  final List<String> _categories = const [
+    'server_os',
+    'db',
+    'tools',
+    'backend_frameworks',
+    'frontend_frameworks',
+    'ui_frameworks',
+    'testing_frameworks',
+    'cloud_platforms',
+    'aws_services',
+    'azure_services',
+    'gcp_services',
+    'container',
+    'container_orchestration',
+    'ai_services',
+    'skills',
+  ];
 
   @override
   void initState() {
     super.initState();
 
-    _mainTabController =
-        TabController(length: SkillsSectionConfig.mainTabs.length, vsync: this);
+    _mainTabController = TabController(
+      length: SkillsSectionConfig.mainTabs.length,
+      vsync: this,
+    );
 
-    // カテゴリ + workflow 用
-    _categoryTabController =
-        TabController(length: baseCategories.length + 1, vsync: this);
+    _categoryTabController = TabController(
+      length: _categories.length,
+      vsync: this,
+    );
 
     _workSkillsFuture = loadWorkSkillsAll();
     _privateSkillsFuture = loadPrivateSkillsAll();
@@ -48,8 +67,32 @@ class _SkillsSectionState extends State<SkillsSection>
   }
 
   Map<String, double> _getCategoryData(
-      Map<String, Map<String, double>> data, String category) {
+    Map<String, Map<String, double>> data,
+    String category,
+  ) {
     return data[category] ?? {};
+  }
+
+  String _label(String key) {
+    return key
+        .replaceAll('_', ' ')
+        .split(' ')
+        .map((e) => e.isEmpty
+            ? ''
+            : '${e[0].toUpperCase()}${e.substring(1)}')
+        .join(' ');
+  }
+
+  Widget _emptyState(bool isDark) {
+    return Center(
+      child: Text(
+        'データがありません',
+        style: TextStyle(
+          fontSize: 16,
+          color: isDark ? Colors.white70 : Colors.black54,
+        ),
+      ),
+    );
   }
 
   @override
@@ -63,47 +106,40 @@ class _SkillsSectionState extends State<SkillsSection>
       height: MediaQuery.of(context).size.height,
       child: Column(
         children: [
-          // Header
+          /// HEADER
           SkillsHeader(
             showPie: _showPie,
             isDark: isDark,
             onToggle: (val) => setState(() => _showPie = val),
           ),
+
           const SizedBox(height: SkillsLayout.spacing),
 
-          // Main Tabs
+          /// MAIN TAB
           SkillsTabBar(
             controller: _mainTabController,
             tabs: SkillsSectionConfig.mainTabs,
             isDark: isDark,
           ),
+
           const SizedBox(height: SkillsLayout.spacing),
 
-          // Category Tabs
+          /// CATEGORY TAB
           SkillsTabBar(
             controller: _categoryTabController,
-            tabs: [...baseCategories.map((c) => c.toUpperCase()), 'WORKFLOW'],
+            tabs: _categories.map(_label).toList(),
             isDark: isDark,
           ),
+
           const SizedBox(height: SkillsLayout.spacing),
 
-          // Tab content
+          /// CONTENT
           Expanded(
             child: TabBarView(
               controller: _mainTabController,
               children: [
-                // Work
-                _buildFuture(
-                  _workSkillsFuture,
-                  isDark,
-                  isPrivate: false,
-                ),
-                // Private
-                _buildFuture(
-                  _privateSkillsFuture,
-                  isDark,
-                  isPrivate: true,
-                ),
+                _buildFuture(_workSkillsFuture, isDark, isPrivate: false),
+                _buildFuture(_privateSkillsFuture, isDark, isPrivate: true),
               ],
             ),
           ),
@@ -113,10 +149,10 @@ class _SkillsSectionState extends State<SkillsSection>
   }
 
   Widget _buildFuture(
-      Future<Map<String, Map<String, double>>> future,
-      bool isDark, {
-        required bool isPrivate,
-      }) {
+    Future<Map<String, Map<String, double>>> future,
+    bool isDark, {
+    required bool isPrivate,
+  }) {
     return FutureBuilder<Map<String, Map<String, double>>>(
       future: future,
       builder: (context, snapshot) {
@@ -126,35 +162,25 @@ class _SkillsSectionState extends State<SkillsSection>
 
         final data = snapshot.data!;
 
-        // カテゴリ + workflow
-        final categories = [...baseCategories, 'workflow'];
-
         return TabBarView(
           controller: _categoryTabController,
-          children: categories.map((category) {
+          children: _categories.map((category) {
             final categoryData = _getCategoryData(data, category);
 
-            // Private の workflow のみ非表示
-            if (isPrivate && category.toLowerCase() == 'workflow') {
-              return Center(
-                child: Text(
-                  "Private のため表示できません",
-                  style: TextStyle(
-                    color: isDark ? Colors.white : Colors.black,
-                    fontSize: 16,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-              );
+            /// PRIVATE制御
+            if (isPrivate && category == 'workflow') {
+              return _emptyState(isDark);
+            }
+
+            /// ★ 追加：データなし判定
+            if (categoryData.isEmpty) {
+              return _emptyState(isDark);
             }
 
             return SkillsCard(
               data: categoryData,
               isDark: isDark,
-              // workflow 以外はスイッチ反映
-              showPie: category.toLowerCase() == 'workflow' && isPrivate
-                  ? false
-                  : _showPie,
+              showPie: _showPie,
             );
           }).toList(),
         );
