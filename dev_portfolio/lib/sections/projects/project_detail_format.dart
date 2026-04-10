@@ -1,65 +1,39 @@
-// lib/sections/projects/project_detail_format.dart
-import '../projects/models/projects_model.dart';
+import 'models/projects_model.dart';
 
-/// Project モーダル表示用のフィールド定義
-/// Project モーダル表示用のフィールド定義
 class ProjectDetailFormat {
-  /// 表示順のリスト
   static List<ProjectField> fields({bool showWorkflow = false}) {
     final baseFields = [
-      ProjectField(
-        label: 'Title',
-        valueGetter: (p) => p.title,
-        isBold: true,
-        fontSize: 20,
-      ),
-      ProjectField(
-        label: 'Details',
-      valueGetter: (p) => p.details,
-        isBold: false,
-        fontSize: 14,
-      ),
-      ProjectField(
-        label: 'Server OS',
-        valueGetter: (p) => p.serverOS,
-        isBold: false,
-        fontSize: 14,
-      ),
-      ProjectField(
-        label: 'DB',
-        valueGetter: (p) => p.db,
-        isBold: false,
-        fontSize: 14,
-      ),
-      ProjectField(
-        label: 'Tools/Framework',
-        valueGetter: (p) => p.toolsFW,
-        isBold: false,
-        fontSize: 14,
-      ),
-      ProjectField(
-        label: 'Skills',
-        valueGetter: (p) => p.skills,
-        isBold: false,
-        fontSize: 14,
-      ),
-      ProjectField(
-        label: 'Period',
-        valueGetter: (p) => p.period,
-        isBold: false,
-        fontSize: 12,
-      ),
+      ProjectField(label: 'Title', valueGetter: (p) => p.title, isBold: true, fontSize: 20),
+      ProjectField(label: 'Details', valueGetter: (p) => p.details),
+      ProjectField(label: 'Server OS', valueGetter: (p) => p.serverOS),
+      ProjectField(label: 'DB', valueGetter: (p) => p.db),
+      ProjectField(label: 'Tools', valueGetter: (p) => p.tools),
+
+      // ★ 拡張フィールド
+      ProjectField(label: 'Backend', valueGetter: (p) => p.backendFrameworks),
+      ProjectField(label: 'Frontend', valueGetter: (p) => p.frontendFrameworks),
+      ProjectField(label: 'UI', valueGetter: (p) => p.uiFrameworks),
+      ProjectField(label: 'Testing', valueGetter: (p) => p.testingFrameworks),
+
+      ProjectField(label: 'Cloud', valueGetter: (p) => p.cloudPlatforms),
+      ProjectField(label: 'AWS', valueGetter: (p) => p.awsServices),
+      ProjectField(label: 'Azure', valueGetter: (p) => p.azureServices),
+      ProjectField(label: 'GCP', valueGetter: (p) => p.gcpServices),
+
+      ProjectField(label: 'Container', valueGetter: (p) => p.container),
+      ProjectField(label: 'Orchestration', valueGetter: (p) => p.containerOrchestration),
+      ProjectField(label: 'AI', valueGetter: (p) => p.aiServices),
+
+      ProjectField(label: 'Skills', valueGetter: (p) => p.skills),
+      ProjectField(label: 'Period', valueGetter: (p) => p.period),
     ];
 
     if (showWorkflow) {
       baseFields.add(
         ProjectField(
           label: 'Workflow',
-          valueGetter: (p) => p.workflow.entries
-              .map((e) => '${e.key}: ${e.value ? "✅" : "❌"}')
-              .join(', '),
-          isBold: false,
-          fontSize: 14,
+          valueGetter: (p) =>
+              p.workflow.entries.map((e) => '${e.key}:${e.value}').join(', '),
         ),
       );
     }
@@ -68,7 +42,6 @@ class ProjectDetailFormat {
   }
 }
 
-/// 1項目の定義
 class ProjectField {
   final String label;
   final String Function(Project) valueGetter;

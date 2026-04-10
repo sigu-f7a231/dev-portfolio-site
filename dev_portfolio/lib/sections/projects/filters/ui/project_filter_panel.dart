@@ -1,15 +1,14 @@
-// lib/sections/projects/filters/projects_filter.dart
 import 'package:flutter/material.dart';
-import 'project_filter_chips.dart';
 import '../../models/projects_model.dart';
 import '../../../../utils/language_utils.dart';
-import '../../../../utils/string_utils.dart'; // splitSkills など
+import '../state/project_filter_state.dart';
+import 'project_filter_chips.dart';
 
 class ProjectsFilter extends StatefulWidget {
   final List<Project> projects;
-  final int tabIndex; // 0: work, 1: private
+  final int tabIndex;
   final bool isDark;
-  final ValueChanged<Map<String, List<String>>>? onApply; // 反映ボタン用コールバック
+  final ValueChanged<Map<String, List<String>>>? onApply;
 
   const ProjectsFilter({
     super.key,
@@ -24,21 +23,17 @@ class ProjectsFilter extends StatefulWidget {
 }
 
 class _ProjectsFilterState extends State<ProjectsFilter> {
-  bool _expanded = false; // 折りたたみ用
-  final Map<String, List<String>> _selectedFilters = {
-    'serverOS': [],
-    'db': [],
-    'toolsFW': [],
-    'skills': [],
-    'workflow': [],
-  };
+  bool _expanded = false;
 
-  List<String> _uniqueItems(List<String> items) => items.toSet().toList();
+  final Map<String, List<String>> _selectedFilters =
+      ProjectFilterState.initial().selectedFilters;
 
-  void _clearFilters() {
+  List<String> _unique(List<String> v) => v.toSet().toList();
+
+  void _clear() {
     setState(() {
-      for (var key in _selectedFilters.keys) {
-        _selectedFilters[key]!.clear();
+      for (final k in _selectedFilters.keys) {
+        _selectedFilters[k]!.clear();
       }
     });
   }
@@ -47,176 +42,126 @@ class _ProjectsFilterState extends State<ProjectsFilter> {
   Widget build(BuildContext context) {
     final showWorkflow = widget.tabIndex == 0;
 
-    // ★ UI 用のフィルター候補リストを作成
-    final serverOSItems = _uniqueItems(
-      widget.projects.expand((e) => splitSkills(e.serverOS)).toList(),
-    );
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        TextButton.icon(
+          onPressed: () => setState(() => _expanded = !_expanded),
+          icon: Icon(_expanded ? Icons.expand_less : Icons.expand_more),
+          label: const Text('フィルター'),
+        ),
 
-    final dbItems = _uniqueItems(
-      widget.projects.expand((e) => splitSkills(e.db)).toList(),
-    );
+        if (_expanded)
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              FilterChipsSection(
+                title: 'Server OS',
+                items: _unique(widget.projects.expand((e) => e.serverOSList).toList()),
+                selectedItems: _selectedFilters['serverOS']!,
+                onSelected: (v) => setState(() {
+                  _selectedFilters['serverOS']!.contains(v)
+                      ? _selectedFilters['serverOS']!.remove(v)
+                      : _selectedFilters['serverOS']!.add(v);
+                }),
+                isDark: widget.isDark,
+              ),
 
-    final toolsFWItems = _uniqueItems(
-      widget.projects.expand((e) => splitSkills(e.toolsFW)).toList(),
-    );
+              FilterChipsSection(
+                title: 'DB',
+                items: _unique(widget.projects.expand((e) => e.dbList).toList()),
+                selectedItems: _selectedFilters['db']!,
+                onSelected: (v) => setState(() {
+                  _selectedFilters['db']!.contains(v)
+                      ? _selectedFilters['db']!.remove(v)
+                      : _selectedFilters['db']!.add(v);
+                }),
+                isDark: widget.isDark,
+              ),
 
-    final skillsItems = _uniqueItems(
-      widget.projects.expand((e) => splitSkills(e.skills)).toList(),
-    );
+              FilterChipsSection(
+                title: 'Tools',
+                items: _unique(widget.projects.expand((e) => e.toolsList).toList()),
+                selectedItems: _selectedFilters['tools']!,
+                onSelected: (v) => setState(() {
+                  _selectedFilters['tools']!.contains(v)
+                      ? _selectedFilters['tools']!.remove(v)
+                      : _selectedFilters['tools']!.add(v);
+                }),
+                isDark: widget.isDark,
+              ),
 
-    final workflowItems = showWorkflow
-        ? _uniqueItems(widget.projects
-            .expand((e) => e.workflow.keys)
-            .map((key) => LanguageUtils.workflowLabels['ja']?[key] ?? key)
-            .toList())
-        : <String>[];
+              FilterChipsSection(
+                title: 'Backend',
+                items: _unique(widget.projects.expand((e) => e.backendList).toList()),
+                selectedItems: _selectedFilters['backendFrameworks']!,
+                onSelected: (v) => setState(() {
+                  _selectedFilters['backendFrameworks']!.contains(v)
+                      ? _selectedFilters['backendFrameworks']!.remove(v)
+                      : _selectedFilters['backendFrameworks']!.add(v);
+                }),
+                isDark: widget.isDark,
+              ),
 
-    return Align(
-      alignment: Alignment.topLeft,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // 折りたたみボタン
-          TextButton.icon(
-            onPressed: () => setState(() => _expanded = !_expanded),
-            icon: Icon(_expanded ? Icons.expand_less : Icons.expand_more),
-            label: const Text('フィルター'),
-          ),
-          if (_expanded)
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Server OS
-                if (serverOSItems.isNotEmpty)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 4.0),
-                    child: FilterChipsSection(
-                      items: serverOSItems,
-                      selectedItems: _selectedFilters['serverOS']!,
-                      onSelected: (val) {
-                        setState(() {
-                          _selectedFilters['serverOS']!.contains(val)
-                              ? _selectedFilters['serverOS']!.remove(val)
-                              : _selectedFilters['serverOS']!.add(val);
-                        });
-                      },
-                      isDark: widget.isDark,
-                      title: 'Server OS',
-                    ),
-                  ),
-                // Database
-                if (dbItems.isNotEmpty)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 4.0),
-                    child: FilterChipsSection(
-                      items: dbItems,
-                      selectedItems: _selectedFilters['db']!,
-                      onSelected: (val) {
-                        setState(() {
-                          _selectedFilters['db']!.contains(val)
-                              ? _selectedFilters['db']!.remove(val)
-                              : _selectedFilters['db']!.add(val);
-                        });
-                      },
-                      isDark: widget.isDark,
-                      title: 'Database',
-                    ),
-                  ),
-                // Tools / Frameworks
-                if (toolsFWItems.isNotEmpty)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 4.0),
-                    child: FilterChipsSection(
-                      items: toolsFWItems,
-                      selectedItems: _selectedFilters['toolsFW']!,
-                      onSelected: (val) {
-                        setState(() {
-                          _selectedFilters['toolsFW']!.contains(val)
-                              ? _selectedFilters['toolsFW']!.remove(val)
-                              : _selectedFilters['toolsFW']!.add(val);
-                        });
-                      },
-                      isDark: widget.isDark,
-                      title: 'Tools / Frameworks',
-                    ),
-                  ),
-                // Skills
-                if (skillsItems.isNotEmpty)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 4.0),
-                    child: FilterChipsSection(
-                      items: skillsItems,
-                      selectedItems: _selectedFilters['skills']!,
-                      onSelected: (val) {
-                        setState(() {
-                          _selectedFilters['skills']!.contains(val)
-                              ? _selectedFilters['skills']!.remove(val)
-                              : _selectedFilters['skills']!.add(val);
-                        });
-                      },
-                      isDark: widget.isDark,
-                      title: 'Skills',
-                    ),
-                  ),
-                // Workflow
-                if (showWorkflow && workflowItems.isNotEmpty)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 4.0),
-                    child: FilterChipsSection(
-                      items: workflowItems,
-                      selectedItems: _selectedFilters['workflow']!,
-                      onSelected: (val) {
-                        setState(() {
-                          _selectedFilters['workflow']!.contains(val)
-                              ? _selectedFilters['workflow']!.remove(val)
-                              : _selectedFilters['workflow']!.add(val);
-                        });
-                      },
-                      isDark: widget.isDark,
-                      title: 'Workflow',
-                    ),
-                  ),
-                // 反映・クリアボタン
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      ElevatedButton(
-                        onPressed: () {
-                          // 日本語ラベル → 英語キーに変換
-                          final workflowSelectedJa = _selectedFilters['workflow']!;
-                          final workflowSelectedEn = workflowSelectedJa.map((ja) {
-                            return LanguageUtils.workflowLabels['ja']?.entries
-                                    .firstWhere(
-                                      (entry) => entry.value == ja,
-                                      orElse: () => MapEntry(ja, ja),
-                                    )
-                                    .key ??
-                                ja;
-                          }).toList();
+              FilterChipsSection(
+                title: 'Frontend',
+                items: _unique(widget.projects.expand((e) => e.frontendList).toList()),
+                selectedItems: _selectedFilters['frontendFrameworks']!,
+                onSelected: (v) => setState(() {
+                  _selectedFilters['frontendFrameworks']!.contains(v)
+                      ? _selectedFilters['frontendFrameworks']!.remove(v)
+                      : _selectedFilters['frontendFrameworks']!.add(v);
+                }),
+                isDark: widget.isDark,
+              ),
 
-                          // コピーして workflow を英語キーに変換
-                          final appliedFilters = Map<String, List<String>>.from(_selectedFilters);
-                          appliedFilters['workflow'] = workflowSelectedEn;
+              FilterChipsSection(
+                title: 'Skills',
+                items: _unique(widget.projects.expand((e) => e.skillsList).toList()),
+                selectedItems: _selectedFilters['skills']!,
+                onSelected: (v) => setState(() {
+                  _selectedFilters['skills']!.contains(v)
+                      ? _selectedFilters['skills']!.remove(v)
+                      : _selectedFilters['skills']!.add(v);
+                }),
+                isDark: widget.isDark,
+              ),
 
-                          widget.onApply?.call(appliedFilters);
-                          setState(() => _expanded = false);
-                        },
-                        child: const Text('反映'),
-                      ),
-                      const SizedBox(width: 8),
-                      TextButton(
-                        onPressed: _clearFilters,
-                        child: const Text('クリア'),
-                      ),
-                    ],
-                  ),
+              if (showWorkflow)
+                FilterChipsSection(
+                  title: 'Workflow',
+                  items: _unique(widget.projects
+                      .expand((e) => e.workflow.keys)
+                      .map((e) => LanguageUtils.workflowLabels['ja']?[e] ?? e)
+                      .toList()),
+                  selectedItems: _selectedFilters['workflow']!,
+                  onSelected: (v) => setState(() {
+                    _selectedFilters['workflow']!.contains(v)
+                        ? _selectedFilters['workflow']!.remove(v)
+                        : _selectedFilters['workflow']!.add(v);
+                  }),
+                  isDark: widget.isDark,
                 ),
-              ],
-            ),
-        ],
-      ),
+
+              Row(
+                children: [
+                  ElevatedButton(
+                    onPressed: () {
+                      widget.onApply?.call(_selectedFilters);
+                      setState(() => _expanded = false);
+                    },
+                    child: const Text('反映'),
+                  ),
+                  const SizedBox(width: 8),
+                  TextButton(
+                    onPressed: _clear,
+                    child: const Text('クリア'),
+                  ),
+                ],
+              ),
+            ],
+          ),
+      ],
     );
   }
 }

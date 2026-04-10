@@ -1,92 +1,177 @@
 class Project {
+  // =========================
+  // BASIC
+  // =========================
   final String title;
   final String description;
   final String details;
-  final String serverOS;
-  final String db;
-  final String toolsFW;
-  final String skills;
-  final Map<String, bool> workflow;
   final String period;
   final String link;
+
+  // =========================
+  // INFRA
+  // =========================
+  final String serverOS;
+  final String db;
+
+  // =========================
+  // TOOLING (統合ビュー用)
+  // =========================
+  final String tools;
+
+  // =========================
+  // FRAMEWORKS
+  // =========================
+  final String backendFrameworks;
+  final String frontendFrameworks;
+  final String uiFrameworks;
+  final String testingFrameworks;
+
+  // =========================
+  // CLOUD
+  // =========================
+  final String cloudPlatforms;
+  final String awsServices;
+  final String azureServices;
+  final String gcpServices;
+
+  // =========================
+  // ADVANCED
+  // =========================
+  final String container;
+  final String containerOrchestration;
+  final String aiServices;
+
+  // =========================
+  // SKILLS (統合)
+  // =========================
+  final String skills;
+
+  // =========================
+  // WORKFLOW
+  // =========================
+  final Map<String, bool> workflow;
 
   Project({
     required this.title,
     required this.description,
     required this.details,
-    required this.serverOS,
-    required this.db,
-    required this.toolsFW,
-    required this.skills,
-    required this.workflow,
     required this.period,
     required this.link,
+
+    required this.serverOS,
+    required this.db,
+    required this.tools,
+
+    required this.backendFrameworks,
+    required this.frontendFrameworks,
+    required this.uiFrameworks,
+    required this.testingFrameworks,
+
+    required this.cloudPlatforms,
+    required this.awsServices,
+    required this.azureServices,
+    required this.gcpServices,
+
+    required this.container,
+    required this.containerOrchestration,
+    required this.aiServices,
+
+    required this.skills,
+    required this.workflow,
   });
 
   // =========================
-  // 🔽 追加（ここだけ）
+  // SAFE CONVERTER
   // =========================
+  static String _toCsv(dynamic v) {
+    if (v == null) return '';
+    if (v is List) return v.map((e) => e.toString()).join(', ');
+    if (v is String) return v;
+    return v.toString();
+  }
 
-  static String _toCsvString(dynamic value) {
-    if (value is List) {
-      return value.map((e) => e.toString()).join(', ');
-    } else if (value is String) {
-      return value;
+  static String _toPeriod(dynamic v) {
+    if (v is List && v.length == 2) {
+      return '${v[0]} ~ ${v[1]}';
     }
+    if (v is String) return v;
     return '';
   }
 
-  static String _toPeriodString(dynamic value) {
-    if (value is List && value.length == 2) {
-      return '${value[0]} ~ ${value[1]}';
-    } else if (value is String) {
-      return value;
-    }
-    return '';
+  factory Project.fromMap(Map<String, dynamic> json) {
+    return Project(
+      title: json['title'] ?? '',
+      description: json['description'] ?? '',
+      details: json['details'] ?? '',
+      period: _toPeriod(json['period']),
+      link: json['link'] ?? '',
+
+      serverOS: _toCsv(json['server_os']),
+      db: _toCsv(json['db']),
+
+      // ★ YAML揺れ完全吸収（tools or tools_fw）
+      tools: _toCsv(json['tools'] ?? json['tools_fw']),
+
+      backendFrameworks: _toCsv(json['backend_frameworks']),
+      frontendFrameworks: _toCsv(json['frontend_frameworks']),
+      uiFrameworks: _toCsv(json['ui_frameworks']),
+      testingFrameworks: _toCsv(json['testing_frameworks']),
+
+      cloudPlatforms: _toCsv(json['cloud_platforms']),
+      awsServices: _toCsv(json['aws_services']),
+      azureServices: _toCsv(json['azure_services']),
+      gcpServices: _toCsv(json['gcp_services']),
+
+      container: _toCsv(json['container']),
+      containerOrchestration: _toCsv(json['container_orchestration']),
+      aiServices: _toCsv(json['ai_services']),
+
+      skills: _toCsv(json['skills']),
+
+      workflow: Map<String, bool>.from(json['workflow'] ?? {}),
+    );
   }
 
-  factory Project.fromJson(Map<String, dynamic> json) => Project(
-        title: json['title'] ?? '',
-        description: json['description'] ?? '',
-        details: json['details'] ?? '',
-        serverOS: _toCsvString(json['server_os']),
-        db: _toCsvString(json['db']),
-        toolsFW: _toCsvString(json['tools_fw']),
-        skills: _toCsvString(json['skills']),
-        workflow: Map<String, bool>.from(json['workflow'] ?? {}),
-        period: _toPeriodString(json['period']),
-        link: json['link'] ?? '',
-      );
+  // =========================
+  // SPLIT
+  // =========================
+  List<String> _split(String v) =>
+      v.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toList();
 
   // =========================
-  // 🔽 既存そのまま
+  // FILTER GETTERS（UI/Filter用）
   // =========================
-
-  List<String> _split(String value) {
-    return value
-        .split(',')
-        .map((e) => e.trim())
-        .where((e) => e.isNotEmpty)
-        .toList();
-  }
-
   List<String> get skillsList => _split(skills);
   List<String> get serverOSList => _split(serverOS);
   List<String> get dbList => _split(db);
-  List<String> get toolsFWList => _split(toolsFW);
 
-  List<String> get workflowList {
-    return workflow.entries
-        .where((e) => e.value == true)
-        .map((e) => e.key)
-        .toList();
-  }
+  List<String> get toolsList => _split(tools);
 
+  List<String> get backendList => _split(backendFrameworks);
+  List<String> get frontendList => _split(frontendFrameworks);
+  List<String> get uiList => _split(uiFrameworks);
+  List<String> get testingList => _split(testingFrameworks);
+
+  List<String> get cloudList => _split(cloudPlatforms);
+  List<String> get awsList => _split(awsServices);
+  List<String> get azureList => _split(azureServices);
+  List<String> get gcpList => _split(gcpServices);
+
+  List<String> get containerList => _split(container);
+  List<String> get orchestrationList => _split(containerOrchestration);
+  List<String> get aiList => _split(aiServices);
+
+  List<String> get workflowList =>
+      workflow.entries.where((e) => e.value).map((e) => e.key).toList();
+
+  // =========================
+  // PERIOD SORT FIX
+  // =========================
   DateTime get periodStart {
     try {
-      final startString = period.split('~').first.trim();
-      final parts = startString.split('-');
-      if (parts.length != 2) return DateTime(1970, 1);
+      final start = period.split('~').first.trim();
+      final parts = start.split('-');
       return DateTime(int.parse(parts[0]), int.parse(parts[1]));
     } catch (_) {
       return DateTime(1970, 1);
@@ -95,19 +180,19 @@ class Project {
 
   DateTime get periodEnd {
     try {
-      final endString = period.split('~').last.trim();
-      if (endString.contains('現在') ||
-          endString.toLowerCase().contains('present')) {
+      final end = period.split('~').last.trim();
+
+      if (end.contains('現在') || end.toLowerCase().contains('present')) {
         return DateTime.now();
       }
-      final parts = endString.split('-');
-      if (parts.length != 2) return DateTime.now();
+
+      final parts = end.split('-');
       return DateTime(int.parse(parts[0]), int.parse(parts[1]));
     } catch (_) {
       return DateTime.now();
     }
   }
 
-  factory Project.fromMap(Map<String, dynamic> map) =>
-      Project.fromJson(map);
+  bool get isOngoing =>
+      period.contains('現在') || period.toLowerCase().contains('present');
 }

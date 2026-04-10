@@ -1,7 +1,7 @@
 // lib/sections/skills/data/skills_aggregator.dart
 
 import 'package:yaml/yaml.dart';
-import '../../../utils/string_utils.dart'; // ← 追加
+import '../../../utils/string_utils.dart';
 
 Map<String, double> aggregateCategory(
   YamlList projects,
@@ -12,10 +12,10 @@ Map<String, double> aggregateCategory(
   for (var project in projects) {
     final raw = project[key];
 
-    // 🔥 ここを統一
     final items = parseToList(raw);
 
     for (var item in items) {
+      if (item.isEmpty) continue;
       countMap[item] = (countMap[item] ?? 0) + 1;
     }
   }
@@ -49,7 +49,9 @@ Map<String, double> aggregateWorkflow(YamlList projects) {
   }
 
   return trueCount.map(
-    (key, value) =>
-        MapEntry(key, totalCount[key] == 0 ? 0 : (value / totalCount[key]!) * 100),
+    (key, value) => MapEntry(
+      key,
+      totalCount[key] == 0 ? 0 : (value / totalCount[key]!) * 100,
+    ),
   );
 }

@@ -5,11 +5,46 @@ projects:
       画面設計やバックエンド連携まで担当。長文テスト。
       UI設計やFlutter特有の画面遷移、状態管理までカバー。
       複数行テキストとして詳細を記載可能。
-    server_os: Ubuntu, Windows Server
-    db: MySQL, PostgreSQL
-    tools_fw: Flutter, Firebase, Git
-    skills: Dart, Firebase, UI設計
-    period: 2023-01 ~ 2023-04
+    server_os:
+      - Windows
+    db:
+      - 利用なし
+    tools:
+      - Jira
+      - Bitbucket
+      - VSCode
+    backend_frameworks:
+      - Django
+    frontend_frameworks:
+      - React
+      - Next.js
+    ui_frameworks:
+      - 利用なし
+    testing_frameworks:
+    - 利用なし
+    cloud_platforms:
+      - 利用なし
+    aws_services:
+      - 利用なし
+    azure_services:
+      - 利用なし
+    gcp_services:
+      - 利用なし
+    container:
+      - Docker
+    container_orchestration:
+      - 利用なし
+    ai_services:
+      - 利用なし
+    skills:
+      - Python
+      - JavaScript
+      - HTML
+      - CSS
+      - YAML
+    period:
+      - 2020-01
+      - 2023-03
     link: https://sigu-f7a231.github.io/my-portfolio/works/
 
   - title: ECサイト構築 2
@@ -17,11 +52,46 @@ projects:
     details: |
       プラグイン選定とデザイン調整を実施。長文テスト。
       デザインやテーマカスタマイズ、SEO対応まで担当。
-    server_os: Linux
-    db: MySQL
-    tools_fw: WordPress, PHP
-    skills: PHP, HTML, CSS, Android
-    period: 2022-08 ~ 2022-12
+    server_os:
+      - Windows
+    db:
+      - 利用なし
+    tools:
+      - Jira
+      - Bitbucket
+      - VSCode
+    backend_frameworks:
+      - Django
+    frontend_frameworks:
+      - React
+      - Next.js
+    ui_frameworks:
+      - 利用なし
+    testing_frameworks:
+    - 利用なし
+    cloud_platforms:
+      - 利用なし
+    aws_services:
+      - 利用なし
+    azure_services:
+      - 利用なし
+    gcp_services:
+      - 利用なし
+    container:
+      - Docker
+    container_orchestration:
+      - 利用なし
+    ai_services:
+      - 利用なし
+    skills:
+      - Python
+      - JavaScript
+      - HTML
+      - CSS
+      - YAML
+    period:
+      - 2021-10
+      - 2023-03
     link: ""
 
   - title: 社内管理システム 3
@@ -29,11 +99,46 @@ projects:
     details: |
       画面設計やバックエンド連携まで担当。長文テスト。
       UI設計やFlutter特有の画面遷移、状態管理までカバー。
-    server_os: Ubuntu, Windows Server
-    db: MySQL, PostgreSQL
-    tools_fw: Flutter, Firebase, Git
-    skills: Dart, Firebase, UI設計
-    period: 2023-02 ~ 2023-05
+    server_os:
+      - Windows
+    db:
+      - 利用なし
+    tools:
+      - Jira
+      - Bitbucket
+      - VSCode
+    backend_frameworks:
+      - Django
+    frontend_frameworks:
+      - React
+      - Next.js
+    ui_frameworks:
+      - 利用なし
+    testing_frameworks:
+    - 利用なし
+    cloud_platforms:
+      - 利用なし
+    aws_services:
+      - 利用なし
+    azure_services:
+      - 利用なし
+    gcp_services:
+      - 利用なし
+    container:
+      - Docker
+    container_orchestration:
+      - 利用なし
+    ai_services:
+      - 利用なし
+    skills:
+      - Python
+      - JavaScript
+      - HTML
+      - CSS
+      - YAML
+    period:
+      - 2022-10
+      - 2023-03
     link: ""
 
   - title: ECサイト構築 4
@@ -41,185 +146,90 @@ projects:
     details: |
       プラグイン選定とデザイン調整を実施。長文テスト。
       デザインやテーマカスタマイズ、SEO対応まで担当。
-    server_os: Linux
-    db: MySQL
-    tools_fw: WordPress, PHP
-    skills: PHP, HTML, CSS
-    period: 2022-09 ~ 2022-12
+    server_os:
+      - Windows
+    db:
+      - 利用なし
+    tools:
+      - Jira
+      - Bitbucket
+      - VSCode
+    backend_frameworks:
+      - Django
+    frontend_frameworks:
+      - React
+      - Next.js
+    ui_frameworks:
+      - 利用なし
+    testing_frameworks:
+    - 利用なし
+    cloud_platforms:
+      - 利用なし
+    aws_services:
+      - 利用なし
+    azure_services:
+      - 利用なし
+    gcp_services:
+      - 利用なし
+    container:
+      - Docker
+    container_orchestration:
+      - 利用なし
+    ai_services:
+      - 利用なし
+    skills:
+      - Python
+      - JavaScript
+      - HTML
+      - CSS
+      - YAML
+    period:
+      - 2023-10
+      - 2024-03
     link: ""
 
   - title: 社内管理システム 5
     description: Flutter Webで制作
     details: |
       画面設計やバックエンド連携まで担当。長文テスト。
-    server_os: Ubuntu, Windows Server
-    db: MySQL, PostgreSQL
-    tools_fw: Flutter, Firebase, Git
-    skills: Dart, Firebase, UI設計
-    period: 2023-03 ~ 2023-06
-    link: ""
-
-  - title: ECサイト構築 6
-    description: WordPressで開発
-    details: |
-      プラグイン選定とデザイン調整を実施。長文テスト。
-    server_os: Linux
-    db: MySQL
-    tools_fw: WordPress, PHP
-    skills: PHP, HTML, CSS
-    period: 2022-10 ~ 2022-12
-    link: ""
-
-  - title: 社内管理システム 7
-    description: Flutter Webで制作
-    details: |
-      UI設計やFlutter特有の画面遷移、状態管理までカバー。
-    server_os: Ubuntu, Windows Server
-    db: MySQL, PostgreSQL
-    tools_fw: Flutter, Firebase, Git
-    skills: Dart, Firebase, UI設計
-    period: 2023-04 ~ 2023-07
-    link: ""
-
-  - title: ECサイト構築 8
-    description: WordPressで開発
-    details: |
-      デザインやテーマカスタマイズ、SEO対応まで担当。
-    server_os: Linux
-    db: MySQL
-    tools_fw: WordPress, PHP
-    skills: PHP, HTML, CSS
-    period: 2022-11 ~ 2023-01
-    link: ""
-
-  - title: 社内管理システム 9
-    description: Flutter Webで制作
-    details: |
-      Flutter特有の画面遷移、状態管理までカバー。
-    server_os: Ubuntu, Windows Server
-    db: MySQL, PostgreSQL
-    tools_fw: Flutter, Firebase, Git
-    skills: Dart, Firebase, UI設計
-    period: 2023-05 ~ 2023-08
-    link: ""
-
-  - title: ECサイト構築 10
-    description: WordPressで開発
-    details: |
-      プラグイン選定とデザイン調整を実施。
-    server_os: Linux
-    db: MySQL
-    tools_fw: WordPress, PHP
-    skills: PHP, HTML, CSS
-    period: 2022-12 ~ 2023-02
-    link: ""
-
-  - title: 社内管理システム 11
-    description: Flutter Webで制作
-    details: |
-      画面設計やUI設計を担当。
-    server_os: Ubuntu, Windows Server
-    db: MySQL, PostgreSQL
-    tools_fw: Flutter, Firebase, Git
-    skills: Dart, Firebase, UI設計
-    period: 2023-06 ~ 2023-09
-    link: ""
-
-  - title: ECサイト構築 12
-    description: WordPressで開発
-    details: |
-      デザイン調整、SEO対応まで担当。
-    server_os: Linux
-    db: MySQL
-    tools_fw: WordPress, PHP
-    skills: PHP, HTML, CSS
-    period: 2023-01 ~ 2023-03
-    link: ""
-
-  - title: 社内管理システム 13
-    description: Flutter Webで制作
-    details: |
-      バックエンド連携や状態管理を担当。
-    server_os: Ubuntu, Windows Server
-    db: MySQL, PostgreSQL
-    tools_fw: Flutter, Firebase, Git
-    skills: Dart, Firebase, UI設計
-    period: 2023-07 ~ 2023-10
-    link: ""
-
-  - title: ECサイト構築 14
-    description: WordPressで開発
-    details: |
-      プラグイン設定やテーマカスタマイズを実施。
-    server_os: Linux
-    db: MySQL
-    tools_fw: WordPress, PHP
-    skills: PHP, HTML, CSS
-    period: 2023-02 ~ 2023-04
-    link: ""
-
-  - title: 社内管理システム 15
-    description: Flutter Webで制作
-    details: |
-      UI設計や画面遷移を担当。
-    server_os: Ubuntu, Windows Server
-    db: MySQL, PostgreSQL
-    tools_fw: Flutter, Firebase, Git
-    skills: Dart, Firebase, UI設計
-    period: 2023-08 ~ 2023-11
-    link: ""
-
-  - title: ECサイト構築 16
-    description: WordPressで開発
-    details: |
-      デザインやSEO対応を担当。
-    server_os: Linux
-    db: MySQL
-    tools_fw: WordPress, PHP
-    skills: PHP, HTML, CSS
-    period: 2023-03 ~ 2023-05
-    link: ""
-
-  - title: 社内管理システム 17
-    description: Flutter Webで制作
-    details: |
-      バックエンド連携やFlutter特有の設計を担当。
-    server_os: Ubuntu, Windows Server
-    db: MySQL, PostgreSQL
-    tools_fw: Flutter, Firebase, Git
-    skills: Dart, Firebase, UI設計
-    period: 2023-09 ~ 2023-12
-    link: ""
-
-  - title: ECサイト構築 18
-    description: WordPressで開発
-    details: |
-      プラグインやテーマ調整を担当。
-    server_os: Linux
-    db: MySQL
-    tools_fw: WordPress, PHP
-    skills: PHP, HTML, CSS
-    period: 2023-04 ~ 2023-06
-    link: ""
-
-  - title: 社内管理システム 19
-    description: Flutter Webで制作
-    details: |
-      UI設計とバックエンドを担当。
-    server_os: Ubuntu, Windows Server
-    db: MySQL, PostgreSQL
-    tools_fw: Flutter, Firebase, Git
-    skills: Dart, Firebase, UI設計
-    period: 2023-10 ~ 2024-01
-    link: ""
-
-  - title: ECサイト構築 20
-    description: WordPressで開発
-    details: |
-      デザインやSEO調整を担当。
-    server_os: Linux
-    db: MySQL
-    tools_fw: WordPress, PHP
-    skills: PHP, HTML, CSS
-    period: 2023-05 ~ 2023-07
+    server_os:
+      - Windows
+    db:
+      - 利用なし
+    tools:
+      - Jira
+      - Bitbucket
+      - VSCode
+    backend_frameworks:
+      - Django
+    frontend_frameworks:
+      - React
+      - Next.js
+    ui_frameworks:
+      - 利用なし
+    testing_frameworks:
+    - 利用なし
+    cloud_platforms:
+      - 利用なし
+    aws_services:
+      - 利用なし
+    azure_services:
+      - 利用なし
+    gcp_services:
+      - 利用なし
+    container:
+      - Docker
+    container_orchestration:
+      - 利用なし
+    ai_services:
+      - 利用なし
+    skills:
+      - Python
+      - JavaScript
+      - HTML
+      - CSS
+      - YAML
+    period:
+      - 2025-10
+      - 2026-03
     link: ""

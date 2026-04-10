@@ -11,14 +11,34 @@ projects:
       - Windows
     db: 
      - PostgreSQL
-    tools_fw: 
-      - Django2
-      - Boostrap
+    tools: 
       - RedMine
       - Git
       - GitLab
       - Teraterm
       - AdobeXD
+    backend_frameworks:
+      - Django2
+    frontend_frameworks:
+      - 利用なし
+    ui_frameworks:
+      - Bootstrap
+    testing_frameworks:
+    - 利用なし
+    cloud_platforms:
+      - 利用なし
+    aws_services:
+      - 利用なし
+    azure_services:
+      - 利用なし
+    gcp_services:
+      - 利用なし
+    container:
+      - 利用なし
+    container_orchestration:
+      - 利用なし
+    ai_services:
+      - 利用なし
     skills:
      - Python3
     period:
@@ -43,8 +63,30 @@ projects:
       - Windows
     db:
       - PostgreSQL
-    tools_fw:
+    tools:
       - 独自ツール
+    backend_frameworks:
+      - 利用なし
+    frontend_frameworks:
+      - 利用なし
+    ui_frameworks:
+      - 利用なし
+    testing_frameworks:
+    - 利用なし
+    cloud_platforms:
+      - 利用なし
+    aws_services:
+      - 利用なし
+    azure_services:
+      - 利用なし
+    gcp_services:
+      - 利用なし
+    container:
+      - 利用なし
+    container_orchestration:
+      - 利用なし
+    ai_services:
+      - 利用なし
     skills:
       - Python
     period:
@@ -66,12 +108,35 @@ projects:
       API 設計およびデータ作成・製造
       スクレイピングによるデータ収集およびデータ整備
     server_os:
-      - Windows
+      - mac
     db: 
-    tools_fw:
-      - BeautifulSoup
+    tools:
+     - Terminal
+    backend_frameworks:
+      - Django2
+    frontend_frameworks:
+      - 利用なし
+    ui_frameworks:
+      - Bootstrap
+    testing_frameworks:
+    - 利用なし
+    cloud_platforms:
+      - 利用なし
+    aws_services:
+      - 利用なし
+    azure_services:
+      - 利用なし
+    gcp_services:
+      - 利用なし
+    container:
+      - 利用なし
+    container_orchestration:
+      - 利用なし
+    ai_services:
+      - 利用なし
     skills:
       - Python
+      - BeautifulSoup
     period:
       - 2020-01
       - 2020-03
@@ -98,9 +163,30 @@ projects:
       - Windows
     db:
       - PostgreSQL
-    tools_fw:
+    tools:
       - Git
+    backend_frameworks:
+     - 利用なし
+    frontend_frameworks:
       - Vue.js
+    ui_frameworks:
+      - Bootstrap
+    testing_frameworks:
+    - 利用なし
+    cloud_platforms:
+      - 利用なし
+    aws_services:
+      - 利用なし
+    azure_services:
+      - 利用なし
+    gcp_services:
+      - 利用なし
+    container:
+      - 利用なし
+    container_orchestration:
+      - 利用なし
+    ai_services:
+      - 利用なし
     skills:
       - Flutter
       - JavaScript
@@ -130,20 +216,40 @@ projects:
     server_os:
       - Windows
     db:
-      - MongoDB
-    tools_fw:
-      - S3
-      - Cloud9
-      - Lambda
-      - EC2
-      - MediaConvert
-      - Vue.js
+      - DynamoDB
+    tools:
       - KARTE
       - Git
       - Jira
       - Backlog
       - SourceTree
       - ClamAV
+    backend_frameworks:
+      - 利用なし
+    frontend_frameworks:
+      - Vue.js
+    ui_frameworks:
+      - 利用なし
+    testing_frameworks:
+    - 利用なし
+    cloud_platforms:
+      - AWS
+    aws_services:
+      - S3
+      - Cloud9
+      - MediaConvert
+      - EC2
+      - Lambda
+    azure_services:
+      - 利用なし
+    gcp_services:
+      - 利用なし
+    container:
+      - 利用なし
+    container_orchestration:
+      - 利用なし
+    ai_services:
+      - 利用なし
     skills:
       - Python
       - JavaScript
@@ -176,17 +282,36 @@ projects:
       - Windows
     db:
       - PostgreSQL
-    tools_fw:
+    tools:
       - Git
-      - BitBacket
-      - Docker
+      - Bitbucket
+    backend_frameworks:
       - FastAPI
+    frontend_frameworks:
+      - React
+    ui_frameworks:
+      - 利用なし
+    testing_frameworks:
+    - 利用なし
+    cloud_platforms:
+      - 利用なし
+    aws_services:
+      - 利用なし
+    azure_services:
+      - 利用なし
+    gcp_services:
+      - 利用なし
+    container:
+      - Docker
+    container_orchestration:
+      - 利用なし
+    ai_services:
+      - 利用なし
     skills:
       - Python
       - JavaScript
       - HTML
       - CSS
-      - React
     period:
       - 2021-04
       - 2022-03
@@ -209,15 +334,37 @@ projects:
       - Windows
     db:
       - PostgreSQL
-    tools_fw:
+    tools:
       - GitHub
       - 独自SDK
+    backend_frameworks:
+      - 利用なし
+    frontend_frameworks:
+      - 利用なし
+    ui_frameworks:
+      - 利用なし
+    testing_frameworks:
+    - 利用なし
+    cloud_platforms:
+      - 利用なし
+    aws_services:
+      - 利用なし
+    azure_services:
+      - 利用なし
+    gcp_services:
+      - 利用なし
+    container:
+      - Docker
+    container_orchestration:
+      - 利用なし
+    ai_services:
+      - 利用なし
     skills:
       - Python
       - JavaScript
       - HTML
       - CSS
-      - yml
+      - YAML
     period:
       - 2022-04
       - 2022-09
@@ -241,19 +388,39 @@ projects:
       - Windows
     db:
       - 利用なし
-    tools_fw:
+    tools:
       - Jira
-      - BitBacket
-      - React
+      - Bitbucket
+      - VSCode
+    backend_frameworks:
       - Django
+    frontend_frameworks:
+      - React
       - Next.js
-      - VSCODE
+    ui_frameworks:
+      - 利用なし
+    testing_frameworks:
+    - 利用なし
+    cloud_platforms:
+      - 利用なし
+    aws_services:
+      - 利用なし
+    azure_services:
+      - 利用なし
+    gcp_services:
+      - 利用なし
+    container:
+      - Docker
+    container_orchestration:
+      - 利用なし
+    ai_services:
+      - 利用なし
     skills:
       - Python
       - JavaScript
       - HTML
       - CSS
-      - yml
+      - YAML
     period:
       - 2022-10
       - 2023-03
@@ -276,15 +443,36 @@ projects:
       - Windows
     db:
       - PostgreSQL
-    tools_fw:
-      - VSCODE
+    tools:
+      - VSCode
+    backend_frameworks:
       - Streamlit
+    frontend_frameworks:
+      - 利用なし
+    ui_frameworks:
+      - 利用なし
+    testing_frameworks:
+    - 利用なし
+    cloud_platforms:
+      - 利用なし
+    aws_services:
+      - 利用なし
+    azure_services:
+      - 利用なし
+    gcp_services:
+      - 利用なし
+    container:
+      - Docker
+    container_orchestration:
+      - 利用なし
+    ai_services:
+      - 利用なし
     skills:
       - Python
       - JavaScript
       - HTML
       - CSS
-      - yml
+      - YAML
     period:
       - 2023-04
       - 2023-06
@@ -306,9 +494,31 @@ projects:
       - Windows
     db:
       - 利用なし
-    tools_fw:
+    tools:
       - Github
-      - Zira
+      - Jira
+    backend_frameworks:
+      - 利用なし
+    frontend_frameworks:
+      - 利用なし
+    ui_frameworks:
+      - 利用なし
+    testing_frameworks:
+    - 利用なし
+    cloud_platforms:
+      - 利用なし
+    aws_services:
+      - 利用なし
+    azure_services:
+      - 利用なし
+    gcp_services:
+      - 利用なし
+    container:
+      - Docker
+    container_orchestration:
+      - 利用なし
+    ai_services:
+      - 利用なし
     skills: 
       - 利用なし
     period:
@@ -334,13 +544,34 @@ projects:
       - Windows
     db:
       - PostgreSQL
-    tools_fw:
+    tools:
       - Github
-      - VSCODE
+      - VSCode
       - Box
       - Bizer
       - A5/SQL
+    backend_frameworks:
       - FastAPI
+    frontend_frameworks:
+      - 利用なし
+    ui_frameworks:
+      - 利用なし
+    testing_frameworks:
+    - 利用なし
+    cloud_platforms:
+      - 利用なし
+    aws_services:
+      - 利用なし
+    azure_services:
+      - 利用なし
+    gcp_services:
+      - 利用なし
+    container:
+      - Docker
+    container_orchestration:
+      - 利用なし
+    ai_services:
+      - 利用なし
     skills:
       - Python
       - JavaScript
@@ -369,13 +600,34 @@ projects:
       - Windows
     db:
       - PostgreSQL
-    tools_fw:
+    tools:
       - Github
-      - VSCODE
+      - VSCode
       - Box
       - Bizer
       - A5/SQL
+    backend_frameworks:
       - FastAPI
+    frontend_frameworks:
+      - 利用なし
+    ui_frameworks:
+      - 利用なし
+    testing_frameworks:
+    - 利用なし
+    cloud_platforms:
+      - 利用なし
+    aws_services:
+      - 利用なし
+    azure_services:
+      - 利用なし
+    gcp_services:
+      - 利用なし
+    container:
+      - Docker
+    container_orchestration:
+      - 利用なし
+    ai_services:
+      - 利用なし
     skills:
       - Python
       - JavaScript
@@ -404,16 +656,38 @@ projects:
       - Windows
     db:
       - PostgreSQL
-    tools_fw:
+    tools:
       - Github
-      - VSCODE
-      - Zira
+      - VSCode
+      - Jira
+    backend_frameworks:
+      - FastAPI
+    frontend_frameworks:
+      - 利用なし
+    ui_frameworks:
+      - 利用なし
+    testing_frameworks:
+    - 利用なし
+    cloud_platforms:
+      - AWS
+    aws_services:
+      - EC2
+      - OpenSearch
+    azure_services:
+      - 利用なし
+    gcp_services:
+      - 利用なし
+    container:
+      - Docker
+    container_orchestration:
+      - 利用なし
+    ai_services:
+      - 利用なし
     skills:
       - Python3
-      - EC2
-      - Docker
-      - OpenSearch
-    period: 2024-05 ~ 2024-07
+    period:
+      - 2024-05
+      - 2024-07
     link: ""
     workflow:
       requirements: false
@@ -434,21 +708,41 @@ projects:
       - Windows
     db: 
       - MySQL
-    tools_fw:
+    tools:
       - Github
-      - Zira
-      - VSCODE
+      - Jira
+      - VSCode      
+    backend_frameworks:
+      - Flask
+    frontend_frameworks:
       - Vue.js
-      - Docker
+    ui_frameworks:
+      - 利用なし
+    testing_frameworks:
+    - 利用なし
+    cloud_platforms:
+      - AWS
+      - Azure
+    aws_services:
       - S3
       - EC2
-      - Azure
-      - Flask
+    azure_services:
+      - 利用なし
+    gcp_services:
+      - 利用なし
+    container:
+      - Docker
+    container_orchestration:
+      - 利用なし
+    ai_services:
+      - 利用なし
     skills:
       - Python3
       - TypeScript
       - Python
-    period: 2024-08 ~ 2024-10
+    period:
+      - 2024-08
+      - 2024-10
     link: ""
     workflow:
       requirements: false
@@ -469,15 +763,34 @@ projects:
       - Windows
     db:
       - MySQL
-    tools_fw:
+    tools:
       - Github
-      - VSCODE
-      - NodeJS
-    skills:
+      - VSCode
+      - Node.js
+    backend_frameworks:
       - Angular
-      - TypeScript
-      - Docker
+    frontend_frameworks:
+      - Angular
+    ui_frameworks:
+      - 利用なし
+    testing_frameworks:
+    - 利用なし
+    cloud_platforms:
+      - AWS
+    aws_services:
       - S3
+    azure_services:
+      - 利用なし
+    gcp_services:
+      - 利用なし
+    container:
+      - Docker
+    container_orchestration:
+      - 利用なし
+    ai_services:
+      - 利用なし
+    skills:
+      - TypeScript
     period:
       - 2024-11
       - 2025-03
@@ -503,17 +816,36 @@ projects:
       - Mac
     db:
       - PostgreSQL
-    tools_fw:
+    tools:
       - Github
-      - VSCODE
-      - NodeJS
-    skills:
-      - Python
+      - VSCode
+      - Node.js
+    backend_frameworks:
       - FastAPI
-      - Docker
-      - Lamba
+    frontend_frameworks:
+      - 利用なし
+    ui_frameworks:
+      - 利用なし
+    testing_frameworks:
+    - 利用なし
+    cloud_platforms:
+      - AWS
+    aws_services:
+      - Lambda
       - ECR
       - CloudWatch
+    azure_services:
+      - 利用なし
+    gcp_services:
+      - 利用なし
+    container:
+      - Docker
+    container_orchestration:
+      - 利用なし
+    ai_services:
+      - 利用なし
+    skills:
+      - Python
     period:
       - 2025-04
       - 2025-10
@@ -536,13 +868,33 @@ projects:
       - Windows
     db:
       - PostgreSQL
-    tools_fw:
+    tools:
       - Github
-      - VSCODE
+      - VSCode
       - WSL
-      - NodeJS
-      - MochaTest
-      - Vue.js
+      - Node.js
+    backend_frameworks:
+      - 利用なし
+    frontend_frameworks:
+      - 利用なし
+    ui_frameworks:
+      - 利用なし
+    testing_frameworks:
+    - MochaTest
+    cloud_platforms:
+      - AWS
+    aws_services:
+       - 利用なし
+    azure_services:
+      - 利用なし
+    gcp_services:
+      - 利用なし
+    container:
+      - 利用なし
+    container_orchestration:
+      - 利用なし
+    ai_services:
+      - 利用なし
     skills:
       - TypeScript
       - JavaScript
@@ -569,14 +921,36 @@ projects:
       - Windows
     db:
       - PostgreSQL
-    tools_fw:
+    tools:
       - Teams
       - RedMine
       - Box
       - Teraterm
-    skills:
-      - K8s
+    backend_frameworks:
+      - 利用なし
+    frontend_frameworks:
+      - 利用なし
+    ui_frameworks:
+      - 利用なし
+    testing_frameworks:
+      - 利用なし
+    cloud_platforms:
+      - 利用なし
+    aws_services:
+       - 利用なし
+    azure_services:
+      - 利用なし
+    gcp_services:
+      - 利用なし
+    container:
+      - 利用なし
+    container_orchestration:
+      - Kubernetes
       - OpenShift
+    ai_services:
+      - 利用なし
+    skills:
+      - 利用なし
     period:
       - 2026-01
       - 2026-03
