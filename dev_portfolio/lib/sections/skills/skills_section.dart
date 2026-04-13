@@ -40,7 +40,7 @@ class _SkillsSectionState extends State<SkillsSection>
   /// workのみ追加
   final List<String> _workExtra = const ['workflow'];
 
-  /// ⭐ここが「表示5項目設定」
+  /// 表示TOP
   final List<String> _topDisplayCategories = const [
     'server_os',
     'db',
@@ -55,19 +55,14 @@ class _SkillsSectionState extends State<SkillsSection>
   @override
   void initState() {
     super.initState();
-
     _workSkillsFuture = loadWorkSkillsAll();
     _privateSkillsFuture = loadPrivateSkillsAll();
   }
 
-  /// work / private 全カテゴリ
   List<String> _getAllCategories(bool isWork) {
-    return isWork
-        ? [..._baseCategories, ..._workExtra]
-        : _baseCategories;
+    return isWork ? [..._baseCategories, ..._workExtra] : _baseCategories;
   }
 
-  /// ▼用（トップ5以外）
   List<String> _getDropdownCategories(bool isWork) {
     final all = _getAllCategories(isWork);
     return all.where((c) => !_topDisplayCategories.contains(c)).toList();
@@ -120,7 +115,6 @@ class _SkillsSectionState extends State<SkillsSection>
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-
     final dropdownCategories = _getDropdownCategories(_isWork);
 
     return Container(
@@ -137,7 +131,7 @@ class _SkillsSectionState extends State<SkillsSection>
 
           const SizedBox(height: 12),
 
-          /// WORK / PRIVATE
+          /// WORK / PRIVATE（★修正ここ）
           Row(
             children: [
               Expanded(
@@ -149,8 +143,15 @@ class _SkillsSectionState extends State<SkillsSection>
                   selected: {_isWork},
                   onSelectionChanged: (v) {
                     setState(() {
-                      _isWork = v.first;
-                      _currentCategory = 'server_os';
+                      final newIsWork = v.first;
+                      final allCategories = _getAllCategories(newIsWork);
+
+                      _isWork = newIsWork;
+
+                      // ★重要：存在しない場合のみ補正（維持優先）
+                      if (!allCategories.contains(_currentCategory)) {
+                        _currentCategory = allCategories.first;
+                      }
                     });
                   },
                 ),
@@ -160,10 +161,9 @@ class _SkillsSectionState extends State<SkillsSection>
 
           const SizedBox(height: 12),
 
-          /// ★ TOP5 + ▼ + 現在表示
+          /// TOP5 + dropdown
           Row(
             children: [
-              /// TOP5（設定可能）
               Expanded(
                 child: Wrap(
                   spacing: 8,
@@ -181,7 +181,6 @@ class _SkillsSectionState extends State<SkillsSection>
                 ),
               ),
 
-              /// ▼
               PopupMenuButton<String>(
                 icon: const Icon(Icons.arrow_drop_down),
                 onSelected: (value) {
@@ -197,11 +196,9 @@ class _SkillsSectionState extends State<SkillsSection>
                 },
               ),
 
-              /// 現在表示
               Container(
                 margin: const EdgeInsets.only(left: 8),
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 10, vertical: 4),
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
                   color: isDark ? Colors.white12 : Colors.black12,
                   borderRadius: BorderRadius.circular(12),
@@ -213,7 +210,7 @@ class _SkillsSectionState extends State<SkillsSection>
 
           const SizedBox(height: 12),
 
-          /// CONTENT（安全構造）
+          /// CONTENT
           Expanded(
             child: FutureBuilder<Map<String, Map<String, double>>>(
               future: _isWork ? _workSkillsFuture : _privateSkillsFuture,

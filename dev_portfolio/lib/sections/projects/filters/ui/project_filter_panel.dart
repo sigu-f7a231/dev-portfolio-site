@@ -130,10 +130,13 @@ class _ProjectsFilterState extends State<ProjectsFilter> {
               if (showWorkflow)
                 FilterChipsSection(
                   title: 'Workflow',
-                  items: _unique(widget.projects
-                      .expand((e) => e.workflow.keys)
-                      .map((e) => LanguageUtils.workflowLabels['ja']?[e] ?? e)
-                      .toList()),
+                  items: _unique(
+                    widget.projects
+                        .expand((e) => e.workflow.keys)
+                        .map((e) =>
+                            LanguageUtils.workflowLabels['ja']?[e] ?? e)
+                        .toList(),
+                  ),
                   selectedItems: _selectedFilters['workflow']!,
                   onSelected: (v) => setState(() {
                     _selectedFilters['workflow']!.contains(v)
@@ -142,6 +145,11 @@ class _ProjectsFilterState extends State<ProjectsFilter> {
                   }),
                   isDark: widget.isDark,
                 ),
+
+              /// =========================
+              /// ここが修正ポイント（余白追加）
+              /// =========================
+              const SizedBox(height: 12),
 
               Row(
                 children: [

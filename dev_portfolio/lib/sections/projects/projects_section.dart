@@ -1,4 +1,3 @@
-// lib/sections/projects/projects_section.dart
 import 'package:flutter/material.dart';
 import 'data/projects_work.dart';
 import 'data/projects_private.dart';
@@ -26,9 +25,8 @@ class _ProjectsSectionState extends State<ProjectsSection>
   late Future<List<Project>> workFuture;
   late Future<List<Project>> privateFuture;
 
-  int currentTabIndex = 0; // 0: work, 1: private
+  int currentTabIndex = 0;
 
-  // ★ フィルター状態
   ProjectFilterState filterState = ProjectFilterState.initial();
 
   @override
@@ -72,11 +70,11 @@ class _ProjectsSectionState extends State<ProjectsSection>
             ),
             ProjectsSectionConfig.headerSpacing,
 
-            // ★ Filter UI
             FutureBuilder<List<Project>>(
               future: currentTabIndex == 0 ? workFuture : privateFuture,
               builder: (context, snapshot) {
                 final projects = snapshot.data ?? [];
+
                 return ProjectsFilter(
                   projects: projects,
                   tabIndex: currentTabIndex,
@@ -91,11 +89,9 @@ class _ProjectsSectionState extends State<ProjectsSection>
               },
             ),
 
-            // ★ TabView（高さを画面の70%に固定）
             SizedBox(
               height: screenHeight * 0.7,
               child: ProjectsTabView(
-                tabController: _tabController,
                 workFuture: workFuture,
                 privateFuture: privateFuture,
                 showCollectionNotifier: showCollectionNotifier,
