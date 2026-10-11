@@ -23,7 +23,6 @@ jobs:
         run: flutter pub get
 
       - name: Build web
-        # ※リポジトリ名が異なる場合は /リポジトリ名/ に変更してください
         run: flutter build web --release --base-href "/dev-portfolio-site/"
 
       - name: Deploy to GitHub Pages
