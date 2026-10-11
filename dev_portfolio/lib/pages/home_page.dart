@@ -7,18 +7,24 @@ import '../sections/skills/skills_section.dart';
 import '../sections/projects/projects_section.dart';
 import '../controllers/scroll_controller.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   final ThemeMode themeMode;
   final Function(bool) onThemeChanged;
-  final SectionScrollController scroll = SectionScrollController();
 
-  HomePage({
+  const HomePage({
     super.key,
     required this.themeMode,
     required this.onThemeChanged,
   });
 
-  
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  final SectionScrollController scroll = SectionScrollController();
+  int _refreshKey = 0;        // Projects用の再描画キー
+  int _skillsRefreshKey = 0;  // ★ Skills専用の再描画キーを追加
 
   @override
   Widget build(BuildContext context) {
@@ -67,14 +73,19 @@ class HomePage extends StatelessWidget {
       ),
       body: Column(
         children: [
-          // Header にダークモード切替スイッチを渡す
           Header(
             onHomePressed: () => scroll.scrollTo('home'),
             onAboutPressed: () => scroll.scrollTo('about'),
             onSkillsPressed: () => scroll.scrollTo('skills'),
             onProjectsPressed: () => scroll.scrollTo('projects'),
-            themeMode: themeMode,
-            onThemeChanged: onThemeChanged,
+            themeMode: widget.themeMode,
+            onThemeChanged: widget.onThemeChanged,
+            onYamlStateChanged: () {
+              setState(() {
+                _refreshKey++;       // Projectsを再描画
+                _skillsRefreshKey++; // ★ Skillsも同時に独立して再描画・再集計させる
+              });
+            },
           ),
           Expanded(
             child: SingleChildScrollView(
@@ -83,8 +94,17 @@ class HomePage extends StatelessWidget {
                 children: [
                   HeroSection(key: scroll.keys['home']),
                   AboutSection(key: scroll.keys['about']),
-                  SkillsSection(key: scroll.keys['skills']),
-                  ProjectsSection(key: scroll.keys['projects']),
+                  
+                  // ★ スクロール用キーは外側のContainerに持たせ、
+                  // 内部の SkillsSection に ValueKey を持たせることで確実に再構築・再集計させる
+                  Container(
+                    key: scroll.keys['skills'], 
+                    child: SkillsSection(
+                      key: ValueKey('skills_$_skillsRefreshKey'),
+                    ),
+                  ),
+
+                  ProjectsSection(key: ValueKey(_refreshKey)),
                 ],
               ),
             ),

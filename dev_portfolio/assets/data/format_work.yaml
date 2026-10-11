@@ -1,0 +1,51 @@
+projects:
+  - title: サンプル・ワークプロジェクト
+    description: チーム開発における設計から実装、テストまでのアジャイル開発を担当
+    details: |
+      要件定義を元にした詳細設計、バックエンドのAPI実装、フロントエンドのUI調整を実施。
+      単体テストの作成やコードレビューを通じて品質担保に貢献。
+    server_os:
+      - Linux
+      - Windows
+    db: 
+      - PostgreSQL
+    tools: 
+      - Git
+      - GitLab
+      - VSCode
+    backend_frameworks:
+      - Django
+    frontend_frameworks:
+      - 利用なし
+    ui_frameworks:
+      - Bootstrap
+    testing_frameworks:
+      - 利用なし
+    cloud_platforms:
+      - 利用なし
+    aws_services:
+      - 利用なし
+    azure_services:
+      - 利用なし
+    gcp_services:
+      - 利用なし
+    container:
+      - 利用なし
+    container_orchestration:
+      - 利用なし
+    ai_services:
+      - 利用なし
+    skills:
+      - Python
+    period:
+      - 2023-04
+      - 2023-09
+    link: ""
+    workflow:
+      requirements: false
+      basic_design: true
+      detailed_design: true
+      implementation_unit_test: true
+      integration_test: true
+      system_test: false
+      maintenance_operation: false

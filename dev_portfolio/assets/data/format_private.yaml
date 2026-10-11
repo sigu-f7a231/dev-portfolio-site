@@ -1,0 +1,46 @@
+projects:
+  - title: サンプル・プライベートプロジェクト
+    description: 個人開発によるWebアプリケーション制作
+    details: |
+      モダンな技術スタックを用いたフルスタック開発の検証。
+      UI/UXの設計からレスポンシブ対応、コンテナ化までを一人で担当。
+    server_os:
+      - Windows
+    db:
+      - 利用なし
+    tools:
+      - GitHub
+      - VSCode
+    backend_frameworks:
+      - Node.js
+    frontend_frameworks:
+      - React
+      - Next.js
+    ui_frameworks:
+      - 利用なし
+    testing_frameworks:
+      - 利用なし
+    cloud_platforms:
+      - 利用なし
+    aws_services:
+      - 利用なし
+    azure_services:
+      - 利用なし
+    gcp_services:
+      - 利用なし
+    container:
+      - Docker
+    container_orchestration:
+      - 利用なし
+    ai_services:
+      - 利用なし
+    skills:
+      - JavaScript
+      - TypeScript
+      - HTML
+      - CSS
+      - YAML
+    period:
+      - 2024-01
+      - 2024-06
+    link: https://example.com/sample-portfolio/

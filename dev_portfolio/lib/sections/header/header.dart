@@ -10,6 +10,7 @@ class Header extends StatelessWidget {
   final VoidCallback onProjectsPressed;
   final ThemeMode themeMode;
   final Function(bool) onThemeChanged;
+  final VoidCallback? onYamlStateChanged; // ★ 追加
 
   const Header({
     super.key,
@@ -19,6 +20,7 @@ class Header extends StatelessWidget {
     required this.onProjectsPressed,
     required this.themeMode,
     required this.onThemeChanged,
+    this.onYamlStateChanged, // ★ 追加
   });
 
   @override
@@ -33,6 +35,7 @@ class Header extends StatelessWidget {
             onProjectsPressed: onProjectsPressed,
             themeMode: themeMode,
             onThemeChanged: onThemeChanged,
+            onYamlStateChanged: onYamlStateChanged, // ★ モバイル側でも必要なら渡す
           );
         } else {
           return DesktopHeader(
@@ -42,6 +45,7 @@ class Header extends StatelessWidget {
             onProjectsPressed: onProjectsPressed,
             themeMode: themeMode,
             onThemeChanged: onThemeChanged,
+            onYamlStateChanged: onYamlStateChanged, // ★ DesktopHeaderに渡す
           );
         }
       },

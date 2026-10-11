@@ -1,12 +1,10 @@
-import 'package:flutter/services.dart';
+import '../../../utils/private_yaml_loader.dart';
 import 'package:yaml/yaml.dart';
 import 'skills_aggregator.dart';
 
 Future<Map<String, Map<String, double>>> loadPrivateSkillsAll() async {
-  final yamlString =
-      await rootBundle.loadString('assets/data/projects_private.yaml');
 
-  final yamlMap = loadYaml(yamlString) as YamlMap;
+  final yamlMap = await PrivateYamlLoader.loadPrivateYamlMap();
   final projects = yamlMap['projects'] as YamlList;
 
   return {
