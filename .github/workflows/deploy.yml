@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - develop
+  workflow_dispatch:
 
 jobs:
   build-and-deploy:
@@ -20,13 +21,16 @@ jobs:
           cache: true
 
       - name: Install dependencies
-        # 手元で pub get するのと同じように、ディレクトリを移動してから実行
         run: |
           cd dev_portfolio
           flutter pub get
 
+      - name: Configure Web Support # ←ここを追加！
+        run: |
+          cd dev_portfolio
+          flutter create . --platforms web
+
       - name: Build web
-        # 手元で chrome で動かす代わりに、Web用に出力（ビルド）する
         run: |
           cd dev_portfolio
           flutter build web --release --base-href "/dev-portfolio-site/"
