@@ -37,7 +37,7 @@ class PrivateYamlLoader {
     }
 
     // 3. どちらもなければアセットから読み込む
-    return await rootBundle.loadString('assets/data/projects_private.yaml');
+    return await rootBundle.loadString('assets/data/format_private.yaml');
   }
 
   /// 共通のパース処理を含めたYamlMapの取得

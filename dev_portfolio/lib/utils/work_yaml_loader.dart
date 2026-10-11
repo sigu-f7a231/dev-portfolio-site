@@ -37,7 +37,7 @@ class WorkYamlLoader {
     }
 
     // 3. どちらもなければアセットから読み込む
-    return await rootBundle.loadString('assets/data/projects_work.yaml');
+    return await rootBundle.loadString('assets/data/format_work.yaml');
   }
 
   /// 共通のパース処理を含めたYamlMapの取得
