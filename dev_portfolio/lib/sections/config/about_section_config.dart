@@ -1,28 +1,33 @@
 // lib/sections/config/about_section_config.dart
 import 'package:flutter/material.dart';
 
+// 色は lib/theme/app_colors.dart（aboutBackground / aboutDivider / aboutAccent）、
+// 文字の見た目は lib/theme/app_styles.dart（about*）で管理
+
+// 表示する文言（自己紹介など）は lib/constants/app_texts.dart の AboutContent
+
+/// About のレイアウト
 class AboutSectionConfig {
-  // 背景色
-  static Color backgroundColor(bool isDark) =>
-      isDark ? Colors.grey[900]! : Colors.teal[200]!;
+  static const EdgeInsets padding = EdgeInsets.symmetric(horizontal: 32, vertical: 96);
 
-  // 文字色
-  static Color textColor(bool isDark) => isDark ? Colors.white : Colors.black87;
+  /// 中身の最大幅（1 行が長くなりすぎないように）
+  static const double maxContentWidth = 760;
 
-  // セクション全体のパディング
-  static const EdgeInsets padding =
-      EdgeInsets.symmetric(horizontal: 40, vertical: 80);
+  /// この幅以上で「見出し｜説明」を横並びにする
+  static const double wideBreakpoint = 640;
 
-  // セクションタイトル
-  static const double titleFontSize = 36;
-  static const FontWeight titleFontWeight = FontWeight.bold;
+  /// 横並び時の見出し列の幅
+  static const double termWidth = 140;
 
-  // テキスト本文
-  static const double bodyFontSize = 20;
-  static const FontStyle bodyFontStyleNormal = FontStyle.normal;
-  static const FontStyle bodyFontStyleItalic = FontStyle.italic;
+  static const double headingFontSize = 40;
+  static const double introFontSize = 18;
 
-  // 高さ（縦スペース）
-  static const SizedBox sectionSpacing = SizedBox(height: 40);
-  static const SizedBox textSpacing = SizedBox(height: 20);
+  static const SizedBox headingSpacing = SizedBox(height: 24);
+  static const SizedBox introSpacing = SizedBox(height: 48);
+  static const EdgeInsets rowPadding = EdgeInsets.symmetric(vertical: 20);
+  static const SizedBox closingSpacing = SizedBox(height: 48);
+
+  /// 締めの一文の左の縦線
+  static const double closingBarWidth = 4;
+  static const double closingBarGap = 16;
 }

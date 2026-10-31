@@ -1,28 +1,32 @@
-// lib/sections/skills/config/skills_widgets_header_config.dart
+// lib/sections/config/skills/skills_widgets_header_config.dart
 import 'package:flutter/material.dart';
+import '../../../constants/app_sizes.dart';
 
-/// SkillsHeader 専用の設定
+/// Skills のヘッダー・ツールバー・カテゴリ絞り込みの設定
+/// 色は lib/theme/app_colors.dart、見た目は lib/theme/app_styles.dart、セグメントのサイズは lib/constants/app_sizes.dart
 class SkillsHeaderConfig {
-  // タイトル設定
+  // セクション全体の余白（Projects と合わせる）
+  static const EdgeInsets sectionPadding = EdgeInsets.all(AppSizes.space24);
+
+  // タイトル
   static const double titleFontSize = 28;
-  static const FontWeight titleFontWeight = FontWeight.bold;
+  static const EdgeInsets titlePadding = EdgeInsets.symmetric(vertical: AppSizes.space8);
 
-  // ラベル (Pie切替用) 設定
-  static const double labelFontSize = 14;
+  // タイトル〜ツールバー、ツールバー〜カテゴリ、カテゴリ〜グラフ
+  static const SizedBox headerSpacing = SizedBox(height: AppSizes.space16);
+  static const EdgeInsets panelMargin = EdgeInsets.only(top: AppSizes.space12);
+  static const SizedBox chartSpacing = SizedBox(height: AppSizes.space20);
 
-  // Row 内スペーシング
-  static const double spacingBetweenTitleAndSwitch = 16;
+  // カテゴリパネル（Projects のフィルターパネルと同じ作り）
+  static const EdgeInsets panelPadding = EdgeInsets.all(AppSizes.space20);
+  static const double panelTitleFontSize = 16;
 
-  // Switch のアクティブカラー
-  static const Color switchActiveColor = Colors.orangeAccent;
+  /// この幅以上でグループを 2 列に並べる
+  static const double panelTwoColumnBreakpoint = 720;
+  static const double panelGroupGap = AppSizes.space24;
 
-  // Padding
-  static const EdgeInsets rowPadding =
-      EdgeInsets.symmetric(horizontal: 16, vertical: 8);
-
-  // テキストカラー
-  static Color titleColor(bool isDark) =>
-      isDark ? Colors.white : const Color(0xFF222222);
-  static Color labelColor(bool isDark) =>
-      isDark ? Colors.white70 : Colors.black87;
+  /// ツールバーのカテゴリボタン
+  static const double categoryButtonIconSize = 18;
+  static const EdgeInsets currentCategoryPadding =
+      EdgeInsets.symmetric(horizontal: AppSizes.space8, vertical: AppSizes.space2);
 }

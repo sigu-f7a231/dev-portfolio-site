@@ -1,24 +1,28 @@
 import 'package:flutter/material.dart';
 import '../../../config/skills/skills_bar_chart_config.dart';
+import '../../../../theme/app_theme.dart';
+import '../../../../theme/app_styles.dart';
+import '../../../../constants/app_sizes.dart';
+import '../../../../constants/app_texts.dart';
 
 class BarGraph extends StatelessWidget {
   final List<MapEntry<String, double>> entries;
   final int? touchedIndex;
-  final bool isDark;
   final Function(int?)? onHover;
   final int topN;
 
   const BarGraph({
     super.key,
     required this.entries,
-    required this.isDark,
     this.touchedIndex,
     this.onHover,
-    this.topN = 10,
+    this.topN = AppSizes.chartTopN,
   });
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
+
     // 値で降順ソート
     final sortedEntries = entries.toList()
       ..sort((a, b) => b.value.compareTo(a.value));
@@ -30,7 +34,7 @@ class BarGraph extends StatelessWidget {
     // その他を追加
     if (otherEntries.isNotEmpty) {
       final otherValue = otherEntries.fold<double>(0, (sum, e) => sum + e.value);
-      topEntries.add(MapEntry('その他', otherValue));
+      topEntries.add(MapEntry(AppTexts.chartOthers, otherValue));
     }
 
     return ListView.builder(
@@ -54,7 +58,7 @@ class BarGraph extends StatelessWidget {
                       Container(
                         height: BarChartLayout.barHeight,
                         decoration: BoxDecoration(
-                          color: BarChartColors.bgBarColor(isDark),
+                          color: colors.chartTrack,
                           borderRadius: BorderRadius.circular(
                             BarChartLayout.barBorderRadius,
                           ),
@@ -66,8 +70,8 @@ class BarGraph extends StatelessWidget {
                         child: Container(
                           height: BarChartLayout.barHeight,
                           decoration: BoxDecoration(
-                            color: BarChartColors
-                                .mainColors[i % BarChartColors.mainColors.length]
+                            color: colors
+                                .seriesColor(i)
                                 .withOpacity(
                                   isActive
                                       ? BarChartLayout.barActiveOpacity
@@ -78,7 +82,7 @@ class BarGraph extends StatelessWidget {
                             ),
                             border: isActive
                                 ? Border.all(
-                                    color: BarChartColors.highlightBorder,
+                                    color: colors.chartHighlight,
                                     width: BarChartLayout.barActiveBorderWidth,
                                   )
                                 : null,
@@ -93,10 +97,7 @@ class BarGraph extends StatelessWidget {
                   width: BarChartLayout.barValueWidth,
                   child: Text(
                     '${e.value.toStringAsFixed(1)}%',
-                    style: BarChartTextStyle.value(
-                      isDark: isDark,
-                      isActive: isActive,
-                    ),
+                    style: AppStyles.chartValue(context, isActive: isActive),
                   ),
                 ),
               ],

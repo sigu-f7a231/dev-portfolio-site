@@ -1,21 +1,40 @@
 import 'package:flutter/material.dart';
 import '../../models/projects_model.dart';
 import '../../../../utils/language_utils.dart';
-import '../state/project_filter_state.dart';
-import 'project_filter_chips.dart';
+import '../../../../widgets/filter_chips_section.dart';
+import '../../../config/projects/projects_section_config.dart';
+import '../../../../theme/app_styles.dart';
+import '../../../../constants/app_sizes.dart';
+import '../../../../constants/app_texts.dart';
 
+/// フィルターのグループ定義（キー・見出し・プロジェクトから候補を取り出す関数）
+class _FilterGroup {
+  final String key;
+  final String title;
+  final List<String> Function(Project p) values;
+
+  const _FilterGroup(this.key, this.title, this.values);
+}
+
+/// フィルターパネル（ツールバーの「フィルター」で開閉。開閉は親が管理）
 class ProjectsFilter extends StatefulWidget {
+  /// いま表示しているタブ（Work / Private）のプロジェクト。候補はここから作る
   final List<Project> projects;
-  final int tabIndex;
-  final bool isDark;
-  final ValueChanged<Map<String, List<String>>>? onApply;
+  final bool isWork;
+
+  /// 現在適用中の条件（パネルを開いたときの初期選択）
+  final Map<String, List<String>> initialFilters;
+
+  final ValueChanged<Map<String, List<String>>> onApply;
+  final VoidCallback onClose;
 
   const ProjectsFilter({
     super.key,
     required this.projects,
-    required this.tabIndex,
-    required this.isDark,
-    this.onApply,
+    required this.isWork,
+    required this.initialFilters,
+    required this.onApply,
+    required this.onClose,
   });
 
   @override
@@ -23,153 +42,131 @@ class ProjectsFilter extends StatefulWidget {
 }
 
 class _ProjectsFilterState extends State<ProjectsFilter> {
-  bool _expanded = false;
+  /// パネル内で編集中の条件（「反映」を押すまで一覧には反映しない）
+  late final Map<String, List<String>> _selected = {
+    for (final e in widget.initialFilters.entries) e.key: List<String>.from(e.value),
+  };
 
-  final Map<String, List<String>> _selectedFilters =
-      ProjectFilterState.initial().selectedFilters;
+  static const String _notUsed = '利用なし'; // YAML で「該当なし」を表す値（候補から除く）
 
-  List<String> _unique(List<String> v) => v.toSet().toList();
+  List<_FilterGroup> get _groups => [
+        _FilterGroup('serverOS', AppTexts.filterServerOS, (p) => p.serverOSList),
+        _FilterGroup('db', AppTexts.filterDb, (p) => p.dbList),
+        _FilterGroup('tools', AppTexts.filterTools, (p) => p.toolsList),
+        _FilterGroup('backendFrameworks', AppTexts.filterBackend, (p) => p.backendList),
+        _FilterGroup('frontendFrameworks', AppTexts.filterFrontend, (p) => p.frontendList),
+        _FilterGroup('skills', AppTexts.filterSkills, (p) => p.skillsList),
+        if (widget.isWork)
+          _FilterGroup(
+            'workflow',
+            AppTexts.filterWorkflow,
+            (p) => p.workflow.keys
+                .map((k) => LanguageUtils.workflowLabels['ja']?[k] ?? k)
+                .toList(),
+          ),
+      ];
+
+  List<String> _candidates(_FilterGroup g) => widget.projects
+      .expand(g.values)
+      .where((v) => v != _notUsed)
+      .toSet()
+      .toList();
+
+  void _toggle(String key, String value) {
+    setState(() {
+      final list = _selected.putIfAbsent(key, () => []);
+      list.contains(value) ? list.remove(value) : list.add(value);
+    });
+  }
 
   void _clear() {
     setState(() {
-      for (final k in _selectedFilters.keys) {
-        _selectedFilters[k]!.clear();
+      for (final list in _selected.values) {
+        list.clear();
       }
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    final showWorkflow = widget.tabIndex == 0;
+    final groups = _groups
+        .map((g) => (group: g, items: _candidates(g)))
+        .where((e) => e.items.isNotEmpty)
+        .toList();
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        TextButton.icon(
-          onPressed: () => setState(() => _expanded = !_expanded),
-          icon: Icon(_expanded ? Icons.expand_less : Icons.expand_more),
-          label: const Text('フィルター'),
-        ),
-
-        if (_expanded)
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+    return Container(
+      width: double.infinity,
+      padding: ProjectsSectionConfig.filterPanelPadding,
+      decoration: AppStyles.filterPanel(context),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // 見出し＋閉じる
+          Row(
             children: [
-              FilterChipsSection(
-                title: 'Server OS',
-                items: _unique(widget.projects.expand((e) => e.serverOSList).toList()),
-                selectedItems: _selectedFilters['serverOS']!,
-                onSelected: (v) => setState(() {
-                  _selectedFilters['serverOS']!.contains(v)
-                      ? _selectedFilters['serverOS']!.remove(v)
-                      : _selectedFilters['serverOS']!.add(v);
-                }),
-                isDark: widget.isDark,
+              Expanded(
+                child: Text(AppTexts.filter, style: AppStyles.title(
+                  context,
+                  fontSize: ProjectsSectionConfig.filterPanelTitleFontSize,
+                )),
               ),
-
-              FilterChipsSection(
-                title: 'DB',
-                items: _unique(widget.projects.expand((e) => e.dbList).toList()),
-                selectedItems: _selectedFilters['db']!,
-                onSelected: (v) => setState(() {
-                  _selectedFilters['db']!.contains(v)
-                      ? _selectedFilters['db']!.remove(v)
-                      : _selectedFilters['db']!.add(v);
-                }),
-                isDark: widget.isDark,
-              ),
-
-              FilterChipsSection(
-                title: 'Tools',
-                items: _unique(widget.projects.expand((e) => e.toolsList).toList()),
-                selectedItems: _selectedFilters['tools']!,
-                onSelected: (v) => setState(() {
-                  _selectedFilters['tools']!.contains(v)
-                      ? _selectedFilters['tools']!.remove(v)
-                      : _selectedFilters['tools']!.add(v);
-                }),
-                isDark: widget.isDark,
-              ),
-
-              FilterChipsSection(
-                title: 'Backend',
-                items: _unique(widget.projects.expand((e) => e.backendList).toList()),
-                selectedItems: _selectedFilters['backendFrameworks']!,
-                onSelected: (v) => setState(() {
-                  _selectedFilters['backendFrameworks']!.contains(v)
-                      ? _selectedFilters['backendFrameworks']!.remove(v)
-                      : _selectedFilters['backendFrameworks']!.add(v);
-                }),
-                isDark: widget.isDark,
-              ),
-
-              FilterChipsSection(
-                title: 'Frontend',
-                items: _unique(widget.projects.expand((e) => e.frontendList).toList()),
-                selectedItems: _selectedFilters['frontendFrameworks']!,
-                onSelected: (v) => setState(() {
-                  _selectedFilters['frontendFrameworks']!.contains(v)
-                      ? _selectedFilters['frontendFrameworks']!.remove(v)
-                      : _selectedFilters['frontendFrameworks']!.add(v);
-                }),
-                isDark: widget.isDark,
-              ),
-
-              FilterChipsSection(
-                title: 'Skills',
-                items: _unique(widget.projects.expand((e) => e.skillsList).toList()),
-                selectedItems: _selectedFilters['skills']!,
-                onSelected: (v) => setState(() {
-                  _selectedFilters['skills']!.contains(v)
-                      ? _selectedFilters['skills']!.remove(v)
-                      : _selectedFilters['skills']!.add(v);
-                }),
-                isDark: widget.isDark,
-              ),
-
-              if (showWorkflow)
-                FilterChipsSection(
-                  title: 'Workflow',
-                  items: _unique(
-                    widget.projects
-                        .expand((e) => e.workflow.keys)
-                        .map((e) =>
-                            LanguageUtils.workflowLabels['ja']?[e] ?? e)
-                        .toList(),
-                  ),
-                  selectedItems: _selectedFilters['workflow']!,
-                  onSelected: (v) => setState(() {
-                    _selectedFilters['workflow']!.contains(v)
-                        ? _selectedFilters['workflow']!.remove(v)
-                        : _selectedFilters['workflow']!.add(v);
-                  }),
-                  isDark: widget.isDark,
-                ),
-
-              /// =========================
-              /// ここが修正ポイント（余白追加）
-              /// =========================
-              const SizedBox(height: 12),
-
-              Row(
-                children: [
-                  ElevatedButton(
-                    onPressed: () {
-                      widget.onApply?.call(_selectedFilters);
-                      setState(() => _expanded = false);
-                    },
-                    child: const Text('反映'),
-                  ),
-                  const SizedBox(width: 8),
-                  TextButton(
-                    onPressed: _clear,
-                    child: const Text('クリア'),
-                  ),
-                ],
+              IconButton(
+                icon: const Icon(Icons.close),
+                tooltip: AppTexts.close,
+                onPressed: widget.onClose,
               ),
             ],
           ),
-      ],
+          const SizedBox(height: AppSizes.space8),
+
+          // グループ（幅があれば 2 列）
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final twoColumns = constraints.maxWidth >=
+                  ProjectsSectionConfig.filterTwoColumnBreakpoint;
+              final gap = ProjectsSectionConfig.filterGroupGap;
+              final itemWidth = twoColumns
+                  ? (constraints.maxWidth - gap) / 2
+                  : constraints.maxWidth;
+
+              return Wrap(
+                spacing: gap,
+                runSpacing: AppSizes.space20,
+                children: groups
+                    .map((e) => SizedBox(
+                          width: itemWidth,
+                          child: FilterChipsSection(
+                            title: e.group.title,
+                            items: e.items,
+                            selectedItems: _selected[e.group.key] ?? const [],
+                            onSelected: (v) => _toggle(e.group.key, v),
+                          ),
+                        ))
+                    .toList(),
+              );
+            },
+          ),
+          const SizedBox(height: AppSizes.space20),
+
+          // フッター
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              TextButton(
+                onPressed: _clear,
+                child: const Text(AppTexts.filterClear),
+              ),
+              const SizedBox(width: AppSizes.space8),
+              ElevatedButton(
+                onPressed: () => widget.onApply({
+                  for (final e in _selected.entries) e.key: List<String>.from(e.value),
+                }),
+                child: const Text(AppTexts.filterApply),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }

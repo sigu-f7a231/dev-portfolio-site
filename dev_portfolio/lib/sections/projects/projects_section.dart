@@ -4,11 +4,16 @@ import 'data/projects_private.dart';
 import 'models/projects_model.dart';
 import 'views/projects_tab_view.dart';
 import 'projects_header.dart';
+import 'projects_toolbar.dart';
 import 'filters/ui/project_filter_panel.dart';
+import 'filters/ui/project_active_filters.dart';
 import 'filters/state/project_filter_state.dart';
 import '../config/projects/projects_section_config.dart';
-import '../../utils/theme_colors.dart';
+import '../../theme/app_theme.dart';
+import '../../constants/app_sizes.dart';
 
+/// Projects セクション
+/// 状態（Work/Private・表示形式・フィルター）はここで持ち、ツールバー・パネル・一覧に渡す
 class ProjectsSection extends StatefulWidget {
   const ProjectsSection({super.key});
 
@@ -16,90 +21,119 @@ class ProjectsSection extends StatefulWidget {
   State<ProjectsSection> createState() => _ProjectsSectionState();
 }
 
-class _ProjectsSectionState extends State<ProjectsSection>
-    with SingleTickerProviderStateMixin {
-  late TabController _tabController;
+class _ProjectsSectionState extends State<ProjectsSection> {
+  /// [0] = Work、[1] = Private
+  late final Future<List<List<Project>>> _projectsFuture;
 
-  final ValueNotifier<bool> showCollectionNotifier = ValueNotifier(false);
-
-  late Future<List<Project>> workFuture;
-  late Future<List<Project>> privateFuture;
-
-  int currentTabIndex = 0;
-
-  ProjectFilterState filterState = ProjectFilterState.initial();
+  bool _isWork = true;
+  bool _showCollection = false;
+  bool _filterOpen = false;
+  ProjectFilterState _filterState = ProjectFilterState.initial();
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
-    _tabController.addListener(() {
-      if (_tabController.indexIsChanging) return;
-      setState(() {
-        currentTabIndex = _tabController.index;
-      });
-    });
-
-    workFuture = loadWorkProjects();
-    privateFuture = loadPrivateProjects();
+    _projectsFuture = Future.wait([loadWorkProjects(), loadPrivateProjects()]);
   }
 
-  @override
-  void dispose() {
-    _tabController.dispose();
-    showCollectionNotifier.dispose();
-    super.dispose();
+  /// タブを切り替えたら、候補が変わるのでフィルターはリセットする
+  void _selectTab(bool isWork) {
+    if (_isWork == isWork) return;
+    setState(() {
+      _isWork = isWork;
+      _filterState = ProjectFilterState.initial();
+      _filterOpen = false;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final screenHeight = MediaQuery.of(context).size.height;
 
     return Container(
-      color: AppColors.background(isDark),
+      color: context.colors.projectsBackground,
       padding: ProjectsSectionConfig.padding,
       height: screenHeight,
       child: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            ProjectsHeader(
-              showCollectionNotifier: showCollectionNotifier,
-              isDark: isDark,
-            ),
-            ProjectsSectionConfig.headerSpacing,
+        child: FutureBuilder<List<List<Project>>>(
+          future: _projectsFuture,
+          builder: (context, snapshot) {
+            final work = snapshot.data?[0] ?? const <Project>[];
+            final private = snapshot.data?[1] ?? const <Project>[];
+            final current = _isWork ? work : private;
 
-            FutureBuilder<List<Project>>(
-              future: currentTabIndex == 0 ? workFuture : privateFuture,
-              builder: (context, snapshot) {
-                final projects = snapshot.data ?? [];
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const ProjectsHeader(),
+                ProjectsSectionConfig.headerSpacing,
 
-                return ProjectsFilter(
-                  projects: projects,
-                  tabIndex: currentTabIndex,
-                  isDark: isDark,
-                  onApply: (filtersMap) {
-                    setState(() {
-                      filterState =
-                          ProjectFilterState(selectedFilters: filtersMap);
-                    });
-                  },
-                );
-              },
-            ),
+                // Work/Private ・ フィルター ・ List/Collection
+                ProjectsToolbar(
+                  isWork: _isWork,
+                  workCount: snapshot.hasData ? work.length : null,
+                  privateCount: snapshot.hasData ? private.length : null,
+                  onTabChanged: _selectTab,
+                  filterOpen: _filterOpen,
+                  activeFilterCount: _filterState.activeCount,
+                  onFilterPressed: () => setState(() => _filterOpen = !_filterOpen),
+                  showCollection: _showCollection,
+                  onViewChanged: (v) => setState(() => _showCollection = v),
+                ),
 
-            SizedBox(
-              height: screenHeight * 0.7,
-              child: ProjectsTabView(
-                workFuture: workFuture,
-                privateFuture: privateFuture,
-                showCollectionNotifier: showCollectionNotifier,
-                isDark: isDark,
-                filterState: filterState,
-              ),
-            ),
-          ],
+                // フィルターパネル（開閉はボタン操作への応答としてだけ動かす）
+                AnimatedSize(
+                  duration: AppSizes.filterPanelDuration,
+                  alignment: Alignment.topCenter,
+                  child: _filterOpen
+                      ? Padding(
+                          padding: const EdgeInsets.only(top: AppSizes.space12),
+                          child: ProjectsFilter(
+                            key: ValueKey(_isWork),
+                            projects: current,
+                            isWork: _isWork,
+                            initialFilters: _filterState.selectedFilters,
+                            onApply: (filters) => setState(() {
+                              _filterState = ProjectFilterState(selectedFilters: filters);
+                              _filterOpen = false;
+                            }),
+                            onClose: () => setState(() => _filterOpen = false),
+                          ),
+                        )
+                      : const SizedBox(width: double.infinity),
+                ),
+
+                // 適用中のフィルター
+                if (_filterState.activeCount > 0)
+                  Padding(
+                    padding: const EdgeInsets.only(top: AppSizes.space12),
+                    child: ProjectActiveFilters(
+                      filterState: _filterState,
+                      onRemove: (key, value) => setState(() {
+                        _filterState = _filterState.without(key, value);
+                      }),
+                      onClearAll: () => setState(() {
+                        _filterState = ProjectFilterState.initial();
+                      }),
+                    ),
+                  ),
+
+                ProjectsSectionConfig.toolbarSpacing,
+
+                // 一覧
+                SizedBox(
+                  height: screenHeight * AppSizes.projectsListHeightRatio,
+                  child: snapshot.hasData
+                      ? ProjectsTabView(
+                          projects: current,
+                          filterState: _filterState,
+                          showCollection: _showCollection,
+                        )
+                      : const Center(child: CircularProgressIndicator()),
+                ),
+              ],
+            );
+          },
         ),
       ),
     );

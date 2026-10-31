@@ -5,12 +5,10 @@ import '../../config/skills/skills_bar_chart_config.dart';
 
 class SkillsBarChart extends StatefulWidget {
   final List<MapEntry<String, double>> entries;
-  final bool isDark;
 
   const SkillsBarChart({
     super.key,
     required this.entries,
-    required this.isDark,
   });
 
   @override
@@ -35,7 +33,6 @@ class _SkillsBarChartState extends State<SkillsBarChart> {
           flex: BarChartLayout.barGraphFlex,
           child: BarGraph(
             entries: widget.entries,
-            isDark: widget.isDark,
             touchedIndex: touchedIndex,
             onHover: _onHover,
           ),
@@ -48,7 +45,6 @@ class _SkillsBarChartState extends State<SkillsBarChart> {
           flex: BarChartLayout.barLegendFlex,
           child: BarLegend(
             entries: widget.entries,
-            isDark: widget.isDark,
             touchedIndex: touchedIndex,
             onHover: _onHover,
           ),

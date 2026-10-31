@@ -1,30 +1,43 @@
-// This is a basic Flutter widget test.
+// テーマ（lib/theme/）の基本動作テスト
 //
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
+// ※ main.dart は dart:html（Web 専用）を間接的に読み込むため、
+//   VM 上で動く flutter test からは import しない。
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:dev_portfolio/main.dart';
+import 'package:dev_portfolio/theme/app_colors.dart';
+import 'package:dev_portfolio/theme/app_theme.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  test('ThemeController でライト/ダークを切り替えられる', () {
+    final controller = ThemeController.instance;
+    controller.toggle(true);
+    expect(controller.value, ThemeMode.dark);
+    controller.toggle(false);
+    expect(controller.value, ThemeMode.light);
+  });
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+  testWidgets('context.colors がテーマに応じた色を返す', (tester) async {
+    late AppColors lightColors;
+    late AppColors darkColors;
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
+    await tester.pumpWidget(MaterialApp(
+      theme: AppTheme.light,
+      home: Builder(builder: (context) {
+        lightColors = context.colors;
+        return const SizedBox();
+      }),
+    ));
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    await tester.pumpWidget(MaterialApp(
+      theme: AppTheme.dark,
+      home: Builder(builder: (context) {
+        darkColors = context.colors;
+        return const SizedBox();
+      }),
+    ));
+
+    expect(lightColors, same(AppColors.light));
+    expect(darkColors, same(AppColors.dark));
   });
 }

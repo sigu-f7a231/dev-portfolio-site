@@ -7,21 +7,26 @@ import '../views/projects_collection_view.dart';
 import '../views/project_list/project_list_modal_function.dart';
 import '../filters/state/project_filter_state.dart';
 import '../filters/logic/project_filter_logic.dart';
+import '../../config/projects/projects_views_list_config.dart';
+import '../../config/projects/projects_views_collection_config.dart';
+import '../../../theme/app_theme.dart';
+import '../../../theme/app_styles.dart';
+import '../../../constants/app_sizes.dart';
+import '../../../constants/app_texts.dart';
 
+/// 一覧エリア（フィルター適用 → 並べ替え → ページ分割 → List / Collection）
+/// Work / Private の切替は親（ProjectsSection）のツールバーで行う
 class ProjectsTabView extends StatefulWidget {
-  final Future<List<Project>> workFuture;
-  final Future<List<Project>> privateFuture;
-  final ValueNotifier<bool> showCollectionNotifier;
-  final bool isDark;
-  final ProjectFilterState? filterState;
+  /// いま選んでいるタブ（Work / Private）のプロジェクト
+  final List<Project> projects;
+  final ProjectFilterState filterState;
+  final bool showCollection;
 
   const ProjectsTabView({
     super.key,
-    required this.workFuture,
-    required this.privateFuture,
-    required this.showCollectionNotifier,
-    required this.isDark,
-    this.filterState,
+    required this.projects,
+    required this.filterState,
+    required this.showCollection,
   });
 
   @override
@@ -29,130 +34,99 @@ class ProjectsTabView extends StatefulWidget {
 }
 
 class _ProjectsTabViewState extends State<ProjectsTabView> {
-  bool _isWork = true;
   int currentPage = 1;
 
   @override
+  void didUpdateWidget(covariant ProjectsTabView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // タブ・フィルター・表示形式が変わったら 1 ページ目に戻す
+    if (oldWidget.projects != widget.projects ||
+        oldWidget.filterState != widget.filterState ||
+        oldWidget.showCollection != widget.showCollection) {
+      currentPage = 1;
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final future = _isWork ? widget.workFuture : widget.privateFuture;
+    final filteredProjects =
+        ProjectFilterLogic.apply(widget.projects, widget.filterState)
+          ..sort((a, b) => a.periodStart.compareTo(b.periodStart));
 
-    final bool hasFilter = widget.filterState != null;
-
-    return Column(
-      children: [
-        /// =========================
-        /// WORK / PRIVATE（フィルター時だけ少し下げる）
-        /// =========================
-        AnimatedPadding(
-          duration: const Duration(milliseconds: 150),
-          padding: EdgeInsets.only(top: hasFilter ? 8 : 0),
-          child: Row(
-            children: [
-              Expanded(
-                child: SegmentedButton<bool>(
-                  segments: const [
-                    ButtonSegment(value: true, label: Text("Work")),
-                    ButtonSegment(value: false, label: Text("Private")),
-                  ],
-                  selected: {_isWork},
-                  onSelectionChanged: (v) {
-                    setState(() {
-                      _isWork = v.first;
-                      currentPage = 1;
-                    });
-                  },
-                ),
-              ),
-            ],
-          ),
+    if (filteredProjects.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.search_off,
+              size: ProjectsListConfig.emptyIconSize,
+              color: context.colors.textTertiary,
+            ),
+            const SizedBox(height: AppSizes.space12),
+            Text(AppTexts.noResults, style: AppStyles.cardTitle(context)),
+            const SizedBox(height: AppSizes.space4),
+            Text(AppTexts.noResultsHint, style: AppStyles.cardDescription(context)),
+          ],
         ),
+      );
+    }
 
-        const SizedBox(height: 8),
+    void openDetail(Project p) => showProjectDetailModal(
+          context,
+          p,
+          showWorkflow: p.workflow.isNotEmpty,
+        );
 
-        /// =========================
-        /// CONTENT
-        /// =========================
-        Expanded(
-          child: FutureBuilder<List<Project>>(
-            future: future,
-            builder: (context, snapshot) {
-              if (!snapshot.hasData) {
-                return const Center(child: CircularProgressIndicator());
-              }
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // Collection：列数 × 収まる行数（グリッドの高さ = 全体 − ページネーション）
+        // List：従来どおり ProjectsPaginationConfig.itemsPerPage
+        final perPage = widget.showCollection
+            ? ProjectsCollectionConfig.itemsPerPage(
+                width: constraints.maxWidth,
+                height: constraints.maxHeight - AppSizes.paginationBarHeight,
+              )
+            : null;
 
-              final filteredProjects =
-                  widget.filterState != null
-                      ? ProjectFilterLogic.apply(
-                          snapshot.data!, widget.filterState!)
-                      : snapshot.data!;
+        final totalPages = ProjectsPaginationLogic.getTotalPages(
+          filteredProjects,
+          perPage: perPage,
+        );
+        // 画面サイズが変わって件数が増え、ページ数が減ったときは最終ページに合わせる
+        final page = currentPage > totalPages ? totalPages : currentPage;
+        final paginatedProjects = ProjectsPaginationLogic.getPaginatedProjects(
+          filteredProjects,
+          page,
+          perPage: perPage,
+        );
 
-              if (filteredProjects.isEmpty) {
-                return const Center(child: Text('ヒットしませんでした'));
-              }
-
-              filteredProjects.sort(
-                (a, b) => a.periodStart.compareTo(b.periodStart),
-              );
-
-              final totalPages =
-                  ProjectsPaginationLogic.getTotalPages(filteredProjects);
-
-              final paginatedProjects =
-                  ProjectsPaginationLogic.getPaginatedProjects(
-                filteredProjects,
-                currentPage,
-              );
-
-              return ValueListenableBuilder<bool>(
-                valueListenable: widget.showCollectionNotifier,
-                builder: (_, showCollection, __) {
-                  return Column(
-                    children: [
-                      Expanded(
-                        child: showCollection
-                            ? ProjectCollectionView(
-                                projects: paginatedProjects,
-                                isDark: widget.isDark,
-                                onProjectTap: (p) =>
-                                    showProjectDetailModal(
-                                  context,
-                                  p,
-                                  isDark: widget.isDark,
-                                  showWorkflow: true,
-                                ),
-                              )
-                            : ProjectListUI(
-                                projects: paginatedProjects,
-                                isDark: widget.isDark,
-                                onProjectTap: (p) =>
-                                    showProjectDetailModal(
-                                  context,
-                                  p,
-                                  isDark: widget.isDark,
-                                  showWorkflow: true,
-                                ),
-                              ),
-                      ),
-
-                      SizedBox(
-                        height: 60,
-                        child: ProjectsPaginationUI(
-                          currentPage: currentPage,
-                          totalPages: totalPages,
-                          onPageChanged: (page) {
-                            setState(() => currentPage = page);
-                          },
-                          isDark: widget.isDark,
-                        ),
-                      ),
-                    ],
-                  );
+        return Column(
+          children: [
+            Expanded(
+              child: widget.showCollection
+                  ? ProjectCollectionView(
+                      projects: paginatedProjects,
+                      onProjectTap: openDetail,
+                    )
+                  : ProjectListUI(
+                      projects: paginatedProjects,
+                      onProjectTap: openDetail,
+                    ),
+            ),
+            SizedBox(
+              height: AppSizes.paginationBarHeight,
+              child: ProjectsPaginationUI(
+                currentPage: page,
+                totalPages: totalPages,
+                onPageChanged: (p) {
+                  setState(() => currentPage = p);
                 },
-              );
-            },
-          ),
-        ),
-      ],
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }

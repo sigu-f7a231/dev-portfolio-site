@@ -1,19 +1,18 @@
 // lib/sections/projects/pagination/projects_pagination_ui.dart
 import 'package:flutter/material.dart';
 import '../../config/projects/projects_pagination_config.dart';
+import '../../../theme/app_theme.dart';
 
 class ProjectsPaginationUI extends StatelessWidget {
   final int currentPage;
   final int totalPages;
   final Function(int) onPageChanged;
-  final bool isDark; // 🔽 ダークモード追加
 
   const ProjectsPaginationUI({
     super.key,
     required this.currentPage,
     required this.totalPages,
     required this.onPageChanged,
-    this.isDark = false, // 🔽 デフォルト false
   });
 
   @override
@@ -22,14 +21,7 @@ class ProjectsPaginationUI extends StatelessWidget {
       return const SizedBox();
     }
 
-    final activeColor =
-        isDark ? ProjectsPaginationConfig.darkActiveColor : ProjectsPaginationConfig.activeColor;
-    final inactiveColor =
-        isDark ? ProjectsPaginationConfig.darkInactiveColor : ProjectsPaginationConfig.inactiveColor;
-    final activeTextColor =
-        isDark ? ProjectsPaginationConfig.darkActiveTextColor : ProjectsPaginationConfig.activeTextColor;
-    final inactiveTextColor =
-        isDark ? ProjectsPaginationConfig.darkInactiveTextColor : ProjectsPaginationConfig.inactiveTextColor;
+    final colors = context.colors;
 
     return Padding(
       padding: ProjectsPaginationConfig.containerPadding,
@@ -40,7 +32,7 @@ class ProjectsPaginationUI extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.chevron_left),
             iconSize: ProjectsPaginationConfig.iconSize,
-            color: ProjectsPaginationConfig.iconColor,
+            color: colors.paginationIcon,
             onPressed: () => onPageChanged(currentPage > 1 ? currentPage - 1 : 1),
           ),
 
@@ -55,7 +47,7 @@ class ProjectsPaginationUI extends StatelessWidget {
                 margin: ProjectsPaginationConfig.pageMargin,
                 padding: ProjectsPaginationConfig.pagePadding,
                 decoration: BoxDecoration(
-                  color: isActive ? activeColor : inactiveColor,
+                  color: isActive ? colors.paginationActive : colors.paginationInactive,
                   borderRadius: BorderRadius.circular(ProjectsPaginationConfig.borderRadius),
                 ),
                 child: Text(
@@ -63,7 +55,9 @@ class ProjectsPaginationUI extends StatelessWidget {
                   style: TextStyle(
                     fontSize: ProjectsPaginationConfig.fontSize,
                     fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
-                    color: isActive ? activeTextColor : inactiveTextColor,
+                    color: isActive
+                        ? colors.paginationActiveText
+                        : colors.paginationInactiveText,
                   ),
                 ),
               ),
@@ -74,7 +68,7 @@ class ProjectsPaginationUI extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.chevron_right),
             iconSize: ProjectsPaginationConfig.iconSize,
-            color: ProjectsPaginationConfig.iconColor,
+            color: colors.paginationIcon,
             onPressed: () => onPageChanged(
               currentPage < totalPages ? currentPage + 1 : totalPages,
             ),

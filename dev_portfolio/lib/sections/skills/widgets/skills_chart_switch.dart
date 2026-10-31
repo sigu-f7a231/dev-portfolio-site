@@ -1,71 +1,33 @@
 import 'package:flutter/material.dart';
-import '../../config/skills/skills_widgets_header_config.dart';
+import '../../../widgets/app_segment.dart';
+import '../../../constants/app_texts.dart';
 
-/// Bar / Pie 切り替えボタン（左右ボタンでハイライト）
+/// Bar / Pie 切り替え（アイコン）
 class SkillsChartSwitch extends StatelessWidget {
   final bool showPie; // true: Pie 選択, false: Bar 選択
-  final bool isDark;
-  final Function(bool) onToggle;
+  final ValueChanged<bool> onToggle;
 
   const SkillsChartSwitch({
     super.key,
     required this.showPie,
-    required this.isDark,
     required this.onToggle,
   });
 
   @override
   Widget build(BuildContext context) {
-    final activeColor = SkillsHeaderConfig.switchActiveColor;
-    final inactiveColor = isDark ? Colors.white10 : Colors.black12;
-    final textActiveColor = isDark ? Colors.black : Colors.black87;
-    final textInactiveColor = isDark ? Colors.white60 : Colors.black45;
-
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        // ■ Bar ボタン
-        GestureDetector(
-          onTap: () => onToggle(false),
-          child: Container(
-            constraints: const BoxConstraints(minWidth: 60),
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-            decoration: BoxDecoration(
-              color: !showPie ? activeColor : inactiveColor,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            alignment: Alignment.center,
-            child: Text(
-              'Bar',
-              style: TextStyle(
-                color: !showPie ? textActiveColor : textInactiveColor,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
+    return AppSegment<bool>(
+      value: showPie,
+      onChanged: onToggle,
+      items: const [
+        AppSegmentItem(
+          value: false,
+          icon: Icons.bar_chart,
+          tooltip: AppTexts.chartBarTooltip,
         ),
-
-        const SizedBox(width: 8),
-
-        // ■ Pie ボタン
-        GestureDetector(
-          onTap: () => onToggle(true),
-          child: Container(
-            constraints: const BoxConstraints(minWidth: 60),
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-            decoration: BoxDecoration(
-              color: showPie ? activeColor : inactiveColor,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            alignment: Alignment.center,
-            child: Text(
-              'Pie',
-              style: TextStyle(
-                color: showPie ? textActiveColor : textInactiveColor,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
+        AppSegmentItem(
+          value: true,
+          icon: Icons.pie_chart_outline,
+          tooltip: AppTexts.chartPieTooltip,
         ),
       ],
     );

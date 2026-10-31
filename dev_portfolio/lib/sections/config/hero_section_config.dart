@@ -1,16 +1,36 @@
 // lib/sections/config/hero_section_config.dart
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
+// 色は lib/theme/app_colors.dart（hero*）、文字・ボタンの見た目は lib/theme/app_styles.dart で管理
+
+// 表示する文言（名前・紹介文など）は lib/constants/app_texts.dart の HeroContent
+
+/// Home のレイアウト
 class HeroSectionConfig {
-  // 背景色
-  static Color backgroundColor(bool isDark) =>
-      isDark ? Colors.grey[900]! : Colors.blueAccent;
+  /// セクション高さ（画面の高さ − ヘッダー分。最低 560）
+  static double height(BuildContext context) =>
+      math.max(560.0, MediaQuery.of(context).size.height - 72);
 
-  // セクション高さ
-  static double height(BuildContext context) => MediaQuery.of(context).size.height;
+  /// この幅以上で「テキスト左・YAML 右」の 2 カラムにする
+  static const double wideBreakpoint = 900;
 
-  // テキストスタイル
-  static const double titleFontSize = 36;
-  static const Color titleColor = Colors.white;
-  static const TextAlign titleAlign = TextAlign.center;
+  /// この幅未満では YAML カードを出さない（スマホ）
+  static const double codeCardBreakpoint = 600;
+
+  /// 中身の最大幅
+  static const double maxContentWidth = 1080;
+
+  static const EdgeInsets padding = EdgeInsets.symmetric(horizontal: 32, vertical: 48);
+
+  // 文字サイズ（wide / narrow）
+  static const double nameFontSizeWide = 56;
+  static const double nameFontSizeNarrow = 36;
+  static const double roleFontSize = 20;
+  static const double taglineFontSize = 17;
+
+  /// 紹介文の最大幅（1 行が長くなりすぎないように）
+  static const double taglineMaxWidth = 560;
+
+  static const double codeCardWidth = 380;
 }

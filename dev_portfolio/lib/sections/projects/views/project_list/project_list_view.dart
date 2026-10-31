@@ -10,9 +10,8 @@ import 'project_list_modal_function.dart';
 
 class ProjectList extends StatefulWidget {
   final Future<List<Project>> future;
-  final bool isDark;
 
-  const ProjectList({super.key, required this.future, required this.isDark});
+  const ProjectList({super.key, required this.future});
 
   @override
   State<ProjectList> createState() => _ProjectListState();
@@ -46,12 +45,10 @@ class _ProjectListState extends State<ProjectList> {
             Expanded(
               child: ProjectListUI(
                 projects: paginatedProjects,
-                isDark: widget.isDark,
                 onProjectTap: (project) {
                   showProjectDetailModal(
                     context,
                     project,
-                    isDark: widget.isDark,
                   );
                 },
               ),

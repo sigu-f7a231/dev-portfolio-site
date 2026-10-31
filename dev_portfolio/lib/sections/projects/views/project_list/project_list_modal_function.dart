@@ -3,11 +3,13 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../models/projects_model.dart';
 import '../../project_modal_format.dart';
 import '../../../config/projects/projects_views_list_config.dart';
+import '../../../../theme/app_theme.dart';
+import '../../../../theme/app_styles.dart';
+import '../../../../constants/app_texts.dart';
 
 void showProjectDetailModal(
   BuildContext context,
   Project project, {
-  bool isDark = false,
   bool showWorkflow = false, // ← 追加
 }) {
   showDialog(
@@ -30,7 +32,7 @@ void showProjectDetailModal(
                     child: IconButton(
                       icon: Icon(
                         Icons.close,
-                        color: ProjectsListConfig.closeButtonColor,
+                        color: context.colors.modalClose,
                         size: ProjectsListConfig.closeButtonSize,
                       ),
                       onPressed: () => Navigator.of(context).pop(),
@@ -44,13 +46,11 @@ void showProjectDetailModal(
                       child: RichText(
                         text: TextSpan(
                           text: '${field.label}: ',
-                          style: ProjectsListConfig.fieldLabelStyleDark(
-                              field.fontSize, isDark),
+                          style: AppStyles.modalLabel(context, field.fontSize),
                           children: [
                             TextSpan(
                               text: value,
-                              style: ProjectsListConfig.fieldValueStyleDark(
-                                  field.isBold, isDark),
+                              style: AppStyles.modalValue(context, field.isBold),
                             ),
                           ],
                         ),
@@ -68,8 +68,8 @@ void showProjectDetailModal(
                               mode: LaunchMode.externalApplication);
                         }
                       },
-                      style: ProjectsListConfig.linkButtonStyle,
-                      child: const Text("公開ページを見る"),
+                      style: AppStyles.linkButton(context),
+                      child: const Text(AppTexts.openPublicPage),
                     ),
                 ],
               ),

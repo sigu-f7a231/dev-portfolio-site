@@ -1,27 +1,6 @@
-// lib/sections/config/bar_chart_config.dart
-import 'package:flutter/material.dart';
-
-/// ========================================
-/// BarChart カラー設定
-/// ========================================
-class BarChartColors {
-  /// メインカラー
-  static const List<Color> mainColors = [
-    Colors.blueAccent,
-    Colors.orangeAccent,
-    Colors.greenAccent,
-    Colors.purpleAccent,
-    Colors.redAccent,
-    Colors.tealAccent,
-  ];
-
-  /// アクティブ時の枠線
-  static const Color highlightBorder = Colors.orangeAccent;
-
-  /// 背景バー色
-  static Color bgBarColor(bool isDark) =>
-      isDark ? Colors.white10 : Colors.black12;
-}
+// lib/sections/config/skills/skills_bar_chart_config.dart
+// 色は lib/theme/app_colors.dart（chartSeries / chartHighlight / chartTrack）、
+// ラベル・値の文字スタイルは lib/theme/app_styles.dart（chartLabel / chartValue）で管理
 
 /// ========================================
 /// BarChart レイアウト設定
@@ -50,35 +29,4 @@ class BarChartLayout {
   // ===== Flex =====
   static const int barGraphFlex = 2;
   static const int barLegendFlex = 2;
-}
-
-/// ========================================
-/// BarChart テキストスタイル
-/// ========================================
-class BarChartTextStyle {
-  /// ラベル
-  static TextStyle label({
-    required bool isDark,
-    required bool isActive,
-  }) {
-    return TextStyle(
-      color: isActive
-          ? BarChartColors.highlightBorder
-          : (isDark ? Colors.white : Colors.black87),
-      fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
-    );
-  }
-
-  /// 値（％）
-  static TextStyle value({
-    required bool isDark,
-    required bool isActive,
-  }) {
-    return TextStyle(
-      color: isActive
-          ? BarChartColors.highlightBorder
-          : (isDark ? Colors.white70 : Colors.black54),
-      fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
-    );
-  }
 }

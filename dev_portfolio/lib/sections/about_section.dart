@@ -1,84 +1,144 @@
 // lib/sections/about_section.dart
 import 'package:flutter/material.dart';
 import 'config/about_section_config.dart';
+import '../theme/app_theme.dart';
+import '../theme/app_styles.dart';
+import '../constants/app_sizes.dart';
+import '../constants/app_texts.dart';
 
+/// About：自己紹介 ＋ 得意な領域 / 強み / 開発スタイル ＋ 締めの一言
 class AboutSection extends StatelessWidget {
   const AboutSection({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
     return Container(
       width: double.infinity,
       padding: AboutSectionConfig.padding,
-      color: AboutSectionConfig.backgroundColor(isDark),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // セクションタイトル
-          Text(
-            'About Me',
-            style: TextStyle(
-              fontSize: AboutSectionConfig.titleFontSize,
-              fontWeight: AboutSectionConfig.titleFontWeight,
-              color: AboutSectionConfig.textColor(isDark),
-            ),
-          ),
-          AboutSectionConfig.sectionSpacing,
+      color: context.colors.aboutBackground,
+      alignment: Alignment.topCenter,
+      child: ConstrainedBox(
+        constraints:
+            const BoxConstraints(maxWidth: AboutSectionConfig.maxContentWidth),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final isWide = constraints.maxWidth >= AboutSectionConfig.wideBreakpoint;
 
-          // 1. 自己紹介
-          Text(
-            '自己紹介: 名前・職種・簡単な経歴紹介',
-            style: TextStyle(
-              fontSize: AboutSectionConfig.bodyFontSize,
-              color: AboutSectionConfig.textColor(isDark),
-              fontStyle: AboutSectionConfig.bodyFontStyleNormal,
-            ),
-          ),
-          AboutSectionConfig.textSpacing,
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  AboutContent.heading,
+                  style: AppStyles.aboutHeading(
+                      context, AboutSectionConfig.headingFontSize),
+                ),
+                AboutSectionConfig.headingSpacing,
 
-          // 2. 得意な開発領域
-          Text(
-            '得意な開発領域: Web / モバイル / Flutter / Dart',
-            style: TextStyle(
-              fontSize: AboutSectionConfig.bodyFontSize,
-              color: AboutSectionConfig.textColor(isDark),
-            ),
-          ),
-          AboutSectionConfig.textSpacing,
+                // 自己紹介
+                Text(
+                  AboutContent.intro,
+                  style: AppStyles.aboutLead(
+                      context, AboutSectionConfig.introFontSize),
+                ),
+                AboutSectionConfig.introSpacing,
 
-          // 3. 強み・スキル
-          Text(
-            '強み・スキル: チーム開発、テスト、UI改善など',
-            style: TextStyle(
-              fontSize: AboutSectionConfig.bodyFontSize,
-              color: AboutSectionConfig.textColor(isDark),
-            ),
-          ),
-          AboutSectionConfig.textSpacing,
+                // 得意な領域 / 強み / 開発スタイル
+                _AboutRow(
+                  isWide: isWide,
+                  label: AboutContent.domainsLabel,
+                  child: Wrap(
+                    spacing: AppStyles.skillTagSpacing,
+                    runSpacing: AppStyles.skillTagSpacing,
+                    children: AboutContent.domains
+                        .map((d) => Container(
+                              padding: AppStyles.skillTagPadding,
+                              decoration: AppStyles.skillTag(context),
+                              child: Text(d, style: AppStyles.skillTagText(context)),
+                            ))
+                        .toList(),
+                  ),
+                ),
+                _AboutRow(
+                  isWide: isWide,
+                  label: AboutContent.strengthsLabel,
+                  child: Text(AboutContent.strengths,
+                      style: AppStyles.aboutDescription(context)),
+                ),
+                _AboutRow(
+                  isWide: isWide,
+                  label: AboutContent.styleLabel,
+                  isLast: true,
+                  child: Text(AboutContent.style,
+                      style: AppStyles.aboutDescription(context)),
+                ),
+                AboutSectionConfig.closingSpacing,
 
-          // 4. 開発スタイル・価値観
-          Text(
-            '開発スタイル・価値観: コード品質、スクラム経験、レスポンシブ対応',
-            style: TextStyle(
-              fontSize: AboutSectionConfig.bodyFontSize,
-              color: AboutSectionConfig.textColor(isDark),
-            ),
-          ),
-          AboutSectionConfig.textSpacing,
-
-          // 5. 締めの一言
-          Text(
-            'ユーザー視点での開発を常に心がけています。',
-            style: TextStyle(
-              fontSize: AboutSectionConfig.bodyFontSize,
-              color: AboutSectionConfig.textColor(isDark),
-              fontStyle: AboutSectionConfig.bodyFontStyleItalic,
-            ),
-          ),
-        ],
+                // 締めの一言（左に縦線）
+                IntrinsicHeight(
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Container(
+                        width: AboutSectionConfig.closingBarWidth,
+                        decoration: BoxDecoration(
+                          color: context.colors.aboutAccent,
+                          borderRadius: BorderRadius.circular(
+                              AboutSectionConfig.closingBarWidth),
+                        ),
+                      ),
+                      const SizedBox(width: AboutSectionConfig.closingBarGap),
+                      Expanded(
+                        child: Text(AboutContent.closing,
+                            style: AppStyles.aboutClosing(context)),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
       ),
+    );
+  }
+}
+
+/// 「見出し｜説明」の 1 行。上下を細い線で区切る（狭い画面では縦に積む）
+class _AboutRow extends StatelessWidget {
+  final bool isWide;
+  final String label;
+  final Widget child;
+  final bool isLast;
+
+  const _AboutRow({
+    required this.isWide,
+    required this.label,
+    required this.child,
+    this.isLast = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final divider = BorderSide(color: context.colors.aboutDivider);
+    final term = Text(label, style: AppStyles.aboutTerm(context));
+
+    return Container(
+      padding: AboutSectionConfig.rowPadding,
+      decoration: BoxDecoration(
+        border: Border(top: divider, bottom: isLast ? divider : BorderSide.none),
+      ),
+      child: isWide
+          ? Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(width: AboutSectionConfig.termWidth, child: term),
+                Expanded(child: child),
+              ],
+            )
+          : Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [term, const SizedBox(height: AppSizes.space8), child],
+            ),
     );
   }
 }

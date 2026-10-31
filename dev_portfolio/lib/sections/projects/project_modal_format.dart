@@ -1,5 +1,7 @@
 import 'models/projects_model.dart';
 import '../../utils/language_utils.dart';
+import '../../constants/app_sizes.dart';
+import '../../constants/app_texts.dart';
 
 typedef ValueGetterFunc = String Function(Project project);
 
@@ -13,7 +15,7 @@ class ProjectModalField {
     required this.label,
     required this.valueGetter,
     this.isBold = false,
-    this.fontSize = 14,
+    this.fontSize = AppSizes.modalFieldFontSize,
   });
 }
 
@@ -24,17 +26,17 @@ class ProjectModalFormat {
       // BASIC
       // =========================
       ProjectModalField(
-        label: 'タイトル',
+        label: AppTexts.fieldTitle,
         valueGetter: (p) => '\n${p.title}',
         isBold: true,
-        fontSize: 18,
+        fontSize: AppSizes.modalTitleFontSize,
       ),
       ProjectModalField(
-        label: '説明',
+        label: AppTexts.fieldDescription,
         valueGetter: (p) => '\n${p.description}',
       ),
       ProjectModalField(
-        label: '詳細',
+        label: AppTexts.fieldDetails,
         valueGetter: (p) => '\n${p.details}',
       ),
 
@@ -42,11 +44,11 @@ class ProjectModalFormat {
       // CORE INFRA
       // =========================
       ProjectModalField(
-        label: 'サーバーOS',
+        label: AppTexts.fieldServerOS,
         valueGetter: (p) => '\n${p.serverOS}',
       ),
       ProjectModalField(
-        label: 'DB',
+        label: AppTexts.fieldDb,
         valueGetter: (p) => '\n${p.db}',
       ),
 
@@ -54,23 +56,23 @@ class ProjectModalFormat {
       // FRAMEWORKS / TOOLS
       // =========================
       ProjectModalField(
-        label: 'Tools',
+        label: AppTexts.fieldTools,
         valueGetter: (p) => '\n${p.tools}',
       ),
       ProjectModalField(
-        label: 'Backend Frameworks',
+        label: AppTexts.fieldBackend,
         valueGetter: (p) => '\n${p.backendFrameworks}',
       ),
       ProjectModalField(
-        label: 'Frontend Frameworks',
+        label: AppTexts.fieldFrontend,
         valueGetter: (p) => '\n${p.frontendFrameworks}',
       ),
       ProjectModalField(
-        label: 'UI Frameworks',
+        label: AppTexts.fieldUi,
         valueGetter: (p) => '\n${p.uiFrameworks}',
       ),
       ProjectModalField(
-        label: 'Testing Frameworks',
+        label: AppTexts.fieldTesting,
         valueGetter: (p) => '\n${p.testingFrameworks}',
       ),
 
@@ -78,19 +80,19 @@ class ProjectModalFormat {
       // CLOUD / PLATFORM
       // =========================
       ProjectModalField(
-        label: 'Cloud Platforms',
+        label: AppTexts.fieldCloud,
         valueGetter: (p) => '\n${p.cloudPlatforms}',
       ),
       ProjectModalField(
-        label: 'AWS Services',
+        label: AppTexts.fieldAws,
         valueGetter: (p) => '\n${p.awsServices}',
       ),
       ProjectModalField(
-        label: 'Azure Services',
+        label: AppTexts.fieldAzure,
         valueGetter: (p) => '\n${p.azureServices}',
       ),
       ProjectModalField(
-        label: 'GCP Services',
+        label: AppTexts.fieldGcp,
         valueGetter: (p) => '\n${p.gcpServices}',
       ),
 
@@ -98,15 +100,15 @@ class ProjectModalFormat {
       // CONTAINER / AI
       // =========================
       ProjectModalField(
-        label: 'Container',
+        label: AppTexts.fieldContainer,
         valueGetter: (p) => '\n${p.container}',
       ),
       ProjectModalField(
-        label: 'Container Orchestration',
+        label: AppTexts.fieldOrchestration,
         valueGetter: (p) => '\n${p.containerOrchestration}',
       ),
       ProjectModalField(
-        label: 'AI Services',
+        label: AppTexts.fieldAi,
         valueGetter: (p) => '\n${p.aiServices}',
       ),
 
@@ -114,7 +116,7 @@ class ProjectModalFormat {
       // SKILLS
       // =========================
       ProjectModalField(
-        label: 'Skills',
+        label: AppTexts.fieldSkills,
         valueGetter: (p) => '\n${p.skills}',
       ),
 
@@ -122,7 +124,7 @@ class ProjectModalFormat {
       // PERIOD / LINK
       // =========================
       ProjectModalField(
-        label: '期間',
+        label: AppTexts.fieldPeriod,
         valueGetter: (p) => '\n${p.period}',
       ),
       // ProjectModalField(
@@ -137,11 +139,11 @@ class ProjectModalFormat {
     if (showWorkflow) {
       baseFields.add(
         ProjectModalField(
-          label: 'Workflow',
+          label: AppTexts.fieldWorkflow,
           valueGetter: (p) {
             final lines = p.workflow.entries.map((e) {
               final ja = LanguageUtils.workflowLabels['ja']?[e.key] ?? e.key;
-              return '$ja: ${e.value ? "✅" : "❌"}';
+              return '$ja: ${e.value ? AppTexts.workflowDone : AppTexts.workflowNotDone}';
             }).join('\n');
 
             return '\n$lines';

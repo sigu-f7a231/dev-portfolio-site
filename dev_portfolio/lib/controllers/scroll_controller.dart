@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../constants/app_sizes.dart';
 
 class SectionScrollController {
   final ScrollController controller = ScrollController();
@@ -13,7 +14,7 @@ class SectionScrollController {
     final key = keys[section];
     final context = key?.currentContext;
     if (context != null) {
-      Scrollable.ensureVisible(context, duration: const Duration(milliseconds: 500));
+      Scrollable.ensureVisible(context, duration: AppSizes.scrollDuration);
     }
   }
 }

@@ -5,11 +5,12 @@ class ProjectsPaginationLogic {
   // =========================
   // 総ページ数
   // =========================
-  static int getTotalPages(List<Project> projects) {
+  /// [perPage] を省略すると ProjectsPaginationConfig.itemsPerPage（List 表示）
+  static int getTotalPages(List<Project> projects, {int? perPage}) {
     if (projects.isEmpty) return 1;
 
     return (projects.length /
-            ProjectsPaginationConfig.itemsPerPage)
+            (perPage ?? ProjectsPaginationConfig.itemsPerPage))
         .ceil();
   }
 
@@ -18,12 +19,13 @@ class ProjectsPaginationLogic {
   // =========================
   static List<Project> getPaginatedProjects(
     List<Project> allProjects,
-    int currentPage,
-  ) {
-    final perPage = ProjectsPaginationConfig.itemsPerPage;
+    int currentPage, {
+    int? perPage,
+  }) {
+    final size = perPage ?? ProjectsPaginationConfig.itemsPerPage;
 
-    final startIndex = (currentPage - 1) * perPage;
-    final endIndex = startIndex + perPage;
+    final startIndex = (currentPage - 1) * size;
+    final endIndex = startIndex + size;
 
     if (startIndex >= allProjects.length) {
       return [];

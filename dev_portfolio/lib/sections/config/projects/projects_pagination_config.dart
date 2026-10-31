@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+// 色は lib/theme/app_colors.dart（pagination*）で管理
 class ProjectsPaginationConfig {
   // =========================
   // Layout
@@ -15,17 +16,6 @@ class ProjectsPaginationConfig {
   static const borderRadius = 6.0;
 
   // =========================
-  // Colors
-  // =========================
-  static const activeColor = Colors.blue;
-  static const inactiveColor = Colors.transparent;
-
-  static const activeTextColor = Colors.white;
-  static const inactiveTextColor = Colors.black87;
-
-  static const iconColor = Colors.grey;
-
-  // =========================
   // Typography
   // =========================
   static const fontSize = 14.0;
@@ -39,12 +29,4 @@ class ProjectsPaginationConfig {
   // Pagination behavior
   // =========================
   static const itemsPerPage = 5; // 1ページの表示件数
-
-  // =========================
-  // Dark mode colors
-  // =========================
-  static const darkActiveColor = Colors.lightBlueAccent;
-  static const darkInactiveColor = Colors.black26;
-  static const darkActiveTextColor = Colors.black;
-  static const darkInactiveTextColor = Colors.white70;
 }

@@ -1,64 +1,32 @@
+// lib/sections/config/skills/skills_pie_chart_config.dart
+// 色は lib/theme/app_colors.dart、ラベル・値の文字スタイルは lib/theme/app_styles.dart で管理
 import 'package:flutter/material.dart';
 
 /// ========================================
-/// PieChart カラー設定
+/// PieChart 透明度（色そのものは lib/theme/app_colors.dart の chartSeries）
 /// ========================================
-class PieChartColors {
-  static const List<Color> mainColors = [
-    Colors.blueAccent,
-    Colors.orangeAccent,
-    Colors.greenAccent,
-    Colors.purpleAccent,
-    Colors.redAccent,
-    Colors.tealAccent,
-    Colors.yellowAccent,
-    Colors.pinkAccent,
-  ];
+class PieChartOpacity {
+  /// 非アクティブ時
+  static const double inactiveDark = 0.6;
+  static const double inactiveLight = 0.35;
 
-  static const Color highlightBorder = Colors.orangeAccent;
+  /// ホバー時
+  static const double hoverDark = 0.75;
+  static const double hoverLight = 0.55;
 
-  /// 非アクティブ色の opacity
-  static const double inactiveOpacityDark = 0.6;
-  static const double inactiveOpacityLight = 0.35;
+  /// 選択時
+  static const double selectedDark = 1.0;
+  static const double selectedLight = 1.0;
 
-  /// ホバー時の opacity
-  static const double hoverOpacityDark = 0.75;
-  static const double hoverOpacityLight = 0.55;
-
-  /// 選択時の opacity
-  static const double selectedOpacityDark = 1.0;
-  static const double selectedOpacityLight = 1.0;
-
-  /// PieChart 色（非アクティブ・ホバー・選択で変化）
-  static Color pieColor(
-    Color base, {
+  /// 状態に応じた透明度
+  static double of({
     required bool isDark,
     required bool isHovered,
     required bool isSelected,
   }) {
-    double opacity;
-
-    if (isSelected) {
-      opacity = isDark ? selectedOpacityDark : selectedOpacityLight;
-    } else if (isHovered) {
-      opacity = isDark ? hoverOpacityDark : hoverOpacityLight;
-    } else {
-      opacity = isDark ? inactiveOpacityDark : inactiveOpacityLight;
-    }
-
-    return base.withOpacity(opacity);
-  }
-
-  static BorderSide pieBorder(bool isActive) {
-    return isActive
-        ? BorderSide(
-            color: highlightBorder,
-            width: PieChartLayout.pieActiveBorderWidth,
-          )
-        : BorderSide(
-            color: Colors.transparent,
-            width: PieChartLayout.pieInactiveBorderWidth,
-          );
+    if (isSelected) return isDark ? selectedDark : selectedLight;
+    if (isHovered) return isDark ? hoverDark : hoverLight;
+    return isDark ? inactiveDark : inactiveLight;
   }
 }
 
@@ -103,33 +71,4 @@ class PieChartLayout {
   static const double pieLegendSpacingItem = 8.0;
   static const double pieLegendItemSpacing = 4.0;
   static const double pieLegendValueWidth = 50.0;
-}
-
-/// ========================================
-/// PieChart テキストスタイル
-/// ========================================
-class PieChartTextStyle {
-  static TextStyle label({
-    required bool isDark,
-    required bool isActive,
-  }) {
-    return TextStyle(
-      color: isActive
-          ? PieChartColors.highlightBorder
-          : (isDark ? Colors.white : Colors.black87),
-      fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
-    );
-  }
-
-  static TextStyle value({
-    required bool isDark,
-    required bool isActive,
-  }) {
-    return TextStyle(
-      color: isActive
-          ? PieChartColors.highlightBorder
-          : (isDark ? Colors.white70 : Colors.black54),
-      fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
-    );
-  }
 }

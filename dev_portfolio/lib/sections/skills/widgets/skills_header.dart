@@ -1,44 +1,20 @@
 // lib/sections/skills/widgets/skills_header.dart
 import 'package:flutter/material.dart';
 import '../../config/skills/skills_widgets_header_config.dart';
-import 'skills_chart_switch.dart';
+import '../../../theme/app_styles.dart';
+import '../../../constants/app_texts.dart';
 
+/// Skills セクションのタイトル（Bar/Pie の切替はツールバーに移動）
 class SkillsHeader extends StatelessWidget {
-  final bool showPie;
-  final bool isDark;
-  final Function(bool) onToggle;
-
-  const SkillsHeader({
-    super.key,
-    required this.showPie,
-    required this.isDark,
-    required this.onToggle,
-  });
+  const SkillsHeader({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: SkillsHeaderConfig.rowPadding,
-      child: Row(
-        children: [
-          // タイトル
-          Text(
-            'Skills',
-            style: TextStyle(
-              fontSize: SkillsHeaderConfig.titleFontSize,
-              fontWeight: SkillsHeaderConfig.titleFontWeight,
-              color: SkillsHeaderConfig.titleColor(isDark),
-            ),
-          ),
-          const SizedBox(width: SkillsHeaderConfig.spacingBetweenTitleAndSwitch),
-
-          // Pie/Bar 切り替えボタン
-          SkillsChartSwitch(
-            showPie: showPie,
-            isDark: isDark,
-            onToggle: onToggle,
-          ),
-        ],
+      padding: SkillsHeaderConfig.titlePadding,
+      child: Text(
+        AppTexts.navSkills,
+        style: AppStyles.title(context, fontSize: SkillsHeaderConfig.titleFontSize),
       ),
     );
   }

@@ -3,10 +3,12 @@ import 'package:fl_chart/fl_chart.dart';
 import '../../../config/skills/skills_pie_chart_config.dart';
 import 'package:flutter/gestures.dart';
 import '../../../../utils/graph_utils.dart';
+import '../../../../theme/app_theme.dart';
+import '../../../../constants/app_sizes.dart';
+import '../../../../constants/app_texts.dart';
 
 class PieGraph extends StatelessWidget {
   final Map<String, double> data;
-  final bool isDark;
   final int? hoveredIndex;
   final int? selectedIndex;
   final Function(int?) onHover;
@@ -16,16 +18,18 @@ class PieGraph extends StatelessWidget {
   const PieGraph({
     super.key,
     required this.data,
-    required this.isDark,
     this.hoveredIndex,
     this.selectedIndex,
     required this.onHover,
     required this.onSelect,
-    this.topN = 10,
+    this.topN = AppSizes.chartTopN,
   });
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
+    final isDark = context.isDark;
+
     // データを値順にソート
     final sortedEntries = data.entries.toList()
       ..sort((a, b) => b.value.compareTo(a.value));
@@ -36,7 +40,7 @@ class PieGraph extends StatelessWidget {
     if (otherEntries.isNotEmpty) {
       final otherValue =
           otherEntries.fold<double>(0, (sum, e) => sum + e.value);
-      topEntries.add(MapEntry('その他', otherValue));
+      topEntries.add(MapEntry(AppTexts.chartOthers, otherValue));
     }
 
     return SizedBox(
@@ -61,14 +65,14 @@ class PieGraph extends StatelessWidget {
           sections: topEntries.mapIndexed((entry, index) {
             final isHovered = index == hoveredIndex;
             final isSelected = index == selectedIndex;
-            final baseColor =
-                PieChartColors.mainColors[index % PieChartColors.mainColors.length];
+            final baseColor = colors.seriesColor(index);
 
-            Color sectionColor = PieChartColors.pieColor(
-              baseColor,
-              isDark: isDark,
-              isHovered: isHovered,
-              isSelected: isSelected,
+            Color sectionColor = baseColor.withOpacity(
+              PieChartOpacity.of(
+                isDark: isDark,
+                isHovered: isHovered,
+                isSelected: isSelected,
+              ),
             );
 
             if (isSelected) {
@@ -85,13 +89,10 @@ class PieGraph extends StatelessWidget {
                   : PieChartLayout.pieRadius,
               borderSide: isSelected
                   ? BorderSide(
-                      color: PieChartColors.highlightBorder,
+                      color: colors.chartHighlight,
                       width: PieChartLayout.pieActiveBorderWidth,
                     )
-                  : BorderSide(
-                      color: Colors.transparent,
-                      width: PieChartLayout.pieInactiveBorderWidth,
-                    ),
+                  : BorderSide.none, // 非選択時は枠線なし
               showTitle: false,
             );
           }).toList(),

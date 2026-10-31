@@ -1,52 +1,50 @@
-// dev_portfolio/lib/sections/config/projects/projects_views_collection_config.dart
+// lib/sections/config/projects/projects_views_collection_config.dart
 import 'package:flutter/material.dart';
+import '../../../constants/app_sizes.dart';
 
+// 色は lib/theme/app_colors.dart、カードの見た目は lib/theme/app_styles.dart（projectCard など）で管理
 class ProjectsCollectionConfig {
-  // Layout
-  static const padding = EdgeInsets.all(3);
-  static const gridDelegate = SliverGridDelegateWithFixedCrossAxisCount(
-    crossAxisCount: 2,
-    childAspectRatio: 3.6,
-    crossAxisSpacing: 4,
-    mainAxisSpacing: 4,
-  );
+  // =========================
+  // グリッド（画面幅に応じて列数を変える）
+  // =========================
+  /// 幅（px）→ 列数。上から順に判定し、どれにも当てはまらなければ 1 列
+  static const List<MapEntry<double, int>> columnBreakpoints = [
+    MapEntry(1100, 4),
+    MapEntry(820, 3),
+    MapEntry(520, 2),
+  ];
 
-  // Colors
-  static Color cardColor(bool isDark) => isDark ? Colors.grey.shade900 : Colors.white;
-  static Color titleColor(bool isDark) => isDark ? Colors.white : Colors.black;
-  static Color descriptionColor(bool isDark) => isDark ? Colors.white70 : Colors.black54;
-  static Color periodColor(bool isDark) => isDark ? Colors.white54 : Colors.black45;
+  static int columnsFor(double width) {
+    for (final bp in columnBreakpoints) {
+      if (width >= bp.key) return bp.value;
+    }
+    return 1;
+  }
 
-  // TextStyles
-  static TextStyle titleStyle(bool isDark) => TextStyle(
-        fontWeight: FontWeight.bold,
-        fontSize: 16,
-        color: titleColor(isDark),
-      );
+  /// カード 1 枚の高さ（列数が変わっても高さは一定）
+  static const double cardHeight = 210;
 
-  static TextStyle descriptionStyle(bool isDark) =>
-      TextStyle(fontSize: 14, color: descriptionColor(isDark));
+  /// 高さ [height] のエリアに収まる行数（最低 1 行）
+  static int rowsFor(double height) {
+    final usable = height - padding.vertical + gridSpacing;
+    final rows = (usable / (cardHeight + gridSpacing)).floor();
+    return rows < 1 ? 1 : rows;
+  }
 
-  static TextStyle periodStyle(bool isDark) =>
-      TextStyle(fontSize: 12, color: periodColor(isDark));
+  /// Collection の 1 ページの件数＝列数 × 行数（行がそろう件数）
+  static int itemsPerPage({required double width, required double height}) =>
+      columnsFor(width) * rowsFor(height);
 
-  // Card padding / spacing
-  static const cardPadding = EdgeInsets.all(4);
-  static const verticalSpacingSmall = SizedBox(height: 2);
+  static const double gridSpacing = AppSizes.space12;
+  static const EdgeInsets padding = EdgeInsets.only(bottom: AppSizes.space4);
 
   // =========================
-  // 🔹 スキルボタン用
+  // カード内
   // =========================
-  static Color skillButtonColor(bool isDark) =>
-      isDark ? Colors.blueGrey.shade700 : Colors.blue.shade100;
+  static const EdgeInsets cardPadding = EdgeInsets.all(AppSizes.space16);
+  static const int titleMaxLines = 2;
+  static const int descriptionMaxLines = 3;
 
-  static Color skillButtonTextColor(bool isDark) =>
-      isDark ? Colors.white : Colors.black87;
-
-  static const skillButtonPadding = EdgeInsets.symmetric(horizontal: 6, vertical: 2);
-  static const skillButtonBorderRadius = 12.0;
-  static const skillButtonFontSize = 12.0;
-  static const skillButtonFontWeight = FontWeight.bold;
-  static const skillButtonSpacing = 4.0;
-  static const skillButtonRunSpacing = 2.0;
+  /// カードに出すタグの最大数（超えた分は「+N」）
+  static const int maxTags = 3;
 }

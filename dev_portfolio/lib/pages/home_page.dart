@@ -6,16 +6,12 @@ import '../sections/about_section.dart';
 import '../sections/skills/skills_section.dart';
 import '../sections/projects/projects_section.dart';
 import '../controllers/scroll_controller.dart';
+import '../theme/app_theme.dart';
+import '../constants/app_sizes.dart';
+import '../constants/app_texts.dart';
 
 class HomePage extends StatefulWidget {
-  final ThemeMode themeMode;
-  final Function(bool) onThemeChanged;
-
-  const HomePage({
-    super.key,
-    required this.themeMode,
-    required this.onThemeChanged,
-  });
+  const HomePage({super.key});
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -28,41 +24,43 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
+
     return Scaffold(
       drawer: Drawer(
         child: ListView(
           padding: EdgeInsets.zero,
           children: [
             DrawerHeader(
-              decoration: const BoxDecoration(color: Colors.black87),
-              child: const Text(
-                'DevPortfolio',
-                style: TextStyle(color: Colors.white, fontSize: 24),
+              decoration: BoxDecoration(color: colors.drawerHeaderBackground),
+              child: Text(
+                AppTexts.appTitle,
+                style: TextStyle(color: colors.drawerHeaderForeground, fontSize: AppSizes.drawerTitleFontSize),
               ),
             ),
             ListTile(
-              title: const Text('Home'),
+              title: const Text(AppTexts.navHome),
               onTap: () {
                 scroll.scrollTo('home');
                 Navigator.pop(context);
               },
             ),
             ListTile(
-              title: const Text('About'),
+              title: const Text(AppTexts.navAbout),
               onTap: () {
                 scroll.scrollTo('about');
                 Navigator.pop(context);
               },
             ),
             ListTile(
-              title: const Text('Skills'),
+              title: const Text(AppTexts.navSkills),
               onTap: () {
                 scroll.scrollTo('skills');
                 Navigator.pop(context);
               },
             ),
             ListTile(
-              title: const Text('Projects'),
+              title: const Text(AppTexts.navProjects),
               onTap: () {
                 scroll.scrollTo('projects');
                 Navigator.pop(context);
@@ -78,8 +76,6 @@ class _HomePageState extends State<HomePage> {
             onAboutPressed: () => scroll.scrollTo('about'),
             onSkillsPressed: () => scroll.scrollTo('skills'),
             onProjectsPressed: () => scroll.scrollTo('projects'),
-            themeMode: widget.themeMode,
-            onThemeChanged: widget.onThemeChanged,
             onYamlStateChanged: () {
               setState(() {
                 _refreshKey++;       // Projectsを再描画
@@ -92,19 +88,25 @@ class _HomePageState extends State<HomePage> {
               controller: scroll.controller,
               child: Column(
                 children: [
-                  HeroSection(key: scroll.keys['home']),
+                  HeroSection(
+                    key: scroll.keys['home'],
+                    onSkillsPressed: () => scroll.scrollTo('skills'),
+                    onProjectsPressed: () => scroll.scrollTo('projects'),
+                  ),
                   AboutSection(key: scroll.keys['about']),
-                  
                   // ★ スクロール用キーは外側のContainerに持たせ、
                   // 内部の SkillsSection に ValueKey を持たせることで確実に再構築・再集計させる
                   Container(
-                    key: scroll.keys['skills'], 
+                    key: scroll.keys['skills'],
                     child: SkillsSection(
                       key: ValueKey('skills_$_skillsRefreshKey'),
                     ),
                   ),
-
-                  ProjectsSection(key: ValueKey(_refreshKey)),
+                  // Skills と同じく、スクロール用キーは外側の Container に持たせる
+                  Container(
+                    key: scroll.keys['projects'],
+                    child: ProjectsSection(key: ValueKey(_refreshKey)),
+                  ),
                 ],
               ),
             ),

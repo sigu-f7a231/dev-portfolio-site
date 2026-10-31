@@ -4,17 +4,18 @@ import 'charts/skills_pie_chart.dart';
 import 'data/skills_work.dart';
 import 'data/skills_private.dart';
 import '../config/skills/skills_tabs_config.dart';
+import '../../theme/app_theme.dart';
+import '../../constants/app_sizes.dart';
+import '../../constants/app_texts.dart';
 
 class SkillsTabs extends StatefulWidget {
   final TabController tabController;
   final bool showPie;
-  final bool isDark;
 
   const SkillsTabs({
     super.key,
     required this.tabController,
     required this.showPie,
-    required this.isDark,
   });
 
   @override
@@ -63,9 +64,9 @@ class _SkillsTabsState extends State<SkillsTabs> {
       children: [
         TabBar(
           controller: widget.tabController,
-          labelColor: SkillsTabsConfig.labelColor(widget.isDark),
-          unselectedLabelColor: SkillsTabsConfig.unselectedLabelColor(widget.isDark),
-          indicatorColor: SkillsTabsConfig.indicatorColor(widget.isDark),
+          labelColor: context.colors.accent,
+          unselectedLabelColor: context.colors.textSecondary,
+          indicatorColor: context.colors.accent,
           tabs: SkillsTabsConfig.mainTabs.map((t) => Tab(text: t)).toList(),
         ),
         const SizedBox(height: SkillsTabsConfig.spacingBetweenTabBarAndContent),
@@ -79,8 +80,8 @@ class _SkillsTabsState extends State<SkillsTabs> {
                   width: SkillsTabsConfig.cardWidth,
                   height: SkillsTabsConfig.cardHeight,
                   child: widget.showPie
-                      ? SkillsPieChart(data: workSkills!, isDark: widget.isDark)
-                      : SkillsBarChart(entries: workEntries, isDark: widget.isDark),
+                      ? SkillsPieChart(data: workSkills!)
+                      : SkillsBarChart(entries: workEntries),
                 ),
               ),
               // Private Skills
@@ -93,10 +94,10 @@ class _SkillsTabsState extends State<SkillsTabs> {
                       // privateEntriesを参照して警告を回避
                       final _ = privateEntries.length;
                       return Text(
-                        "Private のため表示できません",
+                        AppTexts.privateHidden,
                         style: TextStyle(
-                          color: widget.isDark ? Colors.white : Colors.black,
-                          fontSize: 16,
+                          color: context.colors.textStrong,
+                          fontSize: AppSizes.skillsTabsMessageFontSize,
                         ),
                         textAlign: TextAlign.center,
                       );

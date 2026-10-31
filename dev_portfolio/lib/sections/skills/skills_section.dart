@@ -3,6 +3,16 @@ import 'data/skills_work.dart';
 import 'data/skills_private.dart';
 import 'widgets/skills_header.dart';
 import 'widgets/skills_card.dart';
+import 'widgets/skills_chart_switch.dart';
+import 'widgets/skills_category_filter.dart';
+import '../config/skills/skills_widgets_header_config.dart';
+import '../../widgets/app_segment.dart';
+import '../../theme/app_styles.dart';
+import '../../constants/app_sizes.dart';
+import '../../constants/app_texts.dart';
+
+/// カテゴリ → （項目名 → 割合%）
+typedef SkillsData = Map<String, Map<String, double>>;
 
 class SkillsSection extends StatefulWidget {
   const SkillsSection({super.key});
@@ -11,12 +21,11 @@ class SkillsSection extends StatefulWidget {
   State<SkillsSection> createState() => _SkillsSectionState();
 }
 
-class _SkillsSectionState extends State<SkillsSection>
-    with TickerProviderStateMixin {
+class _SkillsSectionState extends State<SkillsSection> {
   bool _showPie = false;
 
-  late Future<Map<String, Map<String, double>>> _workSkillsFuture;
-  late Future<Map<String, Map<String, double>>> _privateSkillsFuture;
+  /// [0] = Work、[1] = Private
+  late final Future<List<SkillsData>> _skillsFuture;
 
   /// 全カテゴリ
   final List<String> _baseCategories = const [
@@ -40,59 +49,62 @@ class _SkillsSectionState extends State<SkillsSection>
   /// workのみ追加
   final List<String> _workExtra = const ['workflow'];
 
-  /// 表示TOP
-  final List<String> _topDisplayCategories = const [
-    'server_os',
-    'db',
-    'backend_frameworks',
-    'frontend_frameworks',
-    'aws_services',
+  /// カテゴリパネルのグループ（どのカテゴリをどの見出しの下に並べるか）
+  static const List<SkillsCategoryGroup> _categoryGroups = [
+    SkillsCategoryGroup(AppTexts.categoryGroupInfra, [
+      'server_os',
+      'db',
+      'container',
+      'container_orchestration',
+    ]),
+    SkillsCategoryGroup(AppTexts.categoryGroupDev, [
+      'backend_frameworks',
+      'frontend_frameworks',
+      'ui_frameworks',
+      'testing_frameworks',
+      'tools',
+      'skills',
+    ]),
+    SkillsCategoryGroup(AppTexts.categoryGroupCloud, [
+      'cloud_platforms',
+      'aws_services',
+      'azure_services',
+      'gcp_services',
+      'ai_services',
+    ]),
+    SkillsCategoryGroup(AppTexts.categoryGroupProcess, ['workflow']),
   ];
 
   String _currentCategory = 'server_os';
   bool _isWork = true;
+  bool _categoryOpen = false;
 
   @override
   void initState() {
     super.initState();
-    _workSkillsFuture = loadWorkSkillsAll();
-    _privateSkillsFuture = loadPrivateSkillsAll();
+    _skillsFuture = Future.wait([loadWorkSkillsAll(), loadPrivateSkillsAll()]);
   }
 
   List<String> _getAllCategories(bool isWork) {
     return isWork ? [..._baseCategories, ..._workExtra] : _baseCategories;
   }
 
-  List<String> _getDropdownCategories(bool isWork) {
-    final all = _getAllCategories(isWork);
-    return all.where((c) => !_topDisplayCategories.contains(c)).toList();
+  /// パネルに出すグループ：いまのタブにあり、データがあるカテゴリだけ（空のグループは出さない）
+  List<SkillsCategoryGroup> _panelGroups(SkillsData? data) {
+    final all = _getAllCategories(_isWork);
+    return _categoryGroups
+        .map((g) => SkillsCategoryGroup(
+              g.title,
+              g.categories
+                  .where((c) => all.contains(c))
+                  .where((c) => data == null || (data[c]?.isNotEmpty ?? false))
+                  .toList(),
+            ))
+        .where((g) => g.categories.isNotEmpty)
+        .toList();
   }
 
-  Map<String, double> _getCategoryData(
-    Map<String, Map<String, double>> data,
-    String category,
-  ) {
-    return data[category] ?? {};
-  }
-
-  final Map<String, String> _labelOverrides = {
-    'server_os': 'OS',
-    'db': 'DB',
-    'tools': 'Tools',
-    'backend_frameworks': 'Backend',
-    'frontend_frameworks': 'Frontend',
-    'ui_frameworks': 'UI Frameworks',
-    'testing_frameworks': 'Testing Frameworks',
-    'cloud_platforms': 'Cloud Platforms',
-    'aws_services': 'AWS',
-    'gcp_services': 'GCP',
-    'azure_services': 'Azure',
-    'container': 'Container',
-    'container_orchestration': 'Container Orchestration',
-    'ai_services': 'AI Services',
-    'skills': 'Skills',
-    'workflow': 'Workflow',
-  };
+  final Map<String, String> _labelOverrides = AppTexts.skillCategoryLabels;
 
   String _label(String key) =>
       _labelOverrides[key] ??
@@ -101,141 +113,112 @@ class _SkillsSectionState extends State<SkillsSection>
         return '${e[0].toUpperCase()}${e.substring(1)}';
       }).join(' ');
 
-  Widget _emptyState(bool isDark) {
-    return Center(
-      child: Text(
-        'データがありません',
-        style: TextStyle(
-          color: isDark ? Colors.white70 : Colors.black54,
-        ),
-      ),
-    );
+  void _selectTab(bool isWork) {
+    setState(() {
+      _isWork = isWork;
+      _categoryOpen = false;
+      // 選んでいたカテゴリが新しいタブにない場合だけ先頭に戻す（維持優先）
+      final allCategories = _getAllCategories(isWork);
+      if (!allCategories.contains(_currentCategory)) {
+        _currentCategory = allCategories.first;
+      }
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final dropdownCategories = _getDropdownCategories(_isWork);
-
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: SkillsHeaderConfig.sectionPadding,
       height: MediaQuery.of(context).size.height,
-      child: Column(
-        children: [
-          /// HEADER
-          SkillsHeader(
-            showPie: _showPie,
-            isDark: isDark,
-            onToggle: (v) => setState(() => _showPie = v),
-          ),
+      child: FutureBuilder<List<SkillsData>>(
+        future: _skillsFuture,
+        builder: (context, snapshot) {
+          final SkillsData? data =
+              snapshot.hasData ? snapshot.data![_isWork ? 0 : 1] : null;
+          final categoryData = data?[_currentCategory] ?? const <String, double>{};
 
-          const SizedBox(height: 12),
-
-          /// WORK / PRIVATE（★修正ここ）
-          Row(
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              const SkillsHeader(),
+              SkillsHeaderConfig.headerSpacing,
+
+              // Work/Private ・ Bar/Pie
+              Wrap(
+                alignment: WrapAlignment.spaceBetween,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                spacing: AppSizes.space12,
+                runSpacing: AppSizes.space12,
+                children: [
+                  AppSegment<bool>(
+                    value: _isWork,
+                    onChanged: _selectTab,
+                    items: const [
+                      AppSegmentItem(value: true, label: AppTexts.work),
+                      AppSegmentItem(value: false, label: AppTexts.private),
+                    ],
+                  ),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      SkillsCategoryButton(
+                        currentLabel: _label(_currentCategory),
+                        open: _categoryOpen,
+                        onPressed: () =>
+                            setState(() => _categoryOpen = !_categoryOpen),
+                      ),
+                      const SizedBox(width: AppSizes.space12),
+                      SkillsChartSwitch(
+                        showPie: _showPie,
+                        onToggle: (v) => setState(() => _showPie = v),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+
+              // カテゴリパネル（ボタン操作に応じて開閉）
+              AnimatedSize(
+                duration: AppSizes.filterPanelDuration,
+                alignment: Alignment.topCenter,
+                child: _categoryOpen
+                    ? Padding(
+                        padding: SkillsHeaderConfig.panelMargin,
+                        child: SkillsCategoryPanel(
+                          key: ValueKey(_isWork),
+                          groups: _panelGroups(data),
+                          current: _currentCategory,
+                          labelOf: _label,
+                          onApply: (c) => setState(() {
+                            _currentCategory = c;
+                            _categoryOpen = false;
+                          }),
+                          onClose: () => setState(() => _categoryOpen = false),
+                        ),
+                      )
+                    : const SizedBox(width: double.infinity),
+              ),
+              SkillsHeaderConfig.chartSpacing,
+
+              // グラフ
               Expanded(
-                child: SegmentedButton<bool>(
-                  segments: const [
-                    ButtonSegment(value: true, label: Text("Work")),
-                    ButtonSegment(value: false, label: Text("Private")),
-                  ],
-                  selected: {_isWork},
-                  onSelectionChanged: (v) {
-                    setState(() {
-                      final newIsWork = v.first;
-                      final allCategories = _getAllCategories(newIsWork);
-
-                      _isWork = newIsWork;
-
-                      // ★重要：存在しない場合のみ補正（維持優先）
-                      if (!allCategories.contains(_currentCategory)) {
-                        _currentCategory = allCategories.first;
-                      }
-                    });
-                  },
-                ),
+                child: !snapshot.hasData
+                    ? const Center(child: CircularProgressIndicator())
+                    : categoryData.isEmpty
+                        ? Center(
+                            child: Text(
+                              AppTexts.noData,
+                              style: AppStyles.secondary(context),
+                            ),
+                          )
+                        : SkillsCard(
+                            data: categoryData,
+                            showPie: _showPie,
+                          ),
               ),
             ],
-          ),
-
-          const SizedBox(height: 12),
-
-          /// TOP5 + dropdown
-          Row(
-            children: [
-              Expanded(
-                child: Wrap(
-                  spacing: 8,
-                  children: _topDisplayCategories.map((key) {
-                    final selected = _currentCategory == key;
-
-                    return ChoiceChip(
-                      label: Text(_label(key)),
-                      selected: selected,
-                      onSelected: (_) {
-                        setState(() => _currentCategory = key);
-                      },
-                    );
-                  }).toList(),
-                ),
-              ),
-
-              PopupMenuButton<String>(
-                icon: const Icon(Icons.arrow_drop_down),
-                onSelected: (value) {
-                  setState(() => _currentCategory = value);
-                },
-                itemBuilder: (context) {
-                  return dropdownCategories
-                      .map((c) => PopupMenuItem(
-                            value: c,
-                            child: Text(_label(c)),
-                          ))
-                      .toList();
-                },
-              ),
-
-              Container(
-                margin: const EdgeInsets.only(left: 8),
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(
-                  color: isDark ? Colors.white12 : Colors.black12,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Text(_label(_currentCategory)),
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 12),
-
-          /// CONTENT
-          Expanded(
-            child: FutureBuilder<Map<String, Map<String, double>>>(
-              future: _isWork ? _workSkillsFuture : _privateSkillsFuture,
-              builder: (context, snapshot) {
-                if (!snapshot.hasData) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-
-                final data = snapshot.data!;
-                final categoryData =
-                    _getCategoryData(data, _currentCategory);
-
-                if (categoryData.isEmpty) {
-                  return _emptyState(isDark);
-                }
-
-                return SkillsCard(
-                  data: categoryData,
-                  isDark: isDark,
-                  showPie: _showPie,
-                );
-              },
-            ),
-          ),
-        ],
+          );
+        },
       ),
     );
   }

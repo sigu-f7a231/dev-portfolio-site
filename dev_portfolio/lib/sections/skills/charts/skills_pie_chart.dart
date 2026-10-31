@@ -5,12 +5,10 @@ import '../../config/skills/skills_pie_chart_config.dart';
 
 class SkillsPieChart extends StatefulWidget {
   final Map<String, double> data;
-  final bool isDark;
 
   const SkillsPieChart({
     super.key,
     required this.data,
-    required this.isDark,
   });
 
   @override
@@ -54,7 +52,6 @@ class _SkillsPieChartState extends State<SkillsPieChart> {
               height: PieChartLayout.pieSize,
               child: PieGraph(
                 data: widget.data,
-                isDark: widget.isDark,
                 hoveredIndex: hoveredIndex,
                 selectedIndex: selectedIndex,
                 onHover: _handleHover,
@@ -66,7 +63,6 @@ class _SkillsPieChartState extends State<SkillsPieChart> {
           Expanded(
             child: PieLegend(
               data: widget.data,
-              isDark: widget.isDark,
               hoveredIndex: hoveredIndex,
               selectedIndex: selectedIndex,
               onHover: (idx) {

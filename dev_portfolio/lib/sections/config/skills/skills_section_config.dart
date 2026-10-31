@@ -1,4 +1,6 @@
-import 'package:flutter/material.dart';
+// ※現在どこからも参照されていない
+// 色は lib/theme/app_colors.dart で管理
+import '../../../constants/app_texts.dart';
 
 /// Skills セクション全体の設定
 class SkillsSectionConfig {
@@ -12,8 +14,8 @@ class SkillsSectionConfig {
 
   /// メインタブ名
   static const List<String> mainTabs = [
-    'Work',
-    'Private',
+    AppTexts.work,
+    AppTexts.private,
   ];
 }
 
@@ -21,13 +23,4 @@ class SkillsSectionConfig {
 class SkillsLayout {
   static const double sectionPadding = 24;
   static const double spacing = 16;
-}
-
-/// カラー設定
-class SkillsColors {
-  static Color background(bool isDark) =>
-      isDark ? Colors.black : const Color(0xFFDADAE3);
-
-  static Color shadow(bool isDark) =>
-      Colors.black.withOpacity(isDark ? 0.2 : 0.1);
 }

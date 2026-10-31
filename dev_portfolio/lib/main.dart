@@ -1,52 +1,31 @@
 // lib/main.dart
 import 'package:flutter/material.dart';
 import 'pages/home_page.dart';
+import 'theme/app_theme.dart';
+import 'constants/app_texts.dart';
 
 void main() {
-  runApp(DevPortfolioApp());
+  runApp(const DevPortfolioApp());
 }
 
-class DevPortfolioApp extends StatefulWidget {
-  @override
-  _DevPortfolioAppState createState() => _DevPortfolioAppState();
-}
-
-class _DevPortfolioAppState extends State<DevPortfolioApp> {
-  ThemeMode _themeMode = ThemeMode.light;
-
-  // ダークモード切り替え関数
-  void _toggleTheme(bool isDark) {
-    setState(() {
-      _themeMode = isDark ? ThemeMode.dark : ThemeMode.light;
-    });
-  }
+class DevPortfolioApp extends StatelessWidget {
+  const DevPortfolioApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'DevPortfolio',
-      theme: ThemeData(
-        brightness: Brightness.light,
-        primarySwatch: Colors.blue,
-        scaffoldBackgroundColor: Colors.white,
-        textTheme: const TextTheme(
-          bodyMedium: TextStyle(color: Colors.black), // ← ここを bodyText2 → bodyMedium に変更
-        ),
-      ),
-      darkTheme: ThemeData(
-        brightness: Brightness.dark,
-        primarySwatch: Colors.blue,
-        scaffoldBackgroundColor: Colors.black,
-        textTheme: const TextTheme(
-          bodyMedium: TextStyle(color: Colors.white), // ← ここも同様
-        ),
-      ),
-      themeMode: _themeMode,
-      home: HomePage(
-        themeMode: _themeMode,
-        onThemeChanged: _toggleTheme,
-      ),
+    // テーマモードは ThemeController が保持し、変わると MaterialApp ごと再構築される
+    return ValueListenableBuilder<ThemeMode>(
+      valueListenable: ThemeController.instance,
+      builder: (context, themeMode, _) {
+        return MaterialApp(
+          debugShowCheckedModeBanner: false,
+          title: AppTexts.appTitle,
+          theme: AppTheme.light,
+          darkTheme: AppTheme.dark,
+          themeMode: themeMode,
+          home: const HomePage(),
+        );
+      },
     );
   }
 }

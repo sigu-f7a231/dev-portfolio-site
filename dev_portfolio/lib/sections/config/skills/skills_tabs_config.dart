@@ -1,15 +1,11 @@
-// lib/sections/skills/config/skills_tabs_config.dart
-import 'package:flutter/material.dart';
+// lib/sections/config/skills/skills_tabs_config.dart
+// 色は lib/theme/app_colors.dart（accent / textSecondary）で管理
+import '../../../constants/app_texts.dart';
 
 /// SkillsTabs 全体の設定
 class SkillsTabsConfig {
   /// メインタブ名（Work / Private）
-  static const List<String> mainTabs = ['Work', 'Private'];
-
-  /// TabBar 用カラー
-  static Color labelColor(bool isDark) => Colors.orangeAccent;
-  static Color unselectedLabelColor(bool isDark) => isDark ? Colors.white70 : Colors.black54;
-  static Color indicatorColor(bool isDark) => Colors.orangeAccent;
+  static const List<String> mainTabs = [AppTexts.work, AppTexts.private];
 
   /// TabBar とコンテンツ間のスペース
   static const double spacingBetweenTabBarAndContent = 16.0;

@@ -4,14 +4,17 @@ import 'dart:convert';
 import 'dart:html' as html; // ★ ブラウザのsessionStorageを使うため
 import 'package:yaml/yaml.dart'; // YAMLパース用
 import '../config/header_config.dart';
+import '../../theme/app_theme.dart';
+import '../../theme/app_styles.dart';
+import 'yaml_format_help.dart';
+import '../../constants/app_sizes.dart';
+import '../../constants/app_texts.dart';
 
 class DesktopHeader extends StatelessWidget {
   final VoidCallback onHomePressed;
   final VoidCallback onAboutPressed;
   final VoidCallback onSkillsPressed;
   final VoidCallback onProjectsPressed;
-  final ThemeMode themeMode;
-  final Function(bool) onThemeChanged;
 
   // 外部へのコールバックが不要な場合は削除可能ですが、
   // 保存後に画面の再描画などをトリガーしたい場合はオプショナルに残しておけます
@@ -23,8 +26,6 @@ class DesktopHeader extends StatelessWidget {
     required this.onAboutPressed,
     required this.onSkillsPressed,
     required this.onProjectsPressed,
-    required this.themeMode,
-    required this.onThemeChanged,
     this.onYamlStateChanged,
   });
 
@@ -76,10 +77,7 @@ class DesktopHeader extends StatelessWidget {
     required String description,
     required String dataType,
   }) {
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    final dialogBgColor = isDarkMode ? const Color(0xFF1E1E1E) : Colors.white;
-    final textColor = isDarkMode ? Colors.white70 : Colors.black87;
-    final titleColor = isDarkMode ? Colors.white : Colors.black;
+    final dialogBgColor = context.colors.dialogBackground;
 
     String? selectedFileName;
     String? loadedYamlString;
@@ -93,18 +91,21 @@ class DesktopHeader extends StatelessWidget {
           builder: (context, setStateModal) {
             return AlertDialog(
               backgroundColor: dialogBgColor,
-              title: Text(title, style: TextStyle(color: titleColor)),
+              title: Text(title, style: AppStyles.dialogTitle(context)),
               content: SizedBox(
-                width: 450,
+                width: AppSizes.uploadDialogWidth,
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       description,
-                      style: TextStyle(fontSize: 13, color: textColor),
+                      style: AppStyles.dialogBody(context),
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: AppSizes.space8),
+                    // フォーマットのダウンロード + ⓘ（書き方の説明）
+                    YamlFormatTools(dataType: dataType),
+                    const SizedBox(height: AppSizes.space8),
                     OutlinedButton.icon(
                       onPressed: isChecking
                           ? null
@@ -128,25 +129,25 @@ class DesktopHeader extends StatelessWidget {
                                 }
                               } catch (e) {
                                 setStateModal(() {
-                                  errorMessage = 'ファイルの読み込みに失敗しました: $e';
+                                  errorMessage = AppTexts.fileReadFailed(e);
                                 });
                               }
                             },
                       icon: const Icon(Icons.attach_file),
-                      label: Text(selectedFileName ?? 'YAMLファイルを選択 (.yaml, .yml)'),
+                      label: Text(selectedFileName ?? AppTexts.selectYamlFile),
                     ),
                     if (selectedFileName != null) ...[
-                      const SizedBox(height: 8),
+                      const SizedBox(height: AppSizes.space8),
                       Text(
-                        '選択中: $selectedFileName',
-                        style: TextStyle(fontSize: 12, color: Colors.green.shade400),
+                        AppTexts.selectedFile(selectedFileName!),
+                        style: AppStyles.dialogSuccess(context),
                       ),
                     ],
                     if (errorMessage != null) ...[
-                      const SizedBox(height: 8),
+                      const SizedBox(height: AppSizes.space8),
                       Text(
                         errorMessage!,
-                        style: const TextStyle(fontSize: 12, color: Colors.redAccent),
+                        style: AppStyles.dialogError(context),
                       ),
                     ],
                   ],
@@ -155,7 +156,7 @@ class DesktopHeader extends StatelessWidget {
               actions: [
                 TextButton(
                   onPressed: isChecking ? null : () => Navigator.of(context).pop(),
-                  child: const Text('キャンセル'),
+                  child: const Text(AppTexts.cancel),
                 ),
                 ElevatedButton(
                   onPressed: loadedYamlString == null || isChecking
@@ -177,7 +178,7 @@ class DesktopHeader extends StatelessWidget {
                             if (context.mounted) {
                               Navigator.of(context).pop();
                               ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text('$dataType用YAMLをセッションに保存しました！')),
+                                SnackBar(content: Text(AppTexts.uploadSaved(dataType))),
                               );
                               
                               // 必要に応じて親画面に状態変化を通知（画面の再描画用など）
@@ -187,18 +188,18 @@ class DesktopHeader extends StatelessWidget {
                             final templateName = dataType == 'work' ? 'format_work.yaml' : 'format_private.yaml';
                             setStateModal(() {
                               isChecking = false;
-                              errorMessage = 'フォーマットが一致しません。\n'
-                                  'このファイルは $dataType 用ではありません（$templateName の構造を満たしていません）。';
+                              errorMessage = AppTexts.formatMismatch(dataType, templateName);
                             });
                           }
                         },
                   child: isChecking
                       ? const SizedBox(
-                          width: 16,
-                          height: 16,
-                          child: CircularProgressIndicator(strokeWidth: 2),
+                          width: AppSizes.buttonLoadingSize,
+                          height: AppSizes.buttonLoadingSize,
+                          child: CircularProgressIndicator(
+                              strokeWidth: AppSizes.buttonLoadingStrokeWidth),
                         )
-                      : const Text('アップロード'),
+                      : const Text(AppTexts.upload),
                 ),
               ],
             );
@@ -212,10 +213,8 @@ class DesktopHeader extends StatelessWidget {
   void _showWorkUploadDialog(BuildContext context) {
     _showUploadDialog(
       context,
-      title: 'Work用 YAMLのアップロード',
-      description: 'Work用のプロジェクト情報を定義したYAMLファイルをアップロードしてください。\n\n'
-          '【注意事項】\n'
-          '・アップロード時に `assets/data/format_work.yaml` の構造と照合され、セッションの `work` キーに保持されます。',
+      title: AppTexts.workUploadTitle,
+      description: AppTexts.workUploadDescription + AppTexts.workUploadNote,
       dataType: 'work',
     );
   }
@@ -224,18 +223,17 @@ class DesktopHeader extends StatelessWidget {
   void _showPrivateUploadDialog(BuildContext context) {
     _showUploadDialog(
       context,
-      title: 'Private用 YAMLのアップロード',
-      description: 'Private用の非公開プロジェクト情報を定義したYAMLファイルをアップロードしてください。\n\n'
-          '【注意事項】\n'
-          '・アップロード時に `assets/data/format_private.yaml` の構造と照合され、セッションの `private` キーに保持されます。',
+      title: AppTexts.privateUploadTitle,
+      description: AppTexts.privateUploadDescription + AppTexts.privateUploadNote,
       dataType: 'private',
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    final bgColor = HeaderConfig.backgroundColor(context);
-    final txtColor = HeaderConfig.textColor(context);
+    final colors = context.colors;
+    final bgColor = colors.headerBackground;
+    final txtColor = colors.headerForeground;
 
     return Container(
       padding: HeaderConfig.desktopPadding,
@@ -247,40 +245,40 @@ class DesktopHeader extends StatelessWidget {
             children: [
               TextButton(
                 onPressed: onHomePressed,
-                child: Text('Home', style: TextStyle(color: txtColor)),
+                child: Text(AppTexts.navHome, style: TextStyle(color: txtColor)),
               ),
               TextButton(
                 onPressed: onAboutPressed,
-                child: Text('About', style: TextStyle(color: txtColor)),
+                child: Text(AppTexts.navAbout, style: TextStyle(color: txtColor)),
               ),
               TextButton(
                 onPressed: onSkillsPressed,
-                child: Text('Skills', style: TextStyle(color: txtColor)),
+                child: Text(AppTexts.navSkills, style: TextStyle(color: txtColor)),
               ),
               TextButton(
                 onPressed: onProjectsPressed,
-                child: Text('Projects', style: TextStyle(color: txtColor)),
+                child: Text(AppTexts.navProjects, style: TextStyle(color: txtColor)),
               ),
             ],
           ),
           Row(
             children: [
               IconButton(
-                icon: const Icon(Icons.work_outline, color: Colors.white70),
-                tooltip: 'Work用のYAMLをアップロード',
+                icon: Icon(Icons.work_outline, color: colors.headerForegroundMuted),
+                tooltip: AppTexts.workUploadTooltip,
                 onPressed: () => _showWorkUploadDialog(context),
               ),
               IconButton(
-                icon: const Icon(Icons.lock_outline, color: Colors.white70),
-                tooltip: 'Private用のYAMLをアップロード',
+                icon: Icon(Icons.lock_outline, color: colors.headerForegroundMuted),
+                tooltip: AppTexts.privateUploadTooltip,
                 onPressed: () => _showPrivateUploadDialog(context),
               ),
-              const SizedBox(width: 24),
-              const Text('Dark Mode', style: TextStyle(color: Colors.white70)),
-              const SizedBox(width: 8),
+              const SizedBox(width: AppSizes.space24),
+              Text(AppTexts.darkMode, style: TextStyle(color: colors.headerForegroundMuted)),
+              const SizedBox(width: AppSizes.space8),
               Switch(
-                value: themeMode == ThemeMode.dark,
-                onChanged: onThemeChanged,
+                value: context.isDark,
+                onChanged: ThemeController.instance.toggle,
               ),
             ],
           ),

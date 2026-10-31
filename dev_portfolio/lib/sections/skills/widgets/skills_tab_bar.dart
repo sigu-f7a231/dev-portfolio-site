@@ -1,15 +1,15 @@
+// ※現在どこからも参照されていない
 import 'package:flutter/material.dart';
+import '../../../theme/app_theme.dart';
 
 class SkillsTabBar extends StatelessWidget {
   final TabController controller;
   final List<String> tabs;
-  final bool isDark;
 
   const SkillsTabBar({
     super.key,
     required this.controller,
     required this.tabs,
-    required this.isDark,
   });
 
   @override
@@ -17,8 +17,8 @@ class SkillsTabBar extends StatelessWidget {
     return TabBar(
       controller: controller,
       isScrollable: true,
-      labelColor: isDark ? Colors.white : Colors.black,
-      unselectedLabelColor: isDark ? Colors.white54 : Colors.black54,
+      labelColor: context.colors.textStrong,
+      unselectedLabelColor: context.colors.textSecondary,
       tabs: tabs.map((t) => Tab(text: t)).toList(),
     );
   }

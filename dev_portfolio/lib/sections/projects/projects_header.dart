@@ -1,50 +1,23 @@
 import 'package:flutter/material.dart';
-import 'projects_view_switch.dart';
 import '../config/projects/projects_header_config.dart';
+import '../../theme/app_styles.dart';
+import '../../constants/app_texts.dart';
 
-/// Projects セクションのヘッダー
-/// タイトル + List/Collection 切替スイッチ（左側に配置）
+/// Projects セクションのタイトル
+/// （List / Collection の切替はツールバー projects_toolbar.dart に移動）
 class ProjectsHeader extends StatelessWidget {
-  final ValueNotifier<bool> showCollectionNotifier;
-  final bool isDark;
-
-  const ProjectsHeader({
-    super.key,
-    required this.showCollectionNotifier,
-    required this.isDark,
-  });
+  const ProjectsHeader({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: ProjectsWidgetsHeaderConfig.titlePadding,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.start, // 左揃え
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          // セクションタイトル
-          Text(
-            'Projects',
-            style: ProjectsWidgetsHeaderConfig.titleStyle(isDark),
-          ),
-
-          const SizedBox(width: 12), // タイトルとスイッチの間隔
-
-          // List / Collection スイッチ
-          ValueListenableBuilder<bool>(
-            valueListenable: showCollectionNotifier,
-            builder: (context, showCollection, _) {
-              return ProjectsViewSwitch(
-                showCollection: showCollection,
-                isDark: isDark,
-                onToggle: (val) {
-                  showCollectionNotifier.value = val;
-                },
-                reverseOrder: true, // 左右反転
-              );
-            },
-          ),
-        ],
+      child: Text(
+        AppTexts.navProjects,
+        style: AppStyles.title(
+          context,
+          fontSize: ProjectsWidgetsHeaderConfig.titleFontSize,
+        ),
       ),
     );
   }

@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import '../../../config/skills/skills_pie_chart_config.dart';
 import '../../../../utils/graph_utils.dart';
+import '../../../../theme/app_theme.dart';
+import '../../../../theme/app_styles.dart';
+import '../../../../constants/app_sizes.dart';
+import '../../../../constants/app_texts.dart';
 
 class PieLegend extends StatelessWidget {
   final Map<String, double> data;
-  final bool isDark;
   final int topN;
   final int? hoveredIndex;
   final int? selectedIndex;
@@ -14,16 +17,17 @@ class PieLegend extends StatelessWidget {
   const PieLegend({
     super.key,
     required this.data,
-    required this.isDark,
     required this.onHover,
     required this.onSelect,
-    this.topN = 10,
+    this.topN = AppSizes.chartTopN,
     this.hoveredIndex,
     this.selectedIndex,
   });
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
+
     // データを値順にソート
     final sortedEntries = data.entries.toList()
       ..sort((a, b) => b.value.compareTo(a.value));
@@ -33,7 +37,7 @@ class PieLegend extends StatelessWidget {
     final otherEntries = sortedEntries.skip(topN).toList();
     if (otherEntries.isNotEmpty) {
       final otherValue = otherEntries.fold<double>(0, (sum, e) => sum + e.value);
-      topEntries.add(MapEntry('その他', otherValue));
+      topEntries.add(MapEntry(AppTexts.chartOthers, otherValue));
     }
 
     return Column(
@@ -56,13 +60,12 @@ class PieLegend extends StatelessWidget {
                     width: PieChartLayout.pieLegendColorSize,
                     height: PieChartLayout.pieLegendColorSize,
                     decoration: BoxDecoration(
-                      color: PieChartColors.mainColors[
-                          index % PieChartColors.mainColors.length],
+                      color: colors.seriesColor(index),
                       borderRadius: BorderRadius.circular(
                           PieChartLayout.pieLegendColorRadius),
                       border: isActive
                           ? Border.all(
-                              color: PieChartColors.highlightBorder,
+                              color: colors.chartHighlight,
                               width: PieChartLayout.pieActiveBorderWidth,
                             )
                           : null,
@@ -72,10 +75,7 @@ class PieLegend extends StatelessWidget {
                   Expanded(
                     child: Text(
                       entry.key,
-                      style: PieChartTextStyle.label(
-                        isDark: isDark,
-                        isActive: isActive,
-                      ),
+                      style: AppStyles.chartLabel(context, isActive: isActive),
                     ),
                   ),
                   SizedBox(
@@ -83,10 +83,7 @@ class PieLegend extends StatelessWidget {
                     child: Text(
                       '${entry.value.toStringAsFixed(1)}%',
                       textAlign: TextAlign.right,
-                      style: PieChartTextStyle.value(
-                        isDark: isDark,
-                        isActive: isActive,
-                      ),
+                      style: AppStyles.chartValue(context, isActive: isActive),
                     ),
                   ),
                 ],
