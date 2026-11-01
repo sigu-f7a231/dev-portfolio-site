@@ -1,4 +1,7 @@
 class Project {
+  /// YAML で「該当なし」を表す値（集計・フィルター候補・詳細表示から除く）
+  static const String notUsed = '利用なし';
+
   // =========================
   // BASIC
   // =========================
@@ -191,6 +194,21 @@ class Project {
     } catch (_) {
       return DateTime.now();
     }
+  }
+
+  /// 期間が「YYYY-MM ~ YYYY-MM」（終わりは「現在」/ present も可）の形で読み取れるか
+  bool get hasValidPeriod {
+    final parts = period.split('~');
+    if (parts.length != 2) return false;
+    bool isYearMonth(String s) => RegExp(r'^\d{4}-\d{1,2}$').hasMatch(s.trim());
+    return isYearMonth(parts[0]) && (isOngoing || isYearMonth(parts[1]));
+  }
+
+  /// 期間の長さ（月数）。開始月と終了月の両方を含めて数える（例：2023-04〜2023-09 は 6 か月）
+  int get durationMonths {
+    final s = periodStart, e = periodEnd;
+    final months = (e.year * 12 + e.month) - (s.year * 12 + s.month) + 1;
+    return months < 1 ? 1 : months;
   }
 
   bool get isOngoing =>

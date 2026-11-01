@@ -55,7 +55,10 @@ class OngoingTag extends StatelessWidget {
   }
 }
 
-/// 期間（時計アイコン＋期間）
+/// 期間：［📅 2023年4月 → 2023年9月］ 6か月
+/// - 枠線だけの枠（下に並ぶスキルタグの塗りと見分けがつくように）
+/// - 進行中は終わりを「現在」にし、今日までの長さを出す
+/// - 「YYYY-MM ~ YYYY-MM」の形でない期間は、文字のまま出す
 class ProjectPeriod extends StatelessWidget {
   final Project project;
 
@@ -63,17 +66,41 @@ class ProjectPeriod extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(
-          Icons.schedule,
-          size: ProjectsListConfig.scheduleIconSize,
-          color: context.colors.textTertiary,
-        ),
-        const SizedBox(width: AppSizes.space4),
-        Text(project.period, style: AppStyles.cardMeta(context)),
-      ],
+    if (!project.hasValidPeriod) {
+      return Text(project.period, style: AppStyles.cardMeta(context));
+    }
+
+    final from = AppTexts.yearMonth(project.periodStart);
+    final to = project.isOngoing ? AppTexts.periodNow : AppTexts.yearMonth(project.periodEnd);
+    final duration = AppTexts.durationLabel(project.durationMonths);
+
+    return Semantics(
+      label: AppTexts.periodSemantics(from, to, duration),
+      excludeSemantics: true,
+      child: Wrap(
+        spacing: ProjectsListConfig.cardPeriodSpacing,
+        runSpacing: AppSizes.space4,
+        crossAxisAlignment: WrapCrossAlignment.center,
+        children: [
+          Container(
+            padding: ProjectsListConfig.cardPeriodPadding,
+            decoration: AppStyles.cardPeriod(context),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.calendar_today_outlined,
+                  size: ProjectsListConfig.scheduleIconSize,
+                  color: context.colors.textTertiary,
+                ),
+                const SizedBox(width: ProjectsListConfig.cardPeriodIconGap),
+                Text(AppTexts.periodSpan(from, to), style: AppStyles.cardPeriodText(context)),
+              ],
+            ),
+          ),
+          Text(duration, style: AppStyles.cardPeriodDuration(context)),
+        ],
+      ),
     );
   }
 }

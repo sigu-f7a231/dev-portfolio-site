@@ -370,4 +370,67 @@ class AppStyles {
 
   static TextStyle cardMeta(BuildContext context) =>
       _text(context).bodySmall!.copyWith(color: context.colors.textTertiary);
+
+  // ----------------------------------------------------------
+  // Projects：詳細ダイアログの Workflow（工程のステップ表示）
+  // ----------------------------------------------------------
+  /// 担当した工程は塗り、担当外は枠線だけ（small の角丸）
+  static BoxDecoration workflowStep(BuildContext context, {required bool done}) =>
+      BoxDecoration(
+        color: done ? context.colors.workflowDoneBackground : null,
+        border: Border.all(
+          color: done
+              ? context.colors.workflowDoneBackground
+              : context.colors.workflowPendingBorder,
+        ),
+        borderRadius: BorderRadius.circular(radiusMd),
+      );
+
+  static TextStyle workflowStepText(BuildContext context, {required bool done}) =>
+      _text(context).labelLarge!.copyWith(
+            color: done
+                ? context.colors.workflowDoneForeground
+                : context.colors.workflowPendingForeground,
+          );
+
+  static Color workflowStepIcon(BuildContext context, {required bool done}) => done
+      ? context.colors.workflowDoneForeground
+      : context.colors.workflowPendingForeground;
+
+  // ----------------------------------------------------------
+  // Projects：詳細ダイアログの値の枠（使用技術など。Workflow の「担当」とは色を分ける）
+  // ----------------------------------------------------------
+  static BoxDecoration detailChip(BuildContext context) => BoxDecoration(
+        color: context.colors.skillTagBackground,
+        borderRadius: BorderRadius.circular(radiusMd),
+      );
+
+  static TextStyle detailChipText(BuildContext context) =>
+      _text(context).labelLarge!.copyWith(color: context.colors.skillTagForeground);
+
+  /// 説明・詳細・期間の本文
+  static TextStyle detailText(BuildContext context) =>
+      _text(context).bodyMedium!.copyWith(height: 1.6, color: context.colors.modalValue);
+
+  /// 期間の矢印・カレンダーアイコンの色
+  static Color periodIcon(BuildContext context) => context.colors.textTertiary;
+
+  /// 期間の長さ（「6か月」）
+  static TextStyle periodDuration(BuildContext context) =>
+      _text(context).labelLarge!.copyWith(color: context.colors.textSecondary);
+
+  // ----------------------------------------------------------
+  // Projects：カード（List / Collection）の期間
+  // スキルタグ（塗り）と見分けがつくよう、枠線だけにする
+  // ----------------------------------------------------------
+  static BoxDecoration cardPeriod(BuildContext context) => BoxDecoration(
+        border: Border.all(color: context.colors.surfaceBorder),
+        borderRadius: BorderRadius.circular(radiusMd),
+      );
+
+  static TextStyle cardPeriodText(BuildContext context) =>
+      _text(context).labelMedium!.copyWith(color: context.colors.textSecondary);
+
+  static TextStyle cardPeriodDuration(BuildContext context) =>
+      _text(context).labelMedium!.copyWith(color: context.colors.textTertiary);
 }

@@ -118,6 +118,12 @@ class AppColors {
   final Color linkButtonBackground;
   final Color linkButtonForeground;
 
+  /// 詳細ダイアログの Workflow（担当した工程＝塗り／担当外＝枠線のみ）
+  final Color workflowDoneBackground;
+  final Color workflowDoneForeground;
+  final Color workflowPendingBorder;
+  final Color workflowPendingForeground;
+
   // ----------------------------------------------------------
   // 切替ボタン（List/Collection・Bar/Pie）
   // ----------------------------------------------------------
@@ -217,6 +223,10 @@ class AppColors {
     required this.modalClose,
     required this.linkButtonBackground,
     required this.linkButtonForeground,
+    required this.workflowDoneBackground,
+    required this.workflowDoneForeground,
+    required this.workflowPendingBorder,
+    required this.workflowPendingForeground,
     required this.projectsToggleActive,
     required this.skillsToggleActive,
     required this.toggleInactiveBackground,
@@ -341,6 +351,10 @@ class AppColors {
       modalClose: s.onSurfaceVariant,
       linkButtonBackground: s.primary,
       linkButtonForeground: s.onPrimary,
+      workflowDoneBackground: s.secondaryContainer,
+      workflowDoneForeground: s.onSecondaryContainer,
+      workflowPendingBorder: s.outlineVariant,
+      workflowPendingForeground: s.outline,
       // 切替（旧スタイル用。現在は SegmentedButton がテーマから色を取る）
       projectsToggleActive: s.secondaryContainer,
       skillsToggleActive: s.secondaryContainer,

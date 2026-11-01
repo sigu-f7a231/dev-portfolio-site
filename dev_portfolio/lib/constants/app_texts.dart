@@ -124,6 +124,11 @@ class AppTexts {
   static const String filterFrontend = 'Frontend';
   static const String filterSkills = 'Skills';
   static const String filterWorkflow = 'Workflow';
+  static const String filterPeriod = '期間';
+  static const String filterOngoingOnly = '進行中のみ';
+  static const String periodAll = '指定なし（すべての期間）';
+  static String periodRange(int from, int to) => from == to ? '$from年' : '$from年〜$to年';
+  static String periodSingleYear(int year) => 'すべて $year 年のプロジェクトです';
 
   static const String viewDetails = '詳細を見る';
   static const String ongoing = '進行中';
@@ -151,9 +156,25 @@ class AppTexts {
   static const String fieldAi = 'AI Services';
   static const String fieldSkills = 'Skills';
   static const String fieldPeriod = '期間';
+  static const String periodNow = '現在';
+  static String periodSpan(String from, String to) => '$from → $to';
+  static String yearMonth(DateTime d) => '${d.year}年${d.month}月';
+
+  /// 期間の長さ（例：6か月 / 1年 / 1年3か月）
+  static String durationLabel(int months) {
+    final y = months ~/ 12, m = months % 12;
+    if (y == 0) return '$mか月';
+    if (m == 0) return '$y年';
+    return '$y年$mか月';
+  }
+
+  static String periodSemantics(String from, String to, String duration) =>
+      '期間 $from から $to まで、$duration';
   static const String fieldWorkflow = 'Workflow';
-  static const String workflowDone = '✅';
-  static const String workflowNotDone = '❌';
+  static const String workflowDone = '担当';
+  static const String workflowNotDone = '担当外';
+  static String workflowStepSemantics(String step, bool done) =>
+      '$step：${done ? workflowDone : workflowNotDone}';
 
   // ----------------------------------------------------------
   // Skills

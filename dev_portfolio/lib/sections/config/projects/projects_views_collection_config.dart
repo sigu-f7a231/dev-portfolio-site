@@ -22,7 +22,7 @@ class ProjectsCollectionConfig {
   }
 
   /// カード 1 枚の高さ（列数が変わっても高さは一定）
-  static const double cardHeight = 210;
+  static const double cardHeight = 236; // 期間の枠 1 行分を含む
 
   /// 高さ [height] のエリアに収まる行数（最低 1 行）
   static int rowsFor(double height) {

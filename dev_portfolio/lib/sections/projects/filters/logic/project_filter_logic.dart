@@ -152,7 +152,17 @@ class ProjectFilterLogic {
       final okWorkflow =
           matchWorkflow(f['workflow'] ?? [], p.workflow);
 
-      return okServer &&
+      // 期間：指定した年の範囲に少しでも重なれば残す
+      final okPeriod = !state.hasPeriod ||
+          (!p.periodStart.isAfter(DateTime(state.toYear!, 12, 31)) &&
+              !p.periodEnd.isBefore(DateTime(state.fromYear!, 1, 1)));
+
+      // 進行中のみ
+      final okOngoing = !state.ongoingOnly || p.isOngoing;
+
+      return okPeriod &&
+          okOngoing &&
+          okServer &&
           okDb &&
           okTools &&
           okBackend &&

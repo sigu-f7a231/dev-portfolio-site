@@ -57,7 +57,7 @@ dev-portfolio-site/
    - 表示する文言は `constants/app_texts.dart` の `HeroContent` / `AboutContent` にまとめてある
 3. **Skills** — ツールバー（Work/Private セグメント・「カテゴリ」ボタン＝今のカテゴリ名を表示・Bar/Pie アイコン切替）→ カテゴリパネル（Projects のフィルターと同じ作り。インフラ／開発／クラウド・AI／工程のグループから 1 つだけ選び「反映」でグラフ切替。データのないカテゴリは出さない）→ グラフ
    - セグメントは `lib/widgets/app_segment.dart`（`AppSegment`）を Projects と共通で使う
-4. **Projects** — ツールバー（Work/Private セグメント＋件数・フィルターボタン＋適用数バッジ・List/Collection アイコン切替）→ フィルターパネル（開閉式、グループは幅 720 以上で 2 列）→ 適用中フィルター（× で個別解除・すべて解除）→ 一覧（List は 5 件ずつ、Collection は「列数 × 表示エリアに収まる行数」ずつページング＝行がそろう。`ProjectsCollectionConfig.itemsPerPage`）→ 詳細モーダル（`url_launcher`）
+4. **Projects** — ツールバー（Work/Private セグメント＋件数・フィルターボタン＋適用数バッジ・List/Collection アイコン切替）→ フィルターパネル（開閉式。先頭に「期間」＝年の範囲スライダー（指定範囲に少しでも重なるプロジェクトを残す）と「進行中のみ」、その下に技術・工程のチップ群。グループは幅 720 以上で 2 列）→ 適用中フィルター（× で個別解除・すべて解除）→ 一覧（List は 5 件ずつ、Collection は「列数 × 表示エリアに収まる行数」ずつページング＝行がそろう。`ProjectsCollectionConfig.itemsPerPage`）→ 詳細モーダル（`url_launcher`）
    - 状態（Work/Private・表示形式・フィルター）は `ProjectsSection` が持つ。タブ切替でフィルターはリセット
    - Collection は幅で列数が変わる（520 未満 1 / 520〜 2 / 820〜 3 / 1100〜 4 列、`ProjectsCollectionConfig.columnBreakpoints`）。カードは高さ固定で、タグは 3 つ＋「+N」
 
@@ -77,7 +77,7 @@ sessionStorage['work'|'private'] ─┘   優先順位: sessionStorage > メモ�
 
 - **YAML のアップロード**: Header のダイアログでファイルを選択 → `_validateAgainstTemplate` で検証（`projects` 配列、各要素に `title` が必須、Work は `workflow` 必須、Private は `workflow` があると NG）→ `html.window.sessionStorage[dataType]` に保存 → `onYamlStateChanged` → `HomePage` が `ValueKey` を増やして Skills/Projects を作り直し、再読込させる。
 - **スキル集計**: カテゴリごとに出現回数を数え、合計に対する % にする。`利用なし` は除外。`workflow` は true の割合（%）。
-- **プロジェクトのフィルタ**: `ProjectFilterState.selectedFilters`（キーは camelCase、例: `serverOS`, `backendFrameworks`）。`ProjectFilterLogic.apply` は選択した値をすべて含むか（AND、部分一致）で判定する。workflow は日本語ラベルを英語キーに変換してから照合する。
+- **プロジェクトのフィルタ**: `ProjectFilterState`（`selectedFilters`：キーは camelCase、例: `serverOS`, `backendFrameworks`／`fromYear`・`toYear`：期間（年）／`ongoingOnly`：進行中のみ）。`ProjectFilterLogic.apply` は選択した値をすべて含むか（AND、部分一致）で判定する。workflow は日本語ラベルを英語キーに変換してから照合する。
 - 一覧は `periodStart` の昇順で並ぶ。
 
 ### YAML スキーマ（1 プロジェクト）

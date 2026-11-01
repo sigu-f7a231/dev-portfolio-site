@@ -7,13 +7,15 @@ import '../../../../constants/app_texts.dart';
 /// 適用中のフィルター（チップの × で 1 つずつ外せる）
 class ProjectActiveFilters extends StatelessWidget {
   final ProjectFilterState filterState;
-  final void Function(String key, String value) onRemove;
+
+  /// 条件を 1 つ外したあとの状態を返す
+  final ValueChanged<ProjectFilterState> onChanged;
   final VoidCallback onClearAll;
 
   const ProjectActiveFilters({
     super.key,
     required this.filterState,
-    required this.onRemove,
+    required this.onChanged,
     required this.onClearAll,
   });
 
@@ -31,11 +33,14 @@ class ProjectActiveFilters extends StatelessWidget {
       children: [
         Text(AppTexts.filterActive, style: AppStyles.filterGroupLabel(context)),
         // M3 の InputChip（× で外す）
-        ...entries.map((e) => InputChip(
-              label: Text(e.value),
-              onDeleted: () => onRemove(e.key, e.value),
-              deleteButtonTooltipMessage: AppTexts.filterRemoveTooltip(e.value),
-            )),
+        if (filterState.hasPeriod)
+          _chip(
+            AppTexts.periodRange(filterState.fromYear!, filterState.toYear!),
+            () => onChanged(filterState.withoutPeriod()),
+          ),
+        if (filterState.ongoingOnly)
+          _chip(AppTexts.filterOngoingOnly, () => onChanged(filterState.withoutOngoing())),
+        ...entries.map((e) => _chip(e.value, () => onChanged(filterState.without(e.key, e.value)))),
         TextButton(
           onPressed: onClearAll,
           child: const Text(AppTexts.filterClearAll),
@@ -43,4 +48,10 @@ class ProjectActiveFilters extends StatelessWidget {
       ],
     );
   }
+
+  Widget _chip(String label, VoidCallback onDeleted) => InputChip(
+        label: Text(label),
+        onDeleted: onDeleted,
+        deleteButtonTooltipMessage: AppTexts.filterRemoveTooltip(label),
+      );
 }

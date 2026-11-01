@@ -44,6 +44,7 @@ class AppTheme {
       dialogTheme: DialogThemeData(backgroundColor: c.dialogBackground),
       // 進捗インジケータは最新の M3 仕様（トラックとの隙間・丸い端）を使う
       progressIndicatorTheme: const ProgressIndicatorThemeData(year2023: false),
+      sliderTheme: const SliderThemeData(year2023: false),
       snackBarTheme: const SnackBarThemeData(behavior: SnackBarBehavior.floating),
       tooltipTheme: TooltipThemeData(
         decoration: BoxDecoration(

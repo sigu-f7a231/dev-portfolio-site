@@ -93,9 +93,9 @@ class _ProjectsSectionState extends State<ProjectsSection> {
                             key: ValueKey(_isWork),
                             projects: current,
                             isWork: _isWork,
-                            initialFilters: _filterState.selectedFilters,
-                            onApply: (filters) => setState(() {
-                              _filterState = ProjectFilterState(selectedFilters: filters);
+                            initialState: _filterState,
+                            onApply: (state) => setState(() {
+                              _filterState = state;
                               _filterOpen = false;
                             }),
                             onClose: () => setState(() => _filterOpen = false),
@@ -110,9 +110,7 @@ class _ProjectsSectionState extends State<ProjectsSection> {
                     padding: const EdgeInsets.only(top: AppSizes.space12),
                     child: ProjectActiveFilters(
                       filterState: _filterState,
-                      onRemove: (key, value) => setState(() {
-                        _filterState = _filterState.without(key, value);
-                      }),
+                      onChanged: (state) => setState(() => _filterState = state),
                       onClearAll: () => setState(() {
                         _filterState = ProjectFilterState.initial();
                       }),
