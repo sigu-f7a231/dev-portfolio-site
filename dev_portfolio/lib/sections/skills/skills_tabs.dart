@@ -7,6 +7,7 @@ import '../config/skills/skills_tabs_config.dart';
 import '../../theme/app_theme.dart';
 import '../../constants/app_sizes.dart';
 import '../../constants/app_texts.dart';
+import '../../widgets/app_loading_indicator.dart';
 
 class SkillsTabs extends StatefulWidget {
   final TabController tabController;
@@ -53,7 +54,7 @@ class _SkillsTabsState extends State<SkillsTabs> {
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return const Center(child: AppLoadingIndicator());
     }
 
     // Map -> List<MapEntry> に変換して変数に格納

@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import '../theme/app_theme.dart';
 import '../theme/app_styles.dart';
 import '../constants/app_sizes.dart';
 
 /// フィルターの 1 グループ（見出し＋選べるチップ）
 /// Projects のフィルター（複数選択）と Skills のカテゴリ（1 つだけ選択）で共通に使う。
 /// 選択の仕方（複数 / 1 つ）は呼び出し側の onSelected で決める。
+/// チップは Material 3 の FilterChip（色・形はテーマから自動）。
 class FilterChipsSection extends StatelessWidget {
   final String? title;
   final List<String> items;
@@ -26,8 +26,6 @@ class FilterChipsSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.colors;
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -40,24 +38,11 @@ class FilterChipsSection extends StatelessWidget {
           spacing: AppSizes.space8,
           runSpacing: AppSizes.space8,
           children: items.map((item) {
-            final isSelected = selectedItems.contains(item);
-
             return FilterChip(
               label: Text(labelOf?.call(item) ?? item),
-              selected: isSelected,
+              selected: selectedItems.contains(item),
               onSelected: (_) => onSelected(item),
               showCheckmark: true,
-              checkmarkColor: colors.chipSelectedText,
-              selectedColor: colors.chipSelected,
-              backgroundColor: colors.chipBackground,
-              side: BorderSide(
-                color: isSelected ? colors.chipSelected : colors.surfaceBorder,
-              ),
-              shape: const StadiumBorder(),
-              labelStyle: TextStyle(
-                color: isSelected ? colors.chipSelectedText : colors.chipText,
-                fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-              ),
             );
           }).toList(),
         ),

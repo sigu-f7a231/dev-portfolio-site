@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../config/projects/projects_pagination_config.dart';
 import '../../../theme/app_theme.dart';
 
+/// ページ送り（M3：現在ページは FilledButton、それ以外は TextButton。押したときの反応・キーボード操作に対応）
 class ProjectsPaginationUI extends StatelessWidget {
   final int currentPage;
   final int totalPages;
@@ -22,6 +23,14 @@ class ProjectsPaginationUI extends StatelessWidget {
     }
 
     final colors = context.colors;
+    final pageStyle = ButtonStyle(
+      minimumSize: const WidgetStatePropertyAll(
+        Size.square(ProjectsPaginationConfig.pageButtonSize),
+      ),
+      padding: const WidgetStatePropertyAll(EdgeInsets.zero),
+      shape: const WidgetStatePropertyAll(CircleBorder()),
+      textStyle: WidgetStatePropertyAll(Theme.of(context).textTheme.labelLarge),
+    );
 
     return Padding(
       padding: ProjectsPaginationConfig.containerPadding,
@@ -33,7 +42,7 @@ class ProjectsPaginationUI extends StatelessWidget {
             icon: const Icon(Icons.chevron_left),
             iconSize: ProjectsPaginationConfig.iconSize,
             color: colors.paginationIcon,
-            onPressed: () => onPageChanged(currentPage > 1 ? currentPage - 1 : 1),
+            onPressed: currentPage > 1 ? () => onPageChanged(currentPage - 1) : null,
           ),
 
           // ページ番号
@@ -41,26 +50,22 @@ class ProjectsPaginationUI extends StatelessWidget {
             final page = index + 1;
             final isActive = page == currentPage;
 
-            return GestureDetector(
-              onTap: () => onPageChanged(page),
-              child: Container(
-                margin: ProjectsPaginationConfig.pageMargin,
-                padding: ProjectsPaginationConfig.pagePadding,
-                decoration: BoxDecoration(
-                  color: isActive ? colors.paginationActive : colors.paginationInactive,
-                  borderRadius: BorderRadius.circular(ProjectsPaginationConfig.borderRadius),
-                ),
-                child: Text(
-                  '$page',
-                  style: TextStyle(
-                    fontSize: ProjectsPaginationConfig.fontSize,
-                    fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
-                    color: isActive
-                        ? colors.paginationActiveText
-                        : colors.paginationInactiveText,
-                  ),
-                ),
-              ),
+            return Padding(
+              padding: ProjectsPaginationConfig.pageMargin,
+              child: isActive
+                  ? FilledButton(
+                      onPressed: () {},
+                      style: pageStyle,
+                      child: Text('$page'),
+                    )
+                  : TextButton(
+                      onPressed: () => onPageChanged(page),
+                      style: pageStyle.copyWith(
+                        foregroundColor:
+                            WidgetStatePropertyAll(colors.paginationInactiveText),
+                      ),
+                      child: Text('$page'),
+                    ),
             );
           }),
 
@@ -69,9 +74,7 @@ class ProjectsPaginationUI extends StatelessWidget {
             icon: const Icon(Icons.chevron_right),
             iconSize: ProjectsPaginationConfig.iconSize,
             color: colors.paginationIcon,
-            onPressed: () => onPageChanged(
-              currentPage < totalPages ? currentPage + 1 : totalPages,
-            ),
+            onPressed: currentPage < totalPages ? () => onPageChanged(currentPage + 1) : null,
           ),
         ],
       ),

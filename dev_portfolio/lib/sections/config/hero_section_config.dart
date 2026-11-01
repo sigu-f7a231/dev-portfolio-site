@@ -24,10 +24,10 @@ class HeroSectionConfig {
   static const EdgeInsets padding = EdgeInsets.symmetric(horizontal: 32, vertical: 48);
 
   // 文字サイズ（wide / narrow）
-  static const double nameFontSizeWide = 56;
-  static const double nameFontSizeNarrow = 36;
-  static const double roleFontSize = 20;
-  static const double taglineFontSize = 17;
+  static const double nameFontSizeWide = 57; // M3 display large
+  static const double nameFontSizeNarrow = 36; // M3 display small
+  static const double roleFontSize = 22; // M3 title large
+  static const double taglineFontSize = 16; // M3 body large
 
   /// 紹介文の最大幅（1 行が長くなりすぎないように）
   static const double taglineMaxWidth = 560;

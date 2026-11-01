@@ -2,13 +2,14 @@
 import 'package:flutter/material.dart';
 import '../../../constants/app_sizes.dart';
 import '../../../constants/app_texts.dart';
+import '../../../widgets/app_loading_indicator.dart';
 
 // 色・文字色・タグ・モーダルの見た目は lib/theme/（app_colors.dart / app_styles.dart）で管理。
 // ここにはレイアウト用のサイズ・余白だけを置く。
 class ProjectsListConfig {
   static const separator = SizedBox(height: AppSizes.space12);
 
-  static const loading = Center(child: CircularProgressIndicator());
+  static const loading = Center(child: AppLoadingIndicator());
   static const empty = Center(child: Text(AppTexts.noProjects));
 
   // =========================

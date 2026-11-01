@@ -19,8 +19,8 @@ class AboutSectionConfig {
   /// 横並び時の見出し列の幅
   static const double termWidth = 140;
 
-  static const double headingFontSize = 40;
-  static const double introFontSize = 18;
+  static const double headingFontSize = 36; // M3 display small
+  static const double introFontSize = 16; // M3 body large
 
   static const SizedBox headingSpacing = SizedBox(height: 24);
   static const SizedBox introSpacing = SizedBox(height: 48);

@@ -57,22 +57,13 @@ class ProjectsToolbar extends StatelessWidget {
             OutlinedButton.icon(
               onPressed: onFilterPressed,
               style: AppStyles.toolbarButton(context, active: filterOpen),
-              icon: const Icon(Icons.tune, size: ProjectsSectionConfig.filterIconSize),
-              label: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Text(AppTexts.filter),
-                  if (activeFilterCount > 0) ...[
-                    const SizedBox(width: AppSizes.space8),
-                    Container(
-                      padding: ProjectsSectionConfig.countBadgePadding,
-                      decoration: AppStyles.countBadge(context),
-                      child: Text('$activeFilterCount',
-                          style: AppStyles.countBadgeText(context)),
-                    ),
-                  ],
-                ],
+              // 適用中の条件数は M3 の Badge でアイコンに重ねる
+              icon: Badge.count(
+                count: activeFilterCount,
+                isLabelVisible: activeFilterCount > 0,
+                child: const Icon(Icons.tune, size: ProjectsSectionConfig.filterIconSize),
               ),
+              label: const Text(AppTexts.filter),
             ),
             const SizedBox(width: AppSizes.space12),
             ProjectsViewSwitch(

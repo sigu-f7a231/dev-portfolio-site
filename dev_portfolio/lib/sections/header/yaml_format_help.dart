@@ -1,37 +1,50 @@
 // lib/sections/header/yaml_format_help.dart
 //
 // YAML アップロードダイアログ（Work / Private）用の補助 UI
-// - フォーマットファイル（assets/data/format_*.yaml）のダウンロードボタン
+// - フォーマットファイル（assets/data/format_*.yaml）を「名前を付けて保存」するボタン
 // - 書き方の説明を開く ⓘ ボタン
 // DesktopHeader / MobileHeader の両方から使う。
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'dart:html' as html; // ブラウザでファイルをダウンロードさせるため
 import '../../theme/app_theme.dart';
 import '../../theme/app_styles.dart';
 import '../../utils/language_utils.dart';
 import '../../constants/app_sizes.dart';
+import '../../utils/file_saver.dart';
 import '../../constants/app_texts.dart';
+import '../../widgets/app_loading_indicator.dart';
 
 /// dataType（'work' / 'private'）に対応するフォーマットファイル名
 String yamlFormatFileName(String dataType) =>
     dataType == 'work' ? 'format_work.yaml' : 'format_private.yaml';
 
-/// フォーマットファイルをブラウザでダウンロードさせる
-Future<void> downloadYamlFormat(String dataType) async {
+/// フォーマットファイルを「名前を付けて保存」する（保存できたらメッセージを出す）
+Future<void> saveYamlFormat(BuildContext context, String dataType) async {
   final fileName = yamlFormatFileName(dataType);
-  final content = await rootBundle.loadString('assets/data/$fileName');
-
-  final blob = html.Blob([content], 'text/yaml;charset=utf-8');
-  final url = html.Url.createObjectUrlFromBlob(blob);
-  html.AnchorElement(href: url)
-    ..download = fileName
-    ..click();
-  // ダウンロード開始を待ってから URL を解放する
-  Future.delayed(AppSizes.downloadUrlRevokeDelay, () => html.Url.revokeObjectUrl(url));
+  try {
+    final content = await rootBundle.loadString('assets/data/$fileName');
+    final result = await FileSaver.saveTextAs(
+      fileName: fileName,
+      text: content,
+      description: AppTexts.yamlFileDescription,
+      mimeType: 'text/yaml',
+      extensions: const ['.yaml', '.yml'],
+    );
+    if (result == FileSaveResult.saved && context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(AppTexts.formatSaved(fileName))),
+      );
+    }
+  } catch (e) {
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(AppTexts.downloadFailed(e))),
+      );
+    }
+  }
 }
 
-/// 「フォーマットをダウンロード」ボタン + ⓘ ボタン
+/// 「フォーマットを保存」ボタン + ⓘ ボタン
 class YamlFormatTools extends StatelessWidget {
   final String dataType; // 'work' or 'private'
 
@@ -45,18 +58,8 @@ class YamlFormatTools extends StatelessWidget {
           child: Tooltip(
             message: AppTexts.downloadFormatTooltip(yamlFormatFileName(dataType)),
             child: TextButton.icon(
-              onPressed: () async {
-                try {
-                  await downloadYamlFormat(dataType);
-                } catch (e) {
-                  if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(AppTexts.downloadFailed(e))),
-                    );
-                  }
-                }
-              },
-              icon: const Icon(Icons.download),
+              onPressed: () => saveYamlFormat(context, dataType),
+              icon: const Icon(Icons.save_alt),
               label: const Text(
                 AppTexts.downloadFormat,
                 overflow: TextOverflow.ellipsis,
@@ -151,9 +154,9 @@ void showYamlFormatHelp(BuildContext context, String dataType) {
         ),
         actions: [
           TextButton.icon(
-            onPressed: () => downloadYamlFormat(dataType),
-            icon: const Icon(Icons.download),
-            label: const Text(AppTexts.download),
+            onPressed: () => saveYamlFormat(context, dataType),
+            icon: const Icon(Icons.save_alt),
+            label: const Text(AppTexts.save),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
@@ -218,7 +221,7 @@ class _YamlSampleState extends State<_YamlSample> {
             return Text(AppTexts.helpSampleLoadFailed, style: AppStyles.dialogError(context));
           }
           if (!snapshot.hasData) {
-            return const Center(child: CircularProgressIndicator());
+            return const Center(child: AppLoadingIndicator());
           }
           return SelectableText(snapshot.data!, style: AppStyles.codeText(context));
         },

@@ -11,6 +11,7 @@ import 'filters/state/project_filter_state.dart';
 import '../config/projects/projects_section_config.dart';
 import '../../theme/app_theme.dart';
 import '../../constants/app_sizes.dart';
+import '../../widgets/app_loading_indicator.dart';
 
 /// Projects セクション
 /// 状態（Work/Private・表示形式・フィルター）はここで持ち、ツールバー・パネル・一覧に渡す
@@ -129,7 +130,7 @@ class _ProjectsSectionState extends State<ProjectsSection> {
                           filterState: _filterState,
                           showCollection: _showCollection,
                         )
-                      : const Center(child: CircularProgressIndicator()),
+                      : const Center(child: AppLoadingIndicator()),
                 ),
               ],
             );

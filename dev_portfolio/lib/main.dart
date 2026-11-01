@@ -3,9 +3,18 @@ import 'package:flutter/material.dart';
 import 'pages/home_page.dart';
 import 'theme/app_theme.dart';
 import 'constants/app_texts.dart';
+import 'utils/app_ready.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // 起動時のローディング表示（web/index.html）の間に、最初の表示に使うデータを読み込んでおく
+  await AppReady.preload();
+
   runApp(const DevPortfolioApp());
+
+  // 描画が落ち着いたら、ローディング表示を消してよいと index.html に知らせる
+  AppReady.notifyWhenSettled();
 }
 
 class DevPortfolioApp extends StatelessWidget {

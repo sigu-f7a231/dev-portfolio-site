@@ -119,7 +119,7 @@ class _Intro extends StatelessWidget {
           spacing: AppSizes.space12,
           runSpacing: AppSizes.space12,
           children: [
-            ElevatedButton(
+            FilledButton(
               onPressed: onSkillsPressed,
               style: AppStyles.heroPrimaryButton(context),
               child: const Text(HeroContent.skillsButtonLabel),

@@ -6,7 +6,6 @@ import '../sections/about_section.dart';
 import '../sections/skills/skills_section.dart';
 import '../sections/projects/projects_section.dart';
 import '../controllers/scroll_controller.dart';
-import '../theme/app_theme.dart';
 import '../constants/app_sizes.dart';
 import '../constants/app_texts.dart';
 
@@ -19,55 +18,47 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   final SectionScrollController scroll = SectionScrollController();
+
+  /// Drawer の並び順に対応するセクション
+  static const List<String> _sections = ['home', 'about', 'skills', 'projects'];
   int _refreshKey = 0;        // Projects用の再描画キー
   int _skillsRefreshKey = 0;  // ★ Skills専用の再描画キーを追加
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.colors;
-
     return Scaffold(
-      drawer: Drawer(
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: [
-            DrawerHeader(
-              decoration: BoxDecoration(color: colors.drawerHeaderBackground),
-              child: Text(
-                AppTexts.appTitle,
-                style: TextStyle(color: colors.drawerHeaderForeground, fontSize: AppSizes.drawerTitleFontSize),
-              ),
+      // M3 の NavigationDrawer（スマホ幅のときにメニューから開く）
+      drawer: NavigationDrawer(
+        selectedIndex: null, // 1 ページ内のスクロールなので選択状態は持たない
+        onDestinationSelected: (index) {
+          scroll.scrollTo(_sections[index]);
+          Navigator.pop(context);
+        },
+        children: [
+          Padding(
+            padding: AppSizes.drawerHeaderPadding,
+            child: Text(
+              AppTexts.appTitle,
+              style: Theme.of(context).textTheme.titleSmall,
             ),
-            ListTile(
-              title: const Text(AppTexts.navHome),
-              onTap: () {
-                scroll.scrollTo('home');
-                Navigator.pop(context);
-              },
-            ),
-            ListTile(
-              title: const Text(AppTexts.navAbout),
-              onTap: () {
-                scroll.scrollTo('about');
-                Navigator.pop(context);
-              },
-            ),
-            ListTile(
-              title: const Text(AppTexts.navSkills),
-              onTap: () {
-                scroll.scrollTo('skills');
-                Navigator.pop(context);
-              },
-            ),
-            ListTile(
-              title: const Text(AppTexts.navProjects),
-              onTap: () {
-                scroll.scrollTo('projects');
-                Navigator.pop(context);
-              },
-            ),
-          ],
-        ),
+          ),
+          const NavigationDrawerDestination(
+            icon: Icon(Icons.home_outlined),
+            label: Text(AppTexts.navHome),
+          ),
+          const NavigationDrawerDestination(
+            icon: Icon(Icons.person_outline),
+            label: Text(AppTexts.navAbout),
+          ),
+          const NavigationDrawerDestination(
+            icon: Icon(Icons.bar_chart),
+            label: Text(AppTexts.navSkills),
+          ),
+          const NavigationDrawerDestination(
+            icon: Icon(Icons.work_outline),
+            label: Text(AppTexts.navProjects),
+          ),
+        ],
       ),
       body: Column(
         children: [

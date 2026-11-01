@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <!--
+    `--base-href`（GitHub Pages では "/dev-portfolio-site/"）でビルド時に置き換わる。
+  -->
+  <base href="$FLUTTER_BASE_HREF">
+
+  <meta charset="UTF-8">
+  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="業務と個人開発のプロジェクト、使用技術をまとめた開発者ポートフォリオ（Flutter Web）">
+
+  <!-- iOS meta tags & icons -->
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="DevPortfolio">
+  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="favicon.png"/>
+
+  <title>DevPortfolio</title>
+  <link rel="manifest" href="manifest.json">
+
+  <!--
+    起動中のローディング表示（Flutter のエンジンを読み込むまでの数秒間）
+    - Material 3 の Progress indicator（円形・不確定）
+      https://m3.material.io/components/progress-indicators/overview
+    - Flutter の CircularProgressIndicator（year2023: false＝最新仕様）と同じ動きを SVG で再現：
+      弧（primary）とトラック（secondaryContainer）の間に 4px の隙間、線は 4px で端が丸い
+    - 色は lib/theme/app_colors.dart の seed（Colors.blueAccent）から M3 が作る
+      primary / secondaryContainer / surface の近似値。Dart 側の色を変えたらここも合わせる
+    - アプリ側の 'app-ready'（lib/utils/app_ready.dart）を受けて、最低 1.5 秒は表示してからフェードして消える
+  -->
+  <style>
+    :root {
+      --m3-primary: #415F91;
+      --m3-secondary-container: #DAE2F9;
+      --m3-surface: #F9F9FF;
+      --m3-on-surface-variant: #44474E;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --m3-primary: #AAC7FF;
+        --m3-secondary-container: #3E4759;
+        --m3-surface: #111318;
+        --m3-on-surface-variant: #C4C6D0;
+      }
+    }
+    html, body { margin: 0; height: 100%; background: var(--m3-surface); }
+
+    #app-loading {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      background: var(--m3-surface);
+      transition: opacity 300ms ease-out;
+      z-index: 9999;
+    }
+    #app-loading.is-done { opacity: 0; pointer-events: none; }
+
+    /* M3 Progress indicator（円形・直径 40px） */
+    .m3-progress { width: 40px; height: 40px; }
+    .m3-progress path { fill: none; stroke-width: 4; stroke-linecap: round; }
+    .m3-progress .active { stroke: var(--m3-primary); }
+    .m3-progress .track { stroke: var(--m3-secondary-container); }
+    .m3-loading-label {
+      font: 500 14px/20px system-ui, -apple-system, "Segoe UI", "Hiragino Sans", "Noto Sans JP", sans-serif;
+      letter-spacing: 0.1px;
+      color: var(--m3-on-surface-variant);
+    }
+
+  </style>
+</head>
+<body>
+  <div id="app-loading">
+    <svg class="m3-progress" viewBox="0 0 40 40" role="progressbar" aria-label="読み込み中">
+      <path class="track" id="m3-track"></path>
+      <path class="active" id="m3-active"></path>
+    </svg>
+    <div class="m3-loading-label">読み込み中…</div>
+  </div>
+
+  <script>
+    // ===== M3 円形 Progress indicator（Flutter の CircularProgressIndicator と同じ計算） =====
+    (function () {
+      var PI = Math.PI, TAU = PI * 2;
+      var PATH_MS = 1333;      // 弧が伸びて縮む 1 回分
+      var ROTATION_MS = 2222;  // 全体の回転 1 周分
+      var C = 20, STROKE = 4, R = C - STROKE / 2;  // 直径 40px・線 4px
+      var GAP = 4;             // 弧とトラックの隙間（M3 の trackGap）
+      var START = -PI / 2;     // 12 時の位置から
+
+      // Curves.fastOutSlowIn = cubic(0.4, 0.0, 0.2, 1.0)
+      function cubic(x1, y1, x2, y2) {
+        function b(t, p1, p2) { var u = 1 - t; return 3 * u * u * t * p1 + 3 * u * t * t * p2 + t * t * t; }
+        return function (x) {
+          var lo = 0, hi = 1, t = x;
+          for (var i = 0; i < 24; i++) { t = (lo + hi) / 2; if (b(t, x1, x2) < x) lo = t; else hi = t; }
+          return b(t, y1, y2);
+        };
+      }
+      var fastOutSlowIn = cubic(0.4, 0.0, 0.2, 1.0);
+      function interval(v, a, b) { return fastOutSlowIn(Math.min(1, Math.max(0, (v - a) / (b - a)))); }
+
+      function arc(from, sweep) {
+        if (sweep <= 0) return '';
+        var x1 = C + R * Math.cos(from), y1 = C + R * Math.sin(from);
+        var x2 = C + R * Math.cos(from + sweep), y2 = C + R * Math.sin(from + sweep);
+        return 'M' + x1.toFixed(3) + ' ' + y1.toFixed(3) +
+          'A' + R + ' ' + R + ' 0 ' + (sweep > PI ? 1 : 0) + ' 1 ' + x2.toFixed(3) + ' ' + y2.toFixed(3);
+      }
+
+      var active = document.getElementById('m3-active');
+      var track = document.getElementById('m3-track');
+      // 丸い端の分も含めた、隙間の角度
+      var gapAngle = (GAP + STROKE) / R;
+
+      function draw(t) {
+        var path = (t % PATH_MS) / PATH_MS;          // 0..1（伸び縮み）
+        var head = interval(path, 0, 0.5);           // 先端
+        var tail = interval(path, 0.5, 1);           // 後端
+        var rotation = (t % ROTATION_MS) / ROTATION_MS;
+        var start = START + tail * 1.5 * PI + rotation * TAU + path * 0.5 * PI;
+        var sweep = Math.max((head - tail) * 1.5 * PI, 0.001);
+        active.setAttribute('d', arc(start, sweep));
+        track.setAttribute('d', arc(start + sweep + gapAngle, TAU - sweep - gapAngle * 2));
+      }
+
+      // 動きを減らす設定の人には、止まった状態で表示する
+      if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        draw(PATH_MS * 0.5);
+        return;
+      }
+      var begin = performance.now();
+      (function frame(now) {
+        if (!document.getElementById('app-loading')) return; // 消えたら止める
+        draw(now - begin);
+        requestAnimationFrame(frame);
+      })(begin);
+    })();
+  </script>
+  <script>
+    // ===== ローディング表示を消すタイミング =====
+    // アプリ側（lib/utils/app_ready.dart）から 'app-ready' が届いたら消す。
+    // - MIN_MS：一瞬だけ出てチラつかないよう、最低この時間は表示する
+    // - SETTLE_MS：合図のあと少し待ってから消す（描画を確実に終わらせる）
+    // - FALLBACK_MS：合図が届かない場合でも、最初の描画からこの時間で消す（出しっぱなし防止）
+    (function () {
+      var MIN_MS = 1500, SETTLE_MS = 300, FALLBACK_MS = 4000;
+      var shownAt = performance.now(), hiding = false;
+
+      function hide() {
+        if (hiding) return;
+        hiding = true;
+        var wait = Math.max(0, MIN_MS - (performance.now() - shownAt)) + SETTLE_MS;
+        setTimeout(function () {
+          var el = document.getElementById('app-loading');
+          if (!el) return;
+          el.classList.add('is-done');
+          setTimeout(function () { el.remove(); }, 350);
+        }, wait);
+      }
+
+      window.addEventListener('app-ready', hide);
+      window.addEventListener('flutter-first-frame', function () { setTimeout(hide, FALLBACK_MS); });
+    })();
+  </script>
+  <script src="flutter_bootstrap.js" async></script>
+</body>
+</html>

@@ -13,7 +13,8 @@ class ProjectsPaginationConfig {
   static const pageMargin =
       EdgeInsets.symmetric(horizontal: 4);
 
-  static const borderRadius = 6.0;
+  /// ページ番号ボタンの大きさ（丸いボタン）
+  static const pageButtonSize = 40.0;
 
   // =========================
   // Typography

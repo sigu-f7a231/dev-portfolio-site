@@ -16,14 +16,10 @@ class ProjectsSectionConfig {
   // =========================
   // ツールバー（Work/Private・フィルター・表示切替）
   // =========================
-  // セグメントのサイズは lib/constants/app_sizes.dart（segment*）
+  // Work/Private・List/Collection は M3 の SegmentedButton（lib/widgets/app_segment.dart）
 
   /// フィルターボタンのアイコン
   static const double filterIconSize = 18;
-
-  /// 件数バッジ
-  static const EdgeInsets countBadgePadding =
-      EdgeInsets.symmetric(horizontal: AppSizes.space6, vertical: AppSizes.space2);
 
   // =========================
   // フィルターパネル

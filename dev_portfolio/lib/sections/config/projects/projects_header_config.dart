@@ -6,7 +6,7 @@ import '../../../constants/app_sizes.dart';
 /// 色は lib/theme/app_colors.dart、文字の見た目は lib/theme/app_styles.dart で管理
 class ProjectsWidgetsHeaderConfig {
   /// セクションタイトルの文字サイズ
-  static const double titleFontSize = 22;
+  static const double titleFontSize = 28; // M3 headline medium（Skills と同じ）
 
   /// セクションタイトルのパディング
   static const EdgeInsets titlePadding =

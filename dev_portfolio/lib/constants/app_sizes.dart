@@ -42,25 +42,28 @@ class AppSizes {
   /// ダウンロード用の一時 URL を解放するまでの待ち時間
   static const Duration downloadUrlRevokeDelay = Duration(seconds: 1);
 
-  // ----------------------------------------------------------
-  // セグメント（Work/Private・List/Collection・Bar/Pie で共通。lib/widgets/app_segment.dart）
-  // ----------------------------------------------------------
-  /// 外枠と中のボタンの間
-  static const EdgeInsets segmentTrackPadding = EdgeInsets.all(space4);
+  /// 描画が落ち着くまで Progress を出す部品（SettledReveal）
+  /// - 最低表示時間：重い描画でも描き切れるよう余裕を持たせる
+  static const Duration revealMinDuration = Duration(milliseconds: 800);
+  static const Duration revealFadeDuration = Duration(milliseconds: 200);
 
-  /// 文字のボタン（Work / Private）
-  static const EdgeInsets segmentItemPadding =
-      EdgeInsets.symmetric(horizontal: space16, vertical: space8);
+  /// 「描画が落ち着いた」とみなすまでに待つフレーム数（SettledReveal・起動時の app-ready 共通）
+  static const int settleFrames = 6;
 
-  /// アイコンのボタン（List / Collection・Bar / Pie）
-  static const EdgeInsets iconSegmentItemPadding =
-      EdgeInsets.symmetric(horizontal: space12, vertical: space8);
-  static const double iconSegmentSize = 20;
+  // ----------------------------------------------------------
+  // 読み込み中（M3 Progress indicator・円形）
+  // ----------------------------------------------------------
+  /// 円の直径（M3 の既定 40dp）
+  static const double loadingIndicatorSize = 40;
+
+  /// ボタンの中など小さく使うときの線の太さ（通常は M3 既定の 4dp）
+  static const double loadingIndicatorStrokeSmall = 2;
 
   // ----------------------------------------------------------
   // Drawer
   // ----------------------------------------------------------
-  static const double drawerTitleFontSize = 24;
+  /// NavigationDrawer の見出しの余白（M3 の指定値）
+  static const EdgeInsets drawerHeaderPadding = EdgeInsets.fromLTRB(28, 16, 16, 10);
 
   // ----------------------------------------------------------
   // ダイアログ（YAML アップロード / 書き方の説明）
@@ -70,7 +73,6 @@ class AppSizes {
 
   /// ボタン内のローディング表示
   static const double buttonLoadingSize = 16;
-  static const double buttonLoadingStrokeWidth = 2;
 
   // ----------------------------------------------------------
   // Projects

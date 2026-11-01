@@ -8,6 +8,7 @@ import '../../theme/app_styles.dart';
 import 'yaml_format_help.dart';
 import '../../constants/app_sizes.dart';
 import '../../constants/app_texts.dart';
+import '../../widgets/app_loading_indicator.dart';
 
 class MobileHeader extends StatelessWidget {
   final VoidCallback onHomePressed;
@@ -154,7 +155,7 @@ class MobileHeader extends StatelessWidget {
                   onPressed: isChecking ? null : () => Navigator.of(context).pop(),
                   child: const Text(AppTexts.cancel),
                 ),
-                ElevatedButton(
+                FilledButton(
                   onPressed: loadedYamlString == null || isChecking
                       ? null
                       : () async {
@@ -187,8 +188,7 @@ class MobileHeader extends StatelessWidget {
                       ? const SizedBox(
                           width: AppSizes.buttonLoadingSize,
                           height: AppSizes.buttonLoadingSize,
-                          child: CircularProgressIndicator(
-                              strokeWidth: AppSizes.buttonLoadingStrokeWidth),
+                          child: AppLoadingIndicator(size: AppSizes.buttonLoadingSize),
                         )
                       : const Text(AppTexts.upload),
                 ),

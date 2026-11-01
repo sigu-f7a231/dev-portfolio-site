@@ -6,6 +6,7 @@ import '../../../config/projects/projects_views_list_config.dart';
 import '../../../../theme/app_theme.dart';
 import '../../../../theme/app_styles.dart';
 import '../../../../constants/app_texts.dart';
+import '../../../../widgets/settled_reveal.dart';
 
 void showProjectDetailModal(
   BuildContext context,
@@ -20,58 +21,61 @@ void showProjectDetailModal(
         insetPadding: ProjectsListConfig.modalPadding,
         child: ConstrainedBox(
           constraints: BoxConstraints(maxHeight: ProjectsListConfig.modalMaxHeight),
-          child: SingleChildScrollView(
-            child: Padding(
-              padding: ProjectsListConfig.modalPadding,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // バツボタン
-                  Align(
-                    alignment: Alignment.topRight,
-                    child: IconButton(
-                      icon: Icon(
-                        Icons.close,
-                        color: context.colors.modalClose,
-                        size: ProjectsListConfig.closeButtonSize,
-                      ),
-                      onPressed: () => Navigator.of(context).pop(),
-                    ),
-                  ),
-                  // プロジェクト詳細フィールド
-                  ...ProjectModalFormat.fields(showWorkflow: showWorkflow).map((field) {
-                    final value = field.valueGetter(project);
-                    return Padding(
-                      padding: ProjectsListConfig.fieldPadding,
-                      child: RichText(
-                        text: TextSpan(
-                          text: '${field.label}: ',
-                          style: AppStyles.modalLabel(context, field.fontSize),
-                          children: [
-                            TextSpan(
-                              text: value,
-                              style: AppStyles.modalValue(context, field.isBold),
-                            ),
-                          ],
+          // 開いたら、中身の描画が落ち着くまで Progress indicator を出し、落ち着いたら表示する
+          child: SettledReveal(
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: ProjectsListConfig.modalPadding,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // バツボタン
+                    Align(
+                      alignment: Alignment.topRight,
+                      child: IconButton(
+                        icon: Icon(
+                          Icons.close,
+                          color: context.colors.modalClose,
+                          size: ProjectsListConfig.closeButtonSize,
                         ),
+                        onPressed: () => Navigator.of(context).pop(),
                       ),
-                    );
-                  }).toList(),
-                  ProjectsListConfig.verticalSpacingSmall,
-                  // 公開ページリンク
-                  if (project.link.isNotEmpty)
-                    ElevatedButton(
-                      onPressed: () async {
-                        final uri = Uri.tryParse(project.link);
-                        if (uri != null && await canLaunchUrl(uri)) {
-                          await launchUrl(uri,
-                              mode: LaunchMode.externalApplication);
-                        }
-                      },
-                      style: AppStyles.linkButton(context),
-                      child: const Text(AppTexts.openPublicPage),
                     ),
-                ],
+                    // プロジェクト詳細フィールド
+                    ...ProjectModalFormat.fields(showWorkflow: showWorkflow).map((field) {
+                      final value = field.valueGetter(project);
+                      return Padding(
+                        padding: ProjectsListConfig.fieldPadding,
+                        child: RichText(
+                          text: TextSpan(
+                            text: '${field.label}: ',
+                            style: AppStyles.modalLabel(context, field.fontSize),
+                            children: [
+                              TextSpan(
+                                text: value,
+                                style: AppStyles.modalValue(context, field.isBold),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                    ProjectsListConfig.verticalSpacingSmall,
+                    // 公開ページリンク
+                    if (project.link.isNotEmpty)
+                      FilledButton(
+                        onPressed: () async {
+                          final uri = Uri.tryParse(project.link);
+                          if (uri != null && await canLaunchUrl(uri)) {
+                            await launchUrl(uri,
+                                mode: LaunchMode.externalApplication);
+                          }
+                        },
+                        style: AppStyles.linkButton(context),
+                        child: const Text(AppTexts.openPublicPage),
+                      ),
+                  ],
+                ),
               ),
             ),
           ),

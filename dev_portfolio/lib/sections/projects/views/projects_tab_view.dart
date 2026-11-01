@@ -13,6 +13,7 @@ import '../../../theme/app_theme.dart';
 import '../../../theme/app_styles.dart';
 import '../../../constants/app_sizes.dart';
 import '../../../constants/app_texts.dart';
+import '../../../widgets/settled_reveal.dart';
 
 /// 一覧エリア（フィルター適用 → 並べ替え → ページ分割 → List / Collection）
 /// Work / Private の切替は親（ProjectsSection）のツールバーで行う
@@ -104,15 +105,19 @@ class _ProjectsTabViewState extends State<ProjectsTabView> {
         return Column(
           children: [
             Expanded(
-              child: widget.showCollection
-                  ? ProjectCollectionView(
-                      projects: paginatedProjects,
-                      onProjectTap: openDetail,
-                    )
-                  : ProjectListUI(
-                      projects: paginatedProjects,
-                      onProjectTap: openDetail,
-                    ),
+              // List / Collection を切り替えたときは、描画が落ち着くまで Progress indicator を出してから表示する
+              child: SettledReveal(
+                key: ValueKey(widget.showCollection),
+                child: widget.showCollection
+                    ? ProjectCollectionView(
+                        projects: paginatedProjects,
+                        onProjectTap: openDetail,
+                      )
+                    : ProjectListUI(
+                        projects: paginatedProjects,
+                        onProjectTap: openDetail,
+                      ),
+              ),
             ),
             SizedBox(
               height: AppSizes.paginationBarHeight,

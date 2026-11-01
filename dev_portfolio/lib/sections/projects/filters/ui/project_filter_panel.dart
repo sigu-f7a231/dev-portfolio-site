@@ -157,7 +157,7 @@ class _ProjectsFilterState extends State<ProjectsFilter> {
                 child: const Text(AppTexts.filterClear),
               ),
               const SizedBox(width: AppSizes.space8),
-              ElevatedButton(
+              FilledButton(
                 onPressed: () => widget.onApply({
                   for (final e in _selected.entries) e.key: List<String>.from(e.value),
                 }),

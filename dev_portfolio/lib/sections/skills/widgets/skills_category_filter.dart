@@ -149,7 +149,7 @@ class _SkillsCategoryPanelState extends State<SkillsCategoryPanel> {
                 child: const Text(AppTexts.cancel),
               ),
               const SizedBox(width: AppSizes.space8),
-              ElevatedButton(
+              FilledButton(
                 onPressed: () => widget.onApply(_pending),
                 child: const Text(AppTexts.filterApply),
               ),

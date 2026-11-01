@@ -9,6 +9,7 @@
 //   → ウィジェットに isDark を引数で渡して回す必要はない。
 import 'package:flutter/material.dart';
 import 'app_colors.dart';
+import 'app_styles.dart';
 
 /// 現在のテーマモードを保持するコントローラ（アプリ全体で 1 つ）
 class ThemeController extends ValueNotifier<ThemeMode> {
@@ -30,13 +31,26 @@ class AppTheme {
   static ThemeData get light => _build(AppColors.light, Brightness.light);
   static ThemeData get dark => _build(AppColors.dark, Brightness.dark);
 
+  /// Material 3 の ThemeData。色はすべて AppColors（＝ seed から作った ColorScheme）から取る。
+  /// 文字は M3 のタイプスケール（Typography 2021）、角丸は M3 のシェイプスケールが既定で使われる。
   static ThemeData _build(AppColors c, Brightness brightness) {
+    final s = c.scheme;
     return ThemeData(
+      useMaterial3: true,
       brightness: brightness,
-      primarySwatch: c.primarySwatch,
+      colorScheme: s,
       scaffoldBackgroundColor: c.scaffoldBackground,
-      textTheme: TextTheme(
-        bodyMedium: TextStyle(color: c.textStrong),
+      // 角丸の大きいダイアログ（M3: extra large = 28）は既定値のまま
+      dialogTheme: DialogThemeData(backgroundColor: c.dialogBackground),
+      // 進捗インジケータは最新の M3 仕様（トラックとの隙間・丸い端）を使う
+      progressIndicatorTheme: const ProgressIndicatorThemeData(year2023: false),
+      snackBarTheme: const SnackBarThemeData(behavior: SnackBarBehavior.floating),
+      tooltipTheme: TooltipThemeData(
+        decoration: BoxDecoration(
+          color: s.inverseSurface,
+          borderRadius: BorderRadius.circular(AppStyles.radiusSm), // M3: extra small
+        ),
+        textStyle: TextStyle(color: s.onInverseSurface),
       ),
     );
   }

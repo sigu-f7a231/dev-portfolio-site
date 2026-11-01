@@ -33,6 +33,7 @@ class AppTexts {
   static const String cancel = 'キャンセル';
   static const String close = '閉じる';
   static const String download = 'ダウンロード';
+  static const String save = '保存';
 
   // ----------------------------------------------------------
   // YAML アップロード（ヘッダー）
@@ -55,6 +56,7 @@ class AppTexts {
 
   static const String selectYamlFile = 'YAMLファイルを選択 (.yaml, .yml)';
   static const String upload = 'アップロード';
+  static const String loading = '読み込み中';
   static String selectedFile(String name) => '選択中: $name';
   static String fileReadFailed(Object e) => 'ファイルの読み込みに失敗しました: $e';
   static String uploadSaved(String dataType) => '$dataType用YAMLをセッションに保存しました！';
@@ -65,9 +67,11 @@ class AppTexts {
   // ----------------------------------------------------------
   // フォーマットのダウンロード / 書き方の説明（ⓘ）
   // ----------------------------------------------------------
-  static const String downloadFormat = 'フォーマットをダウンロード';
-  static String downloadFormatTooltip(String fileName) => '$fileName をダウンロードします';
-  static String downloadFailed(Object e) => 'ダウンロードに失敗しました: $e';
+  static const String downloadFormat = 'フォーマットを保存';
+  static String downloadFormatTooltip(String fileName) => '$fileName を名前を付けて保存します';
+  static String downloadFailed(Object e) => '保存に失敗しました: $e';
+  static String formatSaved(String fileName) => '$fileName を保存しました';
+  static const String yamlFileDescription = 'YAML ファイル';
   static const String formatHelpTooltip = '書き方の説明';
   static String formatHelpTitle(bool isWork) => '${isWork ? work : private} 用 YAML の書き方';
 

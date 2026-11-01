@@ -35,7 +35,7 @@ dev-portfolio-site/
     │   │   ├── projects/          # プロジェクト一覧・フィルタ・ページング・詳細モーダル
     │   │   └── config/            # セクション固有のレイアウト値（*_config.dart）※色・文言は置かない
     │   ├── theme/                 # ★色・テーマ・共通スタイル（§7 参照）
-    │   │   ├── app_colors.dart    #   色の定義（light / dark）。Colors.xxx を書いてよい唯一の場所
+    │   │   ├── app_colors.dart    #   色の定義（M3：seed → ColorScheme → トークン）。Colors.xxx を書いてよい唯一の場所
     │   │   ├── app_theme.dart     #   ThemeController（切替）・ThemeData・context.colors / context.isDark
     │   │   └── app_styles.dart    #   共通スタイル（CSS 相当）：文字・角丸・カード・タグ・ボタン・グラフ文字・モーダル・ダイアログ
     │   ├── constants/             # ★ウィジェットに直接書かない値（§7 参照）
@@ -46,7 +46,7 @@ dev-portfolio-site/
     └── test/widget_test.dart      # ※テンプレのまま（後述の既知の問題を参照）
 ```
 
-`android/ ios/ macos/ linux/ windows/ web/` は `dev_portfolio/.gitignore` で **Git 管理外**。CI では `flutter create . --platforms web` で web を再生成している。
+`android/ ios/ macos/ linux/ windows/` は `dev_portfolio/.gitignore` で **Git 管理外**。`web/` はローディング表示を入れた `index.html` を管理するため Git に含める（CI の `flutter create . --platforms web` は既存ファイルを上書きせず、足りないファイルだけ作る）。
 
 ## 3. 画面構成
 
@@ -62,7 +62,7 @@ dev-portfolio-site/
    - Collection は幅で列数が変わる（520 未満 1 / 520〜 2 / 820〜 3 / 1100〜 4 列、`ProjectsCollectionConfig.columnBreakpoints`）。カードは高さ固定で、タグは 3 つ＋「+N」
 
 Header: ナビボタン、**Work / Private 用 YAML のアップロード**（`file_picker`）、ダークモードのスイッチ。
-アップロードダイアログには、フォーマット（`format_*.yaml`）のダウンロードボタンと、書き方の説明を開く ⓘ ボタンがある（`sections/header/yaml_format_help.dart`。デスクトップ用とモバイル用で共通）。
+アップロードダイアログには、フォーマット（`format_*.yaml`）を「名前を付けて保存」するボタン（`utils/file_saver.dart`：Chrome/Edge は `showSaveFilePicker` の保存ダイアログ、他は通常ダウンロード）と、書き方の説明を開く ⓘ ボタンがある（`sections/header/yaml_format_help.dart`。デスクトップ用とモバイル用で共通）。
 
 ## 4. データフロー（重要）
 
@@ -110,7 +110,13 @@ web/ ディレクトリがない環境では、先に `flutter create . --platfo
 ## 7. コーディング規約・方針
 
 - `flutter_lints`（デフォルトのルール）。
-- **色とテーマ（lib/theme/）**
+- **色とテーマ（lib/theme/）— Material 3 準拠**
+  - `AppColors.seedColor`（ブランド色）から `ColorScheme.fromSeed` でライト/ダークを作り、各トークンは M3 のカラーロール（surface / primaryContainer / outlineVariant など）から割り当てる。ブランド色を変えるときは seed だけ変える。グラフの系列色と success だけは M3 にロールがないので固定値。
+  - 文字は M3 タイプスケール（`Theme.of(context).textTheme` の display / headline / title / body / label）を土台に `AppStyles` で色を付ける。角丸は M3 シェイプスケール（`AppStyles.radiusSm`=4 / `Md`=8 / `Lg`=12 / `Xl`=16 / `Xxl`=28 / `Full`）。
+  - 部品は M3 標準を使う：切替＝`SegmentedButton`（`AppSegment`）、主ボタン＝`FilledButton`、副ボタン＝`OutlinedButton` / `TextButton`、選択チップ＝`FilterChip`、適用中の条件＝`InputChip`、件数＝`Badge`、スマホのメニュー＝`NavigationDrawer`、ページ番号＝丸い `FilledButton` / `TextButton`。`ElevatedButton` は使わない。
+  - 読み込み中の表示は M3 の **Progress indicator（円形・不確定）**（https://m3.material.io/components/progress-indicators/overview）。`lib/widgets/app_loading_indicator.dart`（`AppLoadingIndicator`）が Flutter 公式の `CircularProgressIndicator(year2023: false)`（最新仕様：トラックとの隙間・丸い端）を包んでいる。形が変わる M3 Expressive の Loading indicator は使わない。
+  - 画面内で描画が重いもの（プロジェクト詳細ダイアログ、List/Collection の切替）は `lib/widgets/settled_reveal.dart`（`SettledReveal`）で包む：中身を裏で描き、`AppSizes.settleFrames`（6）フレーム落ち着き＋最低 0.8 秒（`AppSizes.revealMinDuration`）の間は Progress indicator を出し、0.2 秒でフェード表示。
+  - 起動時（Flutter エンジン読み込み中）は `web/index.html` の SVG ＋ スクリプトで、Flutter の CircularProgressIndicator と同じ動き（1333ms で伸縮・2222ms で 1 周・fastOutSlowIn）を再現し。消すタイミングはアプリ側の合図：`main.dart` が `AppReady.preload()`（Work/Private の YAML を先読み）→ `runApp` → 描画が `AppSizes.settleFrames`（6）フレーム落ち着いたら `AppReady.notifyWhenSettled()` が `app-ready` イベントを送り、index.html は最低 1.5 秒表示＋0.3 秒待ってからフェード（合図が来なければ最初の描画から 4 秒で消す）。色は seed から作った primary / secondaryContainer / surface の近似値を CSS に直書きしているので、`AppColors.seedColor` を変えたらここも合わせる。
   - 色は `lib/theme/app_colors.dart` の `AppColors.light` / `AppColors.dark` だけで定義する。`Colors.xxx` / `Color(...)` は lib/theme/ の外に書かない。
   - ウィジェットからは `context.colors.<トークン>`、ダーク判定は `context.isDark`（`theme/app_theme.dart`）。**`isDark` を引数でウィジェットに渡して回さない。**
   - 切替は `ThemeController.instance.toggle(bool)`。`main.dart` が `ValueListenableBuilder` で MaterialApp を再構築する。

@@ -10,6 +10,7 @@ import '../../widgets/app_segment.dart';
 import '../../theme/app_styles.dart';
 import '../../constants/app_sizes.dart';
 import '../../constants/app_texts.dart';
+import '../../widgets/app_loading_indicator.dart';
 
 /// カテゴリ → （項目名 → 割合%）
 typedef SkillsData = Map<String, Map<String, double>>;
@@ -203,7 +204,7 @@ class _SkillsSectionState extends State<SkillsSection> {
               // グラフ
               Expanded(
                 child: !snapshot.hasData
-                    ? const Center(child: CircularProgressIndicator())
+                    ? const Center(child: AppLoadingIndicator())
                     : categoryData.isEmpty
                         ? Center(
                             child: Text(

@@ -3,16 +3,20 @@
 // ============================================================
 // 色の定義（アプリ内で色を指定してよいのはこのファイルだけ）
 // ============================================================
-// - 色を変えたいときは、ここにある light / dark の値だけを書き換える。
+// Material 3 に合わせ、1 つのブランド色（seed）から ColorScheme を作り、
+// 各トークンは M3 のカラーロール（surface / primaryContainer / outlineVariant など）から割り当てる。
+// - ブランド色を変えたいときは [seedColor] だけを変えればライト・ダーク両方が追従する。
+// - 個別に調整したいときは、下の _fromScheme の割り当てを書き換える。
 // - ウィジェットからは `context.colors.xxx`（app_theme.dart の拡張）で参照する。
-// - 新しい色が必要になったら、フィールドを追加して light / dark の両方に値を入れる。
 import 'package:flutter/material.dart';
 
 class AppColors {
+
   // ----------------------------------------------------------
   // ベース（ThemeData の元になる色）
   // ----------------------------------------------------------
-  final MaterialColor primarySwatch;
+  /// Material 3 のカラースキーム（ThemeData にそのまま渡す）
+  final ColorScheme scheme;
   final Color scaffoldBackground;
 
   /// アクセント（Skills のハイライト、Bar/Pie 切替など）
@@ -167,7 +171,7 @@ class AppColors {
   final Color chartValue;
 
   AppColors._({
-    required this.primarySwatch,
+    required this.scheme,
     required this.scaffoldBackground,
     required this.accent,
     required this.primary,
@@ -243,8 +247,14 @@ class AppColors {
   });
 
   // ==========================================================
-  // ライトとダークで共通の色
+  // ブランド色（Material 3 の seed color）
   // ==========================================================
+  static const Color seedColor = Colors.blueAccent;
+
+  // ==========================================================
+  // M3 のカラーロールにない色（ライトとダークで共通）
+  // ==========================================================
+  /// グラフの系列色（M3 にグラフ用のロールはないため、見分けやすいアクセント色を固定で使う）
   static const List<Color> _chartSeries = [
     Colors.blueAccent,
     Colors.orangeAccent,
@@ -257,186 +267,114 @@ class AppColors {
   ];
 
   // ==========================================================
-  // ライトモード
+  // ライト / ダーク
   // ==========================================================
-  static final AppColors light = AppColors._(
-    primarySwatch: Colors.blue,
-    scaffoldBackground: Colors.white,
-    accent: Colors.orangeAccent,
-    primary: Colors.blueAccent,
-    success: Colors.green[400]!,
-    error: Colors.redAccent,
-    // テキスト
-    textStrong: Colors.black,
-    textPrimary: Colors.black87,
-    textSecondary: Colors.black54,
-    textTertiary: Colors.black45,
-    textSoft: Colors.black87,
-    // ヘッダー
-    headerBackground: Colors.blueAccent,
-    headerForeground: Colors.white,
-    headerForegroundMuted: Colors.white70,
-    drawerHeaderBackground: Colors.black87,
-    drawerHeaderForeground: Colors.white,
-    // ダイアログ
-    dialogBackground: Colors.white,
-    codeBackground: Colors.grey[100]!,
-    codeBorder: Colors.black12,
-    // セクション
-    heroBackground: Colors.blueAccent,
-    heroForeground: Colors.white,
-    heroForegroundMuted: Colors.white70,
-    heroCodeBackground: const Color(0x2E000000), // 黒 18%
-    heroCodeBorder: Colors.white24,
-    heroCodeKey: const Color(0xFFFFE082), // amber 200
-    heroCodeValue: Colors.white,
-    heroPrimaryButtonBackground: Colors.white,
-    heroPrimaryButtonForeground: const Color(0xFF1E4FD8),
-    heroSecondaryButtonBorder: Colors.white70,
-    aboutBackground: const Color(0xFFF3F6FB), // 青みのある淡いグレー
-    aboutDivider: Colors.black12,
-    aboutAccent: Colors.blueAccent,
-    projectsBackground: Colors.white,
-    // カード
-    cardBackground: Colors.white,
-    collectionCardBackground: Colors.white,
-    surfaceBorder: Colors.black12,
-    cardShadow: Colors.black.withOpacity(0.1),
-    // タグ
-    skillTagBackground: Colors.blue[100]!,
-    skillTagForeground: Colors.black87,
-    ongoingTagBackground: Colors.green,
-    ongoingTagForeground: Colors.white,
-    // モーダル
-    modalLabel: Colors.blueGrey,
-    modalValue: Colors.black87,
-    modalClose: Colors.black54,
-    linkButtonBackground: Colors.blue,
-    linkButtonForeground: Colors.white,
-    // 切替ボタン
-    projectsToggleActive: Colors.blueAccent,
-    skillsToggleActive: Colors.orangeAccent,
-    toggleInactiveBackground: Colors.black12,
-    toggleActiveText: Colors.black87,
-    toggleInactiveText: Colors.black45,
-    // Projects ツールバー
-    segmentBackground: const Color(0x0F000000), // 黒 6%
-    segmentSelectedBackground: Colors.white,
-    segmentSelectedShadow: const Color(0x24000000), // 黒 14%
-    filterPanelBackground: const Color(0xFFF7F9FC),
-    activeFilterBackground: Colors.blue[50]!,
-    activeFilterForeground: Colors.blue[800]!,
-    countBadgeBackground: Colors.blueAccent,
-    countBadgeForeground: Colors.white,
-    // フィルターチップ
-    chipSelected: Colors.blueAccent,
-    chipBackground: Colors.grey[300]!,
-    chipSelectedText: Colors.white,
-    chipText: Colors.black87,
-    // ページネーション
-    paginationActive: Colors.blue,
-    paginationInactive: Colors.transparent,
-    paginationActiveText: Colors.white,
-    paginationInactiveText: Colors.black87,
-    paginationIcon: Colors.grey,
-    // グラフ
-    chartSeries: _chartSeries,
-    chartHighlight: Colors.orangeAccent,
-    chartTrack: Colors.black12,
-    chartLabel: Colors.black87,
-    chartValue: Colors.black54,
+  static final AppColors light = _fromScheme(
+    ColorScheme.fromSeed(seedColor: seedColor, brightness: Brightness.light),
+    isDark: false,
   );
 
-  // ==========================================================
-  // ダークモード
-  // ==========================================================
-  static final AppColors dark = AppColors._(
-    primarySwatch: Colors.blue,
-    scaffoldBackground: Colors.black,
-    accent: Colors.orangeAccent,
-    primary: Colors.blueAccent,
-    success: Colors.green[400]!,
-    error: Colors.redAccent,
-    // テキスト
-    textStrong: Colors.white,
-    textPrimary: Colors.white,
-    textSecondary: Colors.white70,
-    textTertiary: Colors.white54,
-    textSoft: Colors.white70,
-    // ヘッダー
-    headerBackground: Colors.black87,
-    headerForeground: Colors.white,
-    headerForegroundMuted: Colors.white70,
-    drawerHeaderBackground: Colors.black87,
-    drawerHeaderForeground: Colors.white,
-    // ダイアログ
-    dialogBackground: const Color(0xFF1E1E1E),
-    codeBackground: Colors.black38,
-    codeBorder: Colors.white12,
-    // セクション
-    heroBackground: Colors.grey[900]!,
-    heroForeground: Colors.white,
-    heroForegroundMuted: Colors.white70,
-    heroCodeBackground: const Color(0x0FFFFFFF), // 白 6%
-    heroCodeBorder: Colors.white12,
-    heroCodeKey: const Color(0xFFFFD180), // orange 100
-    heroCodeValue: Colors.white70,
-    heroPrimaryButtonBackground: Colors.blueAccent,
-    heroPrimaryButtonForeground: Colors.white,
-    heroSecondaryButtonBorder: Colors.white38,
-    aboutBackground: Colors.grey[900]!,
-    aboutDivider: Colors.white12,
-    aboutAccent: Colors.lightBlueAccent,
-    projectsBackground: Colors.black87,
-    // カード
-    cardBackground: Colors.grey[850]!,
-    collectionCardBackground: Colors.grey[900]!,
-    surfaceBorder: Colors.white12,
-    cardShadow: Colors.transparent, // ダークでは影なし
-    // タグ
-    skillTagBackground: Colors.blueGrey[700]!,
-    skillTagForeground: Colors.white,
-    ongoingTagBackground: Colors.green,
-    ongoingTagForeground: Colors.white,
-    // モーダル
-    modalLabel: Colors.white70,
-    modalValue: Colors.white,
-    modalClose: Colors.white70,
-    linkButtonBackground: Colors.blue,
-    linkButtonForeground: Colors.white,
-    // 切替ボタン
-    projectsToggleActive: Colors.blueAccent,
-    skillsToggleActive: Colors.orangeAccent,
-    toggleInactiveBackground: Colors.white10,
-    toggleActiveText: Colors.black,
-    toggleInactiveText: Colors.white60,
-    // Projects ツールバー
-    segmentBackground: const Color(0x14FFFFFF), // 白 8%
-    segmentSelectedBackground: Colors.grey[800]!,
-    segmentSelectedShadow: Colors.transparent,
-    filterPanelBackground: const Color(0xFF1C1C1C),
-    activeFilterBackground: Colors.blueGrey[800]!,
-    activeFilterForeground: Colors.lightBlue[100]!,
-    countBadgeBackground: Colors.lightBlueAccent,
-    countBadgeForeground: Colors.black,
-    // フィルターチップ
-    chipSelected: Colors.tealAccent,
-    chipBackground: Colors.grey[800]!,
-    chipSelectedText: Colors.black,
-    chipText: Colors.white70,
-    // ページネーション
-    paginationActive: Colors.lightBlueAccent,
-    paginationInactive: Colors.black26,
-    paginationActiveText: Colors.black,
-    paginationInactiveText: Colors.white70,
-    paginationIcon: Colors.grey,
-    // グラフ
-    chartSeries: _chartSeries,
-    chartHighlight: Colors.orangeAccent,
-    chartTrack: Colors.white10,
-    chartLabel: Colors.white,
-    chartValue: Colors.white70,
+  static final AppColors dark = _fromScheme(
+    ColorScheme.fromSeed(seedColor: seedColor, brightness: Brightness.dark),
+    isDark: true,
   );
+
+  /// M3 のカラーロール → アプリのトークン
+  static AppColors _fromScheme(ColorScheme s, {required bool isDark}) {
+    // Hero はライトでは primary、ダークでは primaryContainer の上に置く（M3 の推奨に合わせた濃さ）
+    final heroBg = isDark ? s.primaryContainer : s.primary;
+    final heroFg = isDark ? s.onPrimaryContainer : s.onPrimary;
+
+    return AppColors._(
+      scheme: s,
+      scaffoldBackground: s.surface,
+      accent: s.tertiary,
+      primary: s.primary,
+      success: isDark ? Colors.green[300]! : Colors.green[700]!, // M3 に success ロールはない
+      error: s.error,
+      // テキスト
+      textStrong: s.onSurface,
+      textPrimary: s.onSurface,
+      textSecondary: s.onSurfaceVariant,
+      textTertiary: s.outline,
+      textSoft: s.onSurfaceVariant,
+      // ヘッダー（M3 の Top app bar）
+      headerBackground: s.surfaceContainer,
+      headerForeground: s.onSurface,
+      headerForegroundMuted: s.onSurfaceVariant,
+      drawerHeaderBackground: s.primaryContainer,
+      drawerHeaderForeground: s.onPrimaryContainer,
+      // ダイアログ
+      dialogBackground: s.surfaceContainerHigh,
+      codeBackground: s.surfaceContainerHighest,
+      codeBorder: s.outlineVariant,
+      // Hero
+      heroBackground: heroBg,
+      heroForeground: heroFg,
+      heroForegroundMuted: heroFg.withOpacity(0.8),
+      heroCodeBackground: heroFg.withOpacity(0.08),
+      heroCodeBorder: heroFg.withOpacity(0.24),
+      heroCodeKey: isDark ? s.tertiary : s.tertiaryContainer,
+      heroCodeValue: heroFg,
+      heroPrimaryButtonBackground: isDark ? s.primary : s.onPrimary,
+      heroPrimaryButtonForeground: isDark ? s.onPrimary : s.primary,
+      heroSecondaryButtonBorder: heroFg.withOpacity(0.6),
+      // About
+      aboutDivider: s.outlineVariant,
+      aboutAccent: s.primary,
+      aboutBackground: s.surfaceContainerLow,
+      // Projects
+      projectsBackground: s.surface,
+      // カード（M3 の Outlined card / Elevated card）
+      cardBackground: s.surfaceContainerLow,
+      collectionCardBackground: s.surfaceContainerLow,
+      surfaceBorder: s.outlineVariant,
+      cardShadow: isDark ? Colors.transparent : s.shadow.withOpacity(0.12),
+      // タグ
+      skillTagBackground: s.surfaceContainerHighest,
+      skillTagForeground: s.onSurfaceVariant,
+      ongoingTagBackground: s.tertiaryContainer,
+      ongoingTagForeground: s.onTertiaryContainer,
+      // モーダル
+      modalLabel: s.primary,
+      modalValue: s.onSurface,
+      modalClose: s.onSurfaceVariant,
+      linkButtonBackground: s.primary,
+      linkButtonForeground: s.onPrimary,
+      // 切替（旧スタイル用。現在は SegmentedButton がテーマから色を取る）
+      projectsToggleActive: s.secondaryContainer,
+      skillsToggleActive: s.secondaryContainer,
+      toggleInactiveBackground: s.surfaceContainerHighest,
+      toggleActiveText: s.onSecondaryContainer,
+      toggleInactiveText: s.onSurfaceVariant,
+      segmentBackground: s.surfaceContainerHighest,
+      segmentSelectedBackground: s.secondaryContainer,
+      segmentSelectedShadow: Colors.transparent,
+      // フィルター
+      filterPanelBackground: s.surfaceContainerLow,
+      activeFilterBackground: s.secondaryContainer,
+      activeFilterForeground: s.onSecondaryContainer,
+      countBadgeBackground: s.primary,
+      countBadgeForeground: s.onPrimary,
+      // チップ（M3 の Filter chip）
+      chipSelected: s.secondaryContainer,
+      chipBackground: s.surface,
+      chipSelectedText: s.onSecondaryContainer,
+      chipText: s.onSurfaceVariant,
+      // ページネーション
+      paginationActive: s.primary,
+      paginationInactive: Colors.transparent,
+      paginationActiveText: s.onPrimary,
+      paginationInactiveText: s.onSurfaceVariant,
+      paginationIcon: s.onSurfaceVariant,
+      // グラフ
+      chartSeries: _chartSeries,
+      chartHighlight: s.tertiary,
+      chartTrack: s.surfaceContainerHighest,
+      chartLabel: s.onSurface,
+      chartValue: s.onSurfaceVariant,
+    );
+  }
 
   /// 系列 index に対応するグラフの色
   Color seriesColor(int index) => chartSeries[index % chartSeries.length];
