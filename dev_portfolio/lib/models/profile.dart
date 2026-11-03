@@ -11,7 +11,7 @@ class Profile {
   final String role;
   final String tagline;
 
-  /// 右側のカード。値は String か List<String>
+  /// 右側のカード。値は `String` か `List<String>`
   final Map<String, Object> card;
 
   // ---------- About ----------

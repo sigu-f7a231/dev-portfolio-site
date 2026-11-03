@@ -72,8 +72,7 @@ class PieGraph extends StatelessWidget {
             final isSelected = index == selectedIndex;
             final baseColor = colors.seriesColor(index);
 
-            Color sectionColor = baseColor.withOpacity(
-              PieChartOpacity.of(
+            Color sectionColor = baseColor.withValues(alpha: PieChartOpacity.of(
                 isDark: isDark,
                 isHovered: isHovered,
                 isSelected: isSelected,

@@ -334,14 +334,14 @@ class AppColors {
       // Hero
       heroBackground: heroBg,
       heroForeground: heroFg,
-      heroForegroundMuted: heroFg.withOpacity(0.8),
-      heroCodeBackground: heroFg.withOpacity(0.08),
-      heroCodeBorder: heroFg.withOpacity(0.24),
+      heroForegroundMuted: heroFg.withValues(alpha: 0.8),
+      heroCodeBackground: heroFg.withValues(alpha: 0.08),
+      heroCodeBorder: heroFg.withValues(alpha: 0.24),
       heroCodeKey: isDark ? s.tertiary : s.tertiaryContainer,
       heroCodeValue: heroFg,
       heroPrimaryButtonBackground: isDark ? s.primary : s.onPrimary,
       heroPrimaryButtonForeground: isDark ? s.onPrimary : s.primary,
-      heroSecondaryButtonBorder: heroFg.withOpacity(0.6),
+      heroSecondaryButtonBorder: heroFg.withValues(alpha: 0.6),
       // About
       aboutDivider: s.outlineVariant,
       aboutAccent: s.primary,
@@ -352,7 +352,7 @@ class AppColors {
       cardBackground: s.surfaceContainerLow,
       collectionCardBackground: s.surfaceContainerLow,
       surfaceBorder: s.outlineVariant,
-      cardShadow: isDark ? Colors.transparent : s.shadow.withOpacity(0.12),
+      cardShadow: isDark ? Colors.transparent : s.shadow.withValues(alpha: 0.12),
       // タグ
       skillTagBackground: s.surfaceContainerHighest,
       skillTagForeground: s.onSurfaceVariant,

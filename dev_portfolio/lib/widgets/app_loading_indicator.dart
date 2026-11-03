@@ -3,9 +3,9 @@
 // 読み込み中の表示＝ Material 3 の Progress indicator（円形・不確定）
 // https://m3.material.io/components/progress-indicators/overview
 //
-// Flutter 公式の CircularProgressIndicator を、M3 の最新仕様（year2023: false）で使う。
+// Flutter 公式の CircularProgressIndicator を、M3 の最新仕様で使う（テーマの progressIndicatorTheme で year2023: false を指定）。
 // - 弧（primary）とトラック（secondaryContainer）の間に隙間があり、線の端は丸い
-// - 色・太さ・隙間は M3 の既定値（テーマの progressIndicatorTheme でも year2023: false を設定済み）
+// - 色・太さ・隙間は M3 の既定値
 // 起動時の HTML 版（web/index.html）も同じ見た目で描いている。
 import 'package:flutter/material.dart';
 import '../constants/app_sizes.dart';
@@ -28,7 +28,6 @@ class AppLoadingIndicator extends StatelessWidget {
     return SizedBox.square(
       dimension: size,
       child: CircularProgressIndicator(
-        year2023: false,
         strokeWidth: small ? AppSizes.loadingIndicatorStrokeSmall : null,
         semanticsLabel: AppTexts.loading,
       ),

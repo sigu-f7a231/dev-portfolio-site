@@ -5,7 +5,7 @@
 // 1. 表示に使う YAML（Work / Private）を先に読み込み
 // 2. 画面が描かれ、データが入った状態で描き直されるまで待ってから
 // 3. ブラウザに 'app-ready' イベントを送る（index.html はこれを受けて、最低表示時間を守りつつ消す）
-import 'dart:html' as html; // ブラウザへのイベント送信（このアプリは Web 専用）
+import 'browser/browser.dart'; // ブラウザへのイベント送信（Web は package:web）
 import 'package:flutter/widgets.dart';
 import 'work_yaml_loader.dart';
 import 'private_yaml_loader.dart';
@@ -38,7 +38,7 @@ class AppReady {
       for (var i = 0; i < AppSizes.settleFrames; i++) {
         await binding.endOfFrame;
       }
-      html.window.dispatchEvent(html.Event(eventName));
+      dispatchBrowserEvent(eventName);
     });
   }
 }

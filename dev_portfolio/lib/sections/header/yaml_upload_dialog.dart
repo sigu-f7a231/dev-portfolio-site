@@ -10,7 +10,6 @@
 // - テンプレートの保存はこの画面だけ（ⓘ の説明画面には置かない）
 // - こちらは任意なので、キャンセルで閉じられる
 import 'dart:convert';
-import 'dart:html' as html; // sessionStorage（このアプリは Web 専用）
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:yaml/yaml.dart';
@@ -22,25 +21,8 @@ import '../../constants/app_texts.dart';
 import '../../utils/work_yaml_loader.dart';
 import '../../utils/private_yaml_loader.dart';
 import '../../widgets/upload_parts.dart';
-
-/// Work / Private の YAML として正しい形か（projects 配列・各要素に title、Work は workflow 必須、Private は workflow 不可）
-bool isValidProjectsYaml(String text, String dataType) {
-  try {
-    final doc = loadYaml(text);
-    if (doc is! YamlMap || !doc.containsKey('projects')) return false;
-    final projects = doc['projects'];
-    if (projects is! YamlList || projects.isEmpty) return false;
-
-    for (final item in projects) {
-      if (item is! YamlMap || !item.containsKey('title')) return false;
-      if (dataType == 'work' && !item.containsKey('workflow')) return false;
-      if (dataType == 'private' && item.containsKey('workflow')) return false;
-    }
-    return true;
-  } catch (_) {
-    return false;
-  }
-}
+import '../../utils/projects_yaml_validator.dart';
+import '../../utils/browser/browser.dart';
 
 /// アップロード画面を開く。保存できたら [onSaved]（Skills / Projects の読み直し）を呼ぶ
 Future<void> showYamlUploadDialog(
@@ -123,7 +105,7 @@ class _YamlUploadDialogState extends State<_YamlUploadDialog> {
 
     await runReloading(navigator, () async {
       // セッションに保存（同じタブなら再読み込みしても残る）→ Skills / Projects を作り直して読み直す
-      html.window.sessionStorage[widget.dataType] = text;
+      SessionStore.write(widget.dataType, text);
       widget.onSaved?.call();
       await (_isWork ? WorkYamlLoader.loadYamlString() : PrivateYamlLoader.loadYamlString());
     });

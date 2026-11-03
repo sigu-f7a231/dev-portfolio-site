@@ -1,5 +1,5 @@
 import 'package:flutter/services.dart';
-import 'dart:html' as html; // ★ ブラウザのsessionStorage用
+import 'browser/browser.dart'; // sessionStorage（Web は package:web、テストはメモリ）
 import 'package:yaml/yaml.dart';
 
 class PrivateYamlLoader {
@@ -10,13 +10,13 @@ class PrivateYamlLoader {
   static void setCustomYaml(String yamlString) {
     _customYamlString = yamlString;
     // セッションストレージにも確実に保存しておく
-    html.window.sessionStorage['private'] = yamlString;
+    SessionStore.write('private', yamlString);
   }
 
   /// カスタムYAMLがセットされているかクリアする
   static void clearCustomYaml() {
     _customYamlString = null;
-    html.window.sessionStorage.remove('private');
+    SessionStore.remove('private');
   }
 
   /// YAML文字列を取得する
@@ -26,7 +26,7 @@ class PrivateYamlLoader {
   /// 3. アセットファイル (assets/data/projects_private.yaml)
   static Future<String> loadYamlString() async {
     // 1. セッションストレージから先に読み込みを試みる
-    final sessionYaml = html.window.sessionStorage['private'];
+    final sessionYaml = SessionStore.read('private');
     if (sessionYaml != null && sessionYaml.isNotEmpty) {
       return sessionYaml;
     }

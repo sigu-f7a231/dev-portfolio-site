@@ -1,12 +1,12 @@
 // lib/utils/file_saver.dart
 //
-// テキストファイルを「名前を付けて保存」する（Web 専用）
+// テキストファイルを「名前を付けて保存」する（Web 専用。dart:js_interop / package:web を使う）
 // - Chrome / Edge：File System Access API（showSaveFilePicker）で OS の保存ダイアログを開く
 // - それ以外（Firefox / Safari など）：保存ダイアログが使えないので、通常のダウンロードにする
 //   （ブラウザ側で「保存先を毎回確認する」設定なら、そこで保存先を選べる）
-import 'dart:html' as html; // 通常ダウンロード（フォールバック）用
 import 'dart:js_interop';
 import 'dart:js_interop_unsafe';
+import 'package:web/web.dart' as web; // 通常ダウンロード（フォールバック）用。dart:html の後継
 import '../constants/app_sizes.dart';
 
 enum FileSaveResult {
@@ -59,13 +59,17 @@ class FileSaver {
     }
 
     // フォールバック：通常のダウンロード
-    final blob = html.Blob([text], '$mimeType;charset=utf-8');
-    final url = html.Url.createObjectUrlFromBlob(blob);
-    html.AnchorElement(href: url)
+    final blob = web.Blob(
+      <JSAny>[text.toJS].toJS,
+      web.BlobPropertyBag(type: '$mimeType;charset=utf-8'),
+    );
+    final url = web.URL.createObjectURL(blob);
+    web.HTMLAnchorElement()
+      ..href = url
       ..download = fileName
       ..click();
     // ダウンロード開始を待ってから URL を解放する
-    Future.delayed(AppSizes.downloadUrlRevokeDelay, () => html.Url.revokeObjectUrl(url));
+    Future.delayed(AppSizes.downloadUrlRevokeDelay, () => web.URL.revokeObjectURL(url));
     return FileSaveResult.downloaded;
   }
 }

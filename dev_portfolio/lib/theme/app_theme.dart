@@ -43,7 +43,12 @@ class AppTheme {
       // 角丸の大きいダイアログ（M3: extra large = 28）は既定値のまま
       dialogTheme: DialogThemeData(backgroundColor: c.dialogBackground),
       // 進捗インジケータは最新の M3 仕様（トラックとの隙間・丸い端）を使う
+      // M3 の 2024 年版の見た目（隙間のある Progress indicator・新しい Slider）を使う。
+      // year2023 は「移行用」のフラグで非推奨扱いだが、既定値がまだ true（旧デザイン）のため、
+      // 新しい見た目にする方法はこれしかない。既定値が false になったら、この 2 行を消す。
+      // ignore: deprecated_member_use
       progressIndicatorTheme: const ProgressIndicatorThemeData(year2023: false),
+      // ignore: deprecated_member_use
       sliderTheme: const SliderThemeData(year2023: false),
       snackBarTheme: const SnackBarThemeData(behavior: SnackBarBehavior.floating),
       tooltipTheme: TooltipThemeData(

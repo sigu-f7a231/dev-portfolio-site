@@ -73,8 +73,7 @@ class BarGraph extends StatelessWidget {
                           decoration: BoxDecoration(
                             color: colors
                                 .seriesColor(i)
-                                .withOpacity(
-                                  isActive
+                                .withValues(alpha: isActive
                                       ? BarChartLayout.barActiveOpacity
                                       : BarChartLayout.barInactiveOpacity,
                                 ),

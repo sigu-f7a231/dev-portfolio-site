@@ -5,10 +5,10 @@
 //   1. `dart run tool/run.dart xxx.yaml` で起動した場合 → assets/profile/profile.yaml
 //   2. この画面でアップロード済み（同じタブ内）        → sessionStorage['profile']
 //   3. どちらもない                                  → null（入力画面を出す）
-import 'dart:html' as html; // sessionStorage（このアプリは Web 専用）
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import '../models/profile.dart';
+import 'browser/browser.dart'; // sessionStorage（Web は package:web、テストはメモリ）
 
 class ProfileStore extends ValueNotifier<Profile?> {
   ProfileStore._() : super(null);
@@ -36,7 +36,7 @@ class ProfileStore extends ValueNotifier<Profile?> {
       }
     }
 
-    final saved = html.window.sessionStorage[sessionKey];
+    final saved = SessionStore.read(sessionKey);
     if (saved != null) {
       final result = Profile.parse(saved);
       if (result.isOk) value = result.profile;
@@ -45,7 +45,7 @@ class ProfileStore extends ValueNotifier<Profile?> {
 
   /// 入力画面でアップロードした YAML を使う（再読み込みしても同じタブなら残る）
   void setUploaded(String yamlText, Profile profile) {
-    html.window.sessionStorage[sessionKey] = yamlText;
+    SessionStore.write(sessionKey, yamlText);
     startupErrors = const [];
     value = profile;
   }

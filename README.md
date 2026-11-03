@@ -9,7 +9,7 @@ Flutter Web で作った SPA で、GitHub Pages で公開しています。
 > **English summary**
 > A single-page developer portfolio built with Flutter Web and hosted on GitHub Pages, designed to complement a résumé.
 > It shows work and personal projects, and charts the technologies used across them.
-> All content is driven by YAML files; visitors can also load their own YAML in the browser to preview their data.
+> All content is driven by YAML files: the profile (Home / About) is loaded at startup (`dart run tool/run.dart my_profile.yaml`) or uploaded in the first-run dialog, and project data can be uploaded from the header.
 
 ---
 
@@ -19,27 +19,79 @@ Flutter Web で作った SPA で、GitHub Pages で公開しています。
 
 | セクション | 内容 |
 |---|---|
-| **Home** | 名前・職種・紹介文。ボタンで Skills / Projects へ移動できます。右側にはプロフィールを YAML 形式で表示します |
-| **About** | 自己紹介と、得意な領域・強み・開発スタイル |
-| **Skills** | プロジェクトで使った技術の割合を、棒グラフ／円グラフで表示します。Work / Private の切り替えと、カテゴリ（OS・DB・Backend・AWS・工程など）の選択ができます |
-| **Projects** | プロジェクトの一覧です。List / Collection 表示の切り替え、技術・工程・期間（年の範囲、進行中のみ）での絞り込みができ、カードを押すと詳細が開きます |
+| **Home** | 名前・職種・紹介文（プロフィール YAML から）。ボタンで Skills / Projects へ移動できます。右側にはプロフィールのカードを YAML 風に表示します |
+| **About** | 自己紹介と、得意な領域・強み・開発スタイル・締めの一言（プロフィール YAML から。書いていない項目は表示しません） |
+| **Skills** | プロジェクトで使った技術の割合を、棒グラフ／円グラフで表示します。Work / Private の切り替えと、カテゴリ（OS・DB・Backend・AWS・工程など）の選択（ポップアップ）ができます |
+| **Projects** | プロジェクトの一覧です。**List**（年表：開始の年月・期間・長さ）と **Collection**（カバー付きカード）を切り替えられ、技術・工程・期間（年の範囲、進行中のみ）で絞り込めます（ポップアップ）。カードを押すと詳細が開きます |
 
-- **ダークモード**：ヘッダーのスイッチでライト／ダークを切り替えられます
-- **レスポンシブ**：スマホではメニューがドロワーになり、Collection の列数は画面幅に合わせて 1〜4 列に変わります
+- **ヘッダー**：Material 3 のトップアプリバー。ナビは表示中のセクションが強調され、スクロールに合わせて切り替わります
+- **ダークモード**：ヘッダーのスイッチ（☀️ / 🌙）でライト／ダークを切り替えられます（スマホはアイコンボタン）
+- **レスポンシブ**：スマホではメニューがドロワーになり、フィルターは下から出るシートで開きます。Collection は画面幅に合わせて 1〜4 列、ページネーションは幅に応じて「1 … 4 5 6 … 10」「‹ 3 / 10 ›」と省略表示になります
 
-### 自分のデータで表示する（YAML アップロード）
+### 使い方（自分のデータで表示する）
 
-ヘッダーの 💼（Work）／🔒（Private）ボタンから YAML ファイルを読み込むと、そのデータで Skills と Projects を表示し直します。
+このサイトは、**リポジトリをローカルに落として、自分の YAML を読み込んで使う**ことを想定しています。
+公開ページを開くと、最初に「あなたのことを教えてください」（プロフィールの入力画面）が出ます。
 
-- アップロード画面からフォーマット（ひな形）を「名前を付けて保存」できます（Chrome / Edge は保存ダイアログ、そのほかのブラウザは通常のダウンロード）。ⓘ ボタンで書き方の説明を開けます
-- 読み込んだデータはブラウザの **sessionStorage** にだけ保存されます。サーバーには送信されず、タブを閉じると消えます
-- 何も読み込まない場合は、リポジトリにある `assets/data/format_*.yaml` を表示します
+#### 1. プロフィール（Home / About）
+
+起動時に YAML を指定すると、その内容で Home と About を表示します（入力画面は出ません）。
+
+```bash
+cd dev_portfolio
+dart run tool/run.dart my_profile.yaml
+```
+
+- `flutter run -d chrome my_profile.yaml` のように flutter run へ直接 YAML は渡せない（引数は起動する Dart ファイルとして扱われる）ため、このスクリプトを使います。中で `flutter run -d chrome` を実行するので、`r`（ホットリロード）などもそのまま使えます。2 つ目以降の引数は flutter run に渡します（例：`dart run tool/run.dart my_profile.yaml --release`）
+- YAML を指定しない（`dart run tool/run.dart` や `flutter run -d chrome`）と、起動後に入力画面が出ます。**正しい YAML を読み込むまで閉じられません**
+- 指定した YAML は `assets/profile/profile.yaml` にコピーされます。個人情報なので Git には含めません（`.gitignore` 済み）
+
+#### 2. プロジェクト（Work / Private）
+
+ヘッダーの 💼 Work ／ 🔒 Private ボタンから YAML ファイルを読み込むと、そのデータで Skills と Projects を表示し直します。
+何も読み込まない場合は、リポジトリにある `assets/data/format_*.yaml`（サンプル）を表示します。
+
+#### アップロード画面の流れ（プロフィール / Work / Private 共通）
+
+1. **テンプレートを保存**：ひな形を「名前を付けて保存」（Chrome / Edge は保存ダイアログ、そのほかのブラウザは通常のダウンロード）。ⓘ で書き方の説明を開けます
+2. **ファイルを選択**：`.yaml` / `.yml` だけ選べます。選んだ時点で形式を確かめ、間違っていれば理由を表示します（このときは「アップロード」を押せません）
+3. **アップロード**：確認画面で中身（プロフィールの各項目 / プロジェクトの一覧）を確認し、**OK のときだけ**反映します
+4. 反映中は全画面のローディングを数秒（5〜8 秒）表示し、描き直しが終わってから画面に戻ります
+
+読み込んだデータはブラウザの **sessionStorage** にだけ保存されます。サーバーには送信されず、タブを閉じると消えます。
 
 ---
 
 ## データの書き方
 
-表示内容は YAML で定義します。Work 用と Private 用でファイルが分かれています。
+### プロフィール（Home / About）
+
+ひな形：`dev_portfolio/assets/data/format_profile.yaml`。★ は必須、それ以外は書かなければ表示しません。
+
+```yaml
+home:
+  name: 山田 太郎                # ★ 名前
+  role: Web / モバイルエンジニア   # ★ 職種
+  tagline: |                    # ★ 紹介文
+    Flutter と Dart を中心に開発しています。
+  card:                         # 右側のカード（「キー: 値」か「キー: - 箇条書き」で自由に）
+    stack:
+      - Flutter
+      - Dart
+about:
+  intro: |                      # ★ 自己紹介
+    受託開発の会社で Web アプリの設計から実装までを担当しています。
+  domains: [Web, モバイル]       # 得意な領域（タグで表示）
+  strengths: チーム開発、テスト設計  # 強み
+  style: コード品質を重視しています  # 開発スタイル
+  closing: ユーザー視点を大切に     # 締めの一言
+```
+
+知らない項目・必須の空欄・型の違い（文章の場所に箇条書きなど）はエラーになり、読み込みません。
+
+### プロジェクト（Work / Private）
+
+Work 用と Private 用でファイルが分かれています。
 
 | ファイル | 用途 |
 |---|---|
@@ -96,7 +148,7 @@ projects:
 - [url_launcher](https://pub.dev/packages/url_launcher)：公開ページへのリンク
 - **GitHub Actions + GitHub Pages**：自動デプロイ
 
-> `dart:html`（sessionStorage・ファイルのダウンロード）を使っているため、**Web 専用**です。
+> ブラウザの機能（`package:web`：sessionStorage・ファイルの保存）を使っているため、**Web 専用**です。
 
 ---
 
@@ -105,8 +157,17 @@ projects:
 ```bash
 cd dev_portfolio
 flutter pub get
-flutter create . --platforms web   # web/ が無い場合のみ（web/ は Git 管理外）
-flutter run -d chrome
+dart run tool/run.dart my_profile.yaml   # プロフィールを指定して起動（おすすめ）
+# または
+flutter run -d chrome                    # 起動後にプロフィールの入力画面が出る
+```
+
+> `web/index.html`（起動時のローディング表示など）は Git で管理しています。CI の `flutter create . --platforms web` は既存のファイルを上書きしません。
+
+テストの実行：
+
+```bash
+flutter test   # テーマ・YAML の検証・データの読み込み順（sessionStorage はメモリで代用）
 ```
 
 本番と同じ設定でビルドする場合：
@@ -128,13 +189,14 @@ Actions の画面から手動で実行することもできます。
 
 | 変えたいもの | ファイル |
 |---|---|
-| 名前・紹介文・About の内容 | `lib/constants/app_texts.dart`（`HeroContent` / `AboutContent`） |
+| 名前・紹介文・About の内容 | プロフィール YAML（ひな形 `assets/data/format_profile.yaml`） |
 | 画面の文言（ボタン名・メッセージなど） | `lib/constants/app_texts.dart`（`AppTexts`） |
 | 色（ライト / ダーク） | `lib/theme/app_colors.dart` |
 | 文字スタイル・角丸・カードなどの共通の見た目 | `lib/theme/app_styles.dart` |
 | 余白・アニメーション時間などの数値 | `lib/constants/app_sizes.dart` |
 | セクションごとのレイアウト（グラフの大きさ、Collection の列数など） | `lib/sections/config/` |
-| 表示するプロジェクト | `assets/data/format_work.yaml` / `format_private.yaml` |
+| 表示するプロジェクト（サンプル） | `assets/data/format_work.yaml` / `format_private.yaml` |
+| 画面の固定の見出し（About の見出し名など） | `lib/constants/app_texts.dart`（`HeroContent` / `AboutContent` / `ProfileTexts`） |
 
 ## ディレクトリ構成
 
@@ -143,16 +205,48 @@ dev-portfolio-site/
 ├── .github/workflows/deploy.yml   # GitHub Pages への自動デプロイ
 ├── CLAUDE.md                      # 開発メモ（構成・データの流れ・規約・既知の課題）
 └── dev_portfolio/                 # Flutter アプリ
-    ├── assets/data/               # 表示データ（YAML）
+    ├── assets/
+    │   ├── data/                  # ひな形・サンプル（format_profile / format_work / format_private）
+    │   └── profile/               # 起動時に指定したプロフィール（Git 管理外）
+    ├── tool/run.dart              # プロフィール YAML を指定して起動するスクリプト
+    ├── web/index.html             # 起動時のローディング表示
     └── lib/
         ├── main.dart
-        ├── pages/                 # HomePage（全セクションを縦に並べる）
+        ├── pages/                 # HomePage（全セクションを縦に並べる・入力画面を出す）
+        ├── models/                # プロフィール（読み込みと検証）
         ├── sections/              # header / hero / about / skills / projects と config
         ├── theme/                 # 色・テーマ切替・共通スタイル
         ├── constants/             # 文言・数値
-        ├── widgets/               # 共通部品（切替セグメント・チップ）
-        └── utils/                 # YAML ローダーなど
+        ├── controllers/           # セクションへのスクロール・表示中セクション
+        ├── widgets/               # 共通部品（セグメント・ポップアップ・入力画面・アップロード部品・ローディング）
+        └── utils/                 # YAML ローダー・プロフィールの保持・ファイル保存など
 ```
+
+---
+
+## 現状と技術的な課題
+
+**現状**（2026-11-03）：`flutter analyze` は指摘なし、`flutter test` は全件成功。非推奨の API（`dart:html`・`Color.withOpacity`）は置き換え済みです。
+
+課題と今後の改善候補です（詳細は [CLAUDE.md](CLAUDE.md) の「現状と課題」）。
+
+**優先度 高**
+- **画面での動作確認**：レスポンシブ対応・ヘッダー・アップロード画面などの最近の変更は、PC 幅・スマホ幅での見た目と操作の確認がまだです
+- **ローカルでビルドするとプロフィールが入る**：`assets/profile/profile.yaml` が残っていると `flutter build web` の成果物に含まれます（表示はしません）。公開用にビルドする前に消してください
+- **Work / Private の検証が浅い**：`projects` と `title`・`workflow` の有無しか確かめていないため、項目の型が違うと表示が崩れる可能性があります
+
+**優先度 中**
+- **自動テストがまだ足りない**：フィルター・ページネーション・スキル集計・画面操作のテストはまだありません
+- **文字列の分割処理が複数ある**：カンマ区切りの扱いがファイルによって違います
+- **Projects のページを切り替えても一覧の先頭に戻らない**
+- **スマホでのグラフ操作**：棒グラフの強調表示はマウスを乗せたときだけで、タップには反応しません
+- **プロフィール YAML を書き換えたら起動し直しが必要**（`tool/run.dart` は起動時に 1 回読むだけ）
+
+**優先度 低（仕様・整理）**
+- **公開ページでは入力画面が出る**：プロフィールは各自がローカルで読み込む前提です
+- **データはタブを閉じると消える**：アップロードした内容は sessionStorage にだけ保存しています
+- **Web 専用**：ブラウザの機能（`package:web` / `dart:js_interop`）を使うため、Web 以外ではビルドできません
+- **使っていないコード・定数が残っている**：古いタブ UI、旧形式のソート処理、作り直しで不要になった文言など
 
 ---
 

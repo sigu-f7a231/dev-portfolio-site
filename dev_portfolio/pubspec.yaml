@@ -35,6 +35,7 @@ dependencies:
   url_launcher: ^6.1.10
   yaml: ^3.1.2
   file_picker: ^8.0.0
+  web: ^1.1.1 # dart:html の後継（sessionStorage・ダウンロード・イベント送信）
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.

@@ -22,15 +22,20 @@ dev-portfolio-site/
     ├── pubspec.yaml
     ├── assets/data/
     │   ├── format_work.yaml       # Work 用のデフォルトデータ兼フォーマット定義
-    │   └── format_private.yaml    # Private 用のデフォルトデータ兼フォーマット定義
+    │   ├── format_private.yaml    # Private 用のデフォルトデータ兼フォーマット定義
+    │   └── format_profile.yaml    # プロフィール（Home / About）のひな形
+    ├── assets/profile/            # tool/run.dart がコピーするプロフィール（profile.yaml は Git 管理外）
+    ├── tool/run.dart              # プロフィール YAML を指定して flutter run -d chrome する
+    ├── web/index.html             # 起動時のローディング表示（Git 管理）
     ├── lib/
     │   ├── main.dart              # DevPortfolioApp（ライト/ダーク切替を保持）
-    │   ├── pages/home_page.dart   # 縦スクロール 1 ページ + Drawer + Header
-    │   ├── controllers/scroll_controller.dart  # セクションへのスクロール（GlobalKey）
+    │   ├── pages/home_page.dart   # 縦スクロール 1 ページ + Drawer + Header。プロフィールがなければ入力画面を出す
+    │   ├── models/profile.dart    # プロフィールのモデルと検証（Profile.parse）
+    │   ├── controllers/scroll_controller.dart  # セクションへのスクロール（GlobalKey）＋表示中セクション（active）
     │   ├── sections/
-    │   │   ├── header/            # header.dart（600px で desktop/mobile を切替）
-    │   │   ├── hero_section.dart
-    │   │   ├── about_section.dart # 自己紹介（中身は現状プレースホルダ文言）
+    │   │   ├── header/            # header.dart（600px で desktop/mobile を切替）、header_parts.dart（ナビ・テーマ切替・アップロードボタン）、yaml_upload_dialog.dart（Work/Private のアップロード画面）
+    │   │   ├── hero_section.dart  # 中身は ProfileStore から
+    │   │   ├── about_section.dart # 中身は ProfileStore から
     │   │   ├── skills/            # スキル集計 + 棒/円グラフ（fl_chart）
     │   │   ├── projects/          # プロジェクト一覧・フィルタ・ページング・詳細モーダル
     │   │   └── config/            # セクション固有のレイアウト値（*_config.dart）※色・文言は置かない
@@ -42,27 +47,31 @@ dev-portfolio-site/
     │   │   ├── app_sizes.dart     #   余白スケール（space4〜48）・時間（Duration）・ダイアログ幅などの数値
     │   │   └── app_texts.dart     #   画面の文言すべて（AppTexts）＋ Home / About の内容（HeroContent / AboutContent）
     │   ├── widgets/               # 複数セクションで使う部品（app_segment.dart = 切替セグメント、filter_chips_section.dart = 見出し付きチップ群）
-    │   └── utils/                 # YAML ローダー、文字列分割、workflow 日本語化など
-    └── test/widget_test.dart      # ※テンプレのまま（後述の既知の問題を参照）
+    │   ├── widgets/               # 共通部品：app_segment / app_filter_modal（ポップアップ）/ profile_setup_dialog（入力画面）/ upload_parts（手順・ファイル状態・確認画面・全画面ローディング）/ settled_reveal / app_loading_indicator
+    │   └── utils/                 # YAML ローダー、profile_store、file_saver、app_ready、文字列分割、workflow 日本語化など
+    └── test/
+        ├── widget_test.dart                   # テーマ（ThemeController / context.colors）
+        ├── profile_yaml_test.dart             # プロフィール YAML の検証（Profile.parse・テンプレートが通るか）
+        ├── projects_yaml_validator_test.dart  # Work / Private YAML の検証（isValidProjectsYaml・テンプレートが通るか）
+        └── browser_storage_test.dart          # sessionStorage（メモリで代用）・Work / Private ローダー・ProfileStore
 ```
 
 `android/ ios/ macos/ linux/ windows/` は `dev_portfolio/.gitignore` で **Git 管理外**。`web/` はローディング表示を入れた `index.html` を管理するため Git に含める（CI の `flutter create . --platforms web` は既存ファイルを上書きせず、足りないファイルだけ作る）。
 
 ## 3. 画面構成
 
-`HomePage` に Header（固定）＋ `SingleChildScrollView` で以下を縦に並べる:
+`HomePage` に Header（固定）＋ `SingleChildScrollView`（**スクロールはこの 1 本だけ**）で以下を縦に並べる:
 
-1. **Hero（Home）** — 職種・名前・紹介文・「スキルを見る／プロジェクトを見る」ボタン＋右にプロフィール YAML カード（幅 900 以上で 2 カラム、600 未満でカード非表示）
-2. **About** — 自己紹介＋「得意な領域／強み／開発スタイル」の定義リスト＋締めの一言
-   - 表示する文言は `constants/app_texts.dart` の `HeroContent` / `AboutContent` にまとめてある
-3. **Skills** — ツールバー（Work/Private セグメント・「カテゴリ」ボタン＝今のカテゴリ名を表示・Bar/Pie アイコン切替）→ カテゴリパネル（Projects のフィルターと同じ作り。インフラ／開発／クラウド・AI／工程のグループから 1 つだけ選び「反映」でグラフ切替。データのないカテゴリは出さない）→ グラフ
-   - セグメントは `lib/widgets/app_segment.dart`（`AppSegment`）を Projects と共通で使う
-4. **Projects** — ツールバー（Work/Private セグメント＋件数・フィルターボタン＋適用数バッジ・List/Collection アイコン切替）→ フィルターパネル（開閉式。先頭に「期間」＝年の範囲スライダー（指定範囲に少しでも重なるプロジェクトを残す）と「進行中のみ」、その下に技術・工程のチップ群。グループは幅 720 以上で 2 列）→ 適用中フィルター（× で個別解除・すべて解除）→ 一覧（List は 5 件ずつ、Collection は「列数 × 表示エリアに収まる行数」ずつページング＝行がそろう。`ProjectsCollectionConfig.itemsPerPage`）→ 詳細モーダル（`url_launcher`）
+1. **Hero（Home）** — 職種・名前・紹介文・「スキルを見る／プロジェクトを見る」ボタン＋右にプロフィールのカード（`home.card`。幅 900 以上で 2 カラム、600 未満でカード非表示）
+2. **About** — 自己紹介＋「得意な領域／強み／開発スタイル」の定義リスト＋締めの一言（空の項目は出さない）
+   - Home / About の中身はプロフィール YAML（`ProfileStore`）。固定の見出しは `AppTexts` の `HeroContent` / `AboutContent`
+3. **Skills** — ツールバー（Work/Private セグメント・「カテゴリ」ボタン＝今のカテゴリ名・Bar/Pie 切替）→ カテゴリはポップアップ（1 つ選んで「反映」）→ グラフ（カード最大幅 800、狭いと縦並び）
+4. **Projects** — ツールバー（Work/Private セグメント＋件数・フィルターボタン＋適用数バッジ・List/Collection 切替）→ フィルターはポップアップ（期間スライダー・進行中のみ・技術／工程チップ）→ 適用中フィルター → 一覧 → 詳細モーダル（`url_launcher`）
+   - **List** = 年表（左に開始の年・月＋縦線と点、期間の枠＋長さの札、タグ 4 つまで）。5 件ずつ
+   - **Collection** = カバー付きカード（`projectColorSeed` でタイトルから色、頭文字・期間の長さ）。1 ページ＝列数 × 行数（どちらも画面幅で決まる）
    - 状態（Work/Private・表示形式・フィルター）は `ProjectsSection` が持つ。タブ切替でフィルターはリセット
-   - Collection は幅で列数が変わる（520 未満 1 / 520〜 2 / 820〜 3 / 1100〜 4 列、`ProjectsCollectionConfig.columnBreakpoints`）。カードは高さ固定で、タグは 3 つ＋「+N」
 
-Header: ナビボタン、**Work / Private 用 YAML のアップロード**（`file_picker`）、ダークモードのスイッチ。
-アップロードダイアログには、フォーマット（`format_*.yaml`）を「名前を付けて保存」するボタン（`utils/file_saver.dart`：Chrome/Edge は `showSaveFilePicker` の保存ダイアログ、他は通常ダウンロード）と、書き方の説明を開く ⓘ ボタンがある（`sections/header/yaml_format_help.dart`。デスクトップ用とモバイル用で共通）。
+Header: M3 の Small top app bar。ナビ（表示中セクションにインジケーター）、Work / Private の YAML アップロード（Filled tonal）、テーマ切替（☀️/🌙 Switch、スマホは IconButton）。
 
 ## 4. データフロー（重要）
 
@@ -120,6 +129,7 @@ dart run tool/run.dart my_profile.yaml   # プロフィール YAML を指定し�
 dart run tool/run.dart                   # 指定なし → 起動後に「あなたのことを教えてください」を表示
 flutter run -d chrome                 # ローカルで動作確認（Web 専用。dart:html を使っているため）
 flutter analyze
+flutter test                          # テーマ・YAML の検証・sessionStorage / ローダー / ProfileStore
 flutter build web --release --base-href "/dev-portfolio-site/"
 ```
 
@@ -164,15 +174,40 @@ web/ ディレクトリがない環境では、先に `flutter create . --platfo
 - **Projects のフィルター・Skills のカテゴリはポップアップで開く**（`lib/widgets/app_filter_modal.dart` の `showAppFilterModal`）：幅 600 以上は中央のダイアログ、未満は下から出るシート。パネルは見出しとフッターを固定し、本文だけスクロールする。「反映」で反映、×・キャンセル・外側タップでは変えない。
 - **List と Collection は役割で見た目を分ける**：List＝年表（1 枚の面に行を並べ、左に開始の年・月と縦線＋点、説明文なし）／Collection＝カバー付きカードのギャラリー（色は `projectColorSeed` でタイトルから決める、頭文字・期間の長さ・説明 2 行）。
 
-## 8. 既知の問題・技術的負債（2026-10-31 時点の調査）
+## 8. 現状と課題（2026-11-03 時点）
 
-- **`test/widget_test.dart` が壊れている**: 存在しない `MyApp` を参照しているため、`flutter test` は失敗する。
-- **Web 専用**: `dart:html` を直接 import しているため（ローダー、両 Header）、Web 以外ではビルドできない。`dart:html` は非推奨なので、将来は `package:web` に移行することを検討する。
-- **CSV 分割処理が複数ある**: `Project._split` / `ProjectFilterLogic.split` は `,` で分割、`utils/string_utils.parseToList` は `,`・`、`・空白で分割（スペースを含む値が分かれてしまう恐れ）。`utils/project_utils.parseList` もあるが未使用。
-- **未使用（と思われる）コード**: `skills/skills_tabs.dart`, `skills/models/skill_model.dart`, `skills/widgets/skills_tab_bar.dart`, `projects/project_detail_format.dart`, `projects/views/project_list/project_list_view.dart`（＋`project_list_sort.dart`、こちらは期間の形式が現在のデータと合っていない）, `config/projects/projects_tab_config.dart`, `config/skills/skills_section_config.dart`（古い `tools_fw` キー）, `utils/project_utils.dart`。依存パッケージの `shared_preferences` も未使用。
-- `lib/utils/theme_colors.dart` は不要（どこからも import されていない）なので削除してよい。
-- ローダーのコメントに `projects_*.yaml` とあるが、実際に読んでいるのは `format_*.yaml`。
-- `web/index.html` と `pubspec.yaml` の description / title が Flutter テンプレートのまま。`HeroContent` / `AboutContent`（`constants/app_texts.dart`）の名前・文言はまだ仮のもの。
+### 現状
+- `flutter analyze`：指摘 0 件。`flutter test`：全件成功（テーマ・非推奨 API の置き換え結果・プロフィール YAML・Work / Private YAML・sessionStorage / ローダー / `ProfileStore`）。オーナーの手元で確認済み。
+- 非推奨 API は置き換え済み（Flutter stable 2026-10 のソースで `@Deprecated` を照合）:
+  - `dart:html` → `package:web`（`web: ^1.1.1`）。sessionStorage とイベント送信は `utils/browser/browser.dart` 経由（Web は `browser_web.dart`、flutter test は `browser_stub.dart` のメモリ実装を条件付き export で自動選択）。**`dart:html` / `package:web` を直接 import しない**（`file_saver.dart` だけは Web 専用の保存処理なので直接使う）。
+  - `Color.withOpacity` → `withValues(alpha: …)`。
+  - 例外：`ProgressIndicatorThemeData.year2023` / `SliderThemeData.year2023`（`app_theme.dart`）は非推奨だが、既定値がまだ true（旧デザイン）で、M3 2024 版の見た目にする方法がこれしかないため `// ignore: deprecated_member_use` 付きで残す。既定値が false になったら消す。
+- Claude の作業環境には Flutter がない。静的解析・テスト・画面での確認はオーナーの手元で行う。
+
+### 課題：優先度 高（不具合・データの安全に関わる）
+1. **画面での動作確認がまだ**：コミット `b2bd0ed` 以降の変更（レスポンシブ・M3 ヘッダー・ポップアップのフィルター・List / Collection・プロフィール入力画面・アップロードの確認画面と全画面ローディング・`tool/run.dart`）は、analyze / test は通ったが、PC 幅とスマホ幅での見た目・操作は未確認。
+2. **ローカルで `flutter build web` するとプロフィールが成果物に入る**：`assets/profile/` をアセットとして宣言しているため、`profile.yaml` が残っていると `build/web/assets` に含まれる（表示はしないが個人情報）。公開用にビルドする前に消す。ビルド前に自動で消す仕組みはまだない。
+3. **Work / Private の検証が浅い**（`isValidProjectsYaml`）：`projects` 配列・`title`・`workflow` の有無だけ。各項目の型（List / 文字列）や `period` の形式は見ていないので、崩れた YAML でも通って表示がおかしくなる可能性がある。プロフィール（`Profile.parse`）と同じく項目単位のエラーを出す形にしたい。
+
+### 課題：優先度 中（使い勝手・保守性）
+4. **テストがまだ足りない**：`ProjectFilterLogic`（技術・工程・期間・進行中）、ページネーションの `_visiblePages`、スキル集計（`skills_aggregator`）、`Project.fromMap`（期間の解釈・進行中）にテストがない。ウィジェットのテスト（入力画面が閉じられない、確認画面で OK のときだけ反映 など）もない。
+5. **CSV 分割処理が複数ある**：`Project._split` / `ProjectFilterLogic.split` は `,` で分割、`utils/string_utils.parseToList` は `,`・`、`・空白で分割（スペースを含む値が分かれてしまう恐れ）。1 つにまとめたい。
+6. **ページ移動でスクロール位置が残る**：ページ全体でスクロールするので、Projects のページを切り替えて一覧の長さが変わっても位置はそのまま（一覧の先頭へ戻す処理がない）。
+7. **スマホでのグラフ操作**：棒グラフの強調は `MouseRegion` だけなのでタップに反応しない。
+8. **`tool/run.dart` は起動時に 1 回コピーするだけ**：YAML を書き換えたら起動し直す必要がある（ホットリロードでは反映されない）。`dev_portfolio/` で実行する前提。
+9. **全画面ローディングは時間で待っている**：アップロード後は最低 5 秒（`AppSizes.reloadMinDuration`）、最大 8 秒。描画完了を厳密に検知しているわけではない。
+
+### 課題：優先度 低（仕様として受け入れているもの・整理）
+10. **公開ページ（GitHub Pages）では必ずプロフィールの入力画面が出る**：CI は YAML なしでビルドする。ローカルに落として使う前提なので仕様。
+11. **アップロードしたデータは sessionStorage だけ**：タブを閉じると消える（仕様）。
+12. **Web 専用**：`file_saver.dart`（`dart:js_interop` / `package:web`）と `main.dart` 経由のため、Web 以外ではビルドできない（テストは VM で動く）。
+13. **未使用のファイル**（どこからも import されていない）：`skills/skills_tabs.dart`、`skills/models/skill_model.dart`、`skills/widgets/skills_tab_bar.dart`、`projects/project_detail_format.dart`、`projects/views/project_list/project_list_view.dart`（＋`project_list_sort.dart`）、`config/projects/projects_tab_config.dart`、`config/skills/skills_section_config.dart`、`utils/project_utils.dart`。依存パッケージの `shared_preferences` も未使用。
+14. **未使用の定数・スタイル**（作り直しで使わなくなったもの。参照 0 件を確認済み）：`AppSizes.filterPanelDuration`、`AppStyles.filterPanel` / `toggle` / `toggleText`、`AppTexts.selectYamlFile` / `selectedFile` / `uploadYaml` / `workUploadNote` / `privateUploadNote` / `darkMode` / `save`、`ProfileTexts.upload`、`ProjectsListConfig.separator` / `cardPadding`、`SkillsHeaderConfig.panelMargin`、`PieChartLayout.pieInactiveBorderWidth`、ローダーの `setCustomYaml`（テストからのみ使用）。
+15. `pubspec.yaml` の `description` が Flutter テンプレートのまま（`"A new Flutter project."`）。
+
+### テストを書くときの注意
+- `flutter test` は VM で動くため、ブラウザの機能は `utils/browser/browser.dart` 経由にし、検証ロジックは Web に依存しないファイルに置く（`utils/projects_yaml_validator.dart` / `models/profile.dart`）。
+- MaterialApp のテーマ切り替えはアニメーションするので、テーマを変えたあとは `pumpAndSettle()` してから確かめる。
 
 ## 9. Claude の作業メモ
 

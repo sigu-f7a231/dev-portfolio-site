@@ -1,6 +1,6 @@
 // lib/utils/string_utils.dart
 
-/// 文字列 or List を安全に List<String> に変換
+/// 文字列 or List を安全に `List<String>` に変換
 List<String> parseToList(dynamic raw) {
   if (raw == null) return [];
 

@@ -513,8 +513,8 @@ class AppStyles {
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
         colors: [
-          c.withOpacity(dark ? 0.38 : 0.28),
-          c.withOpacity(dark ? 0.14 : 0.08),
+          c.withValues(alpha: dark ? 0.38 : 0.28),
+          c.withValues(alpha: dark ? 0.14 : 0.08),
         ],
       ),
     );
@@ -530,7 +530,7 @@ class AppStyles {
 
   /// カバー上の期間の長さ（小さな札）
   static BoxDecoration collectionCoverBadge(BuildContext context) => BoxDecoration(
-        color: context.colors.collectionCardBackground.withOpacity(0.85),
+        color: context.colors.collectionCardBackground.withValues(alpha: 0.85),
         borderRadius: BorderRadius.circular(radiusFull),
       );
 
