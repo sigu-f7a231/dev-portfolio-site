@@ -59,6 +59,9 @@ flutter:
   assets:
     - assets/data/format_work.yaml
     - assets/data/format_private.yaml
+    - assets/data/format_profile.yaml
+    # 起動時に指定したプロフィール（dart run tool/run.dart xxx.yaml がここにコピーする。Git には含めない）
+    - assets/profile/
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in

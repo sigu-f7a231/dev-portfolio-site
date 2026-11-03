@@ -1,6 +1,9 @@
 // lib/pages/home_page.dart
 import 'package:flutter/material.dart';
 import '../sections/header/header.dart';
+import '../sections/header/header_parts.dart';
+import '../utils/profile_store.dart';
+import '../widgets/profile_setup_dialog.dart';
 import '../sections/hero_section.dart';
 import '../sections/about_section.dart';
 import '../sections/skills/skills_section.dart';
@@ -25,40 +28,52 @@ class _HomePageState extends State<HomePage> {
   int _skillsRefreshKey = 0;  // ★ Skills専用の再描画キーを追加
 
   @override
+  void initState() {
+    super.initState();
+    // YAML を指定せずに起動した（かつ未アップロード）ときは、最初に入力画面を出す
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && ProfileStore.instance.value == null) {
+        showProfileSetupDialog(context);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    scroll.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       // M3 の NavigationDrawer（スマホ幅のときにメニューから開く）
-      drawer: NavigationDrawer(
-        selectedIndex: null, // 1 ページ内のスクロールなので選択状態は持たない
-        onDestinationSelected: (index) {
-          scroll.scrollTo(_sections[index]);
-          Navigator.pop(context);
-        },
-        children: [
-          Padding(
-            padding: AppSizes.drawerHeaderPadding,
-            child: Text(
-              AppTexts.appTitle,
-              style: Theme.of(context).textTheme.titleSmall,
-            ),
+      // スクロールで表示中のセクションが変わったら、選択表示も変わる
+      drawer: ValueListenableBuilder<String>(
+        valueListenable: scroll.active,
+        builder: (context, active, _) => NavigationDrawer(
+            // 表示中のセクションを選択状態にする
+            selectedIndex: _sections.indexOf(active),
+            onDestinationSelected: (index) {
+              Navigator.pop(context);
+              scroll.scrollTo(_sections[index]);
+            },
+            children: [
+              Padding(
+                padding: AppSizes.drawerHeaderPadding,
+                child: Text(
+                  AppTexts.appTitle,
+                  style: Theme.of(context).textTheme.titleSmall,
+                ),
+              ),
+              for (final d in NavDestination.all)
+                NavigationDrawerDestination(
+                  icon: Icon(d.icon),
+                  selectedIcon: Icon(d.selectedIcon),
+                  label: Text(d.label),
+                ),
+            ],
           ),
-          const NavigationDrawerDestination(
-            icon: Icon(Icons.home_outlined),
-            label: Text(AppTexts.navHome),
-          ),
-          const NavigationDrawerDestination(
-            icon: Icon(Icons.person_outline),
-            label: Text(AppTexts.navAbout),
-          ),
-          const NavigationDrawerDestination(
-            icon: Icon(Icons.bar_chart),
-            label: Text(AppTexts.navSkills),
-          ),
-          const NavigationDrawerDestination(
-            icon: Icon(Icons.work_outline),
-            label: Text(AppTexts.navProjects),
-          ),
-        ],
       ),
       body: Column(
         children: [
@@ -67,6 +82,7 @@ class _HomePageState extends State<HomePage> {
             onAboutPressed: () => scroll.scrollTo('about'),
             onSkillsPressed: () => scroll.scrollTo('skills'),
             onProjectsPressed: () => scroll.scrollTo('projects'),
+            activeSection: scroll.active,
             onYamlStateChanged: () {
               setState(() {
                 _refreshKey++;       // Projectsを再描画

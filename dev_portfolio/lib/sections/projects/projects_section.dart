@@ -12,6 +12,7 @@ import '../config/projects/projects_section_config.dart';
 import '../../theme/app_theme.dart';
 import '../../constants/app_sizes.dart';
 import '../../widgets/app_loading_indicator.dart';
+import '../../widgets/app_filter_modal.dart';
 
 /// Projects セクション
 /// 状態（Work/Private・表示形式・フィルター）はここで持ち、ツールバー・パネル・一覧に渡す
@@ -47,16 +48,34 @@ class _ProjectsSectionState extends State<ProjectsSection> {
     });
   }
 
+  /// フィルターをポップアップで開く（「反映」で一覧に反映、閉じる・キャンセルでは変えない）
+  Future<void> _openFilter(List<Project> current) async {
+    setState(() => _filterOpen = true);
+    await showAppFilterModal<void>(
+      context,
+      builder: (ctx) => ProjectsFilter(
+        projects: current,
+        isWork: _isWork,
+        initialState: _filterState,
+        onApply: (state) {
+          Navigator.of(ctx).pop();
+          setState(() => _filterState = state);
+        },
+        onClose: () => Navigator.of(ctx).pop(),
+      ),
+    );
+    if (mounted) setState(() => _filterOpen = false);
+  }
+
   @override
   Widget build(BuildContext context) {
-    final screenHeight = MediaQuery.of(context).size.height;
-
+    // 高さは中身なり。スクロールはページ全体（HomePage）で 1 つにまとめる
+    //（スマホで内側だけがスクロールしてページが動かなくなるのを防ぐ）
     return Container(
+      width: double.infinity,
       color: context.colors.projectsBackground,
       padding: ProjectsSectionConfig.padding,
-      height: screenHeight,
-      child: SingleChildScrollView(
-        child: FutureBuilder<List<List<Project>>>(
+      child: FutureBuilder<List<List<Project>>>(
           future: _projectsFuture,
           builder: (context, snapshot) {
             final work = snapshot.data?[0] ?? const <Project>[];
@@ -77,31 +96,9 @@ class _ProjectsSectionState extends State<ProjectsSection> {
                   onTabChanged: _selectTab,
                   filterOpen: _filterOpen,
                   activeFilterCount: _filterState.activeCount,
-                  onFilterPressed: () => setState(() => _filterOpen = !_filterOpen),
+                  onFilterPressed: () => _openFilter(current),
                   showCollection: _showCollection,
                   onViewChanged: (v) => setState(() => _showCollection = v),
-                ),
-
-                // フィルターパネル（開閉はボタン操作への応答としてだけ動かす）
-                AnimatedSize(
-                  duration: AppSizes.filterPanelDuration,
-                  alignment: Alignment.topCenter,
-                  child: _filterOpen
-                      ? Padding(
-                          padding: const EdgeInsets.only(top: AppSizes.space12),
-                          child: ProjectsFilter(
-                            key: ValueKey(_isWork),
-                            projects: current,
-                            isWork: _isWork,
-                            initialState: _filterState,
-                            onApply: (state) => setState(() {
-                              _filterState = state;
-                              _filterOpen = false;
-                            }),
-                            onClose: () => setState(() => _filterOpen = false),
-                          ),
-                        )
-                      : const SizedBox(width: double.infinity),
                 ),
 
                 // 適用中のフィルター
@@ -120,20 +117,19 @@ class _ProjectsSectionState extends State<ProjectsSection> {
                 ProjectsSectionConfig.toolbarSpacing,
 
                 // 一覧
-                SizedBox(
-                  height: screenHeight * AppSizes.projectsListHeightRatio,
-                  child: snapshot.hasData
-                      ? ProjectsTabView(
-                          projects: current,
-                          filterState: _filterState,
-                          showCollection: _showCollection,
-                        )
-                      : const Center(child: AppLoadingIndicator()),
-                ),
+                snapshot.hasData
+                    ? ProjectsTabView(
+                        projects: current,
+                        filterState: _filterState,
+                        showCollection: _showCollection,
+                      )
+                    : const SizedBox(
+                        height: ProjectsSectionConfig.loadingHeight,
+                        child: Center(child: AppLoadingIndicator()),
+                      ),
               ],
             );
           },
-        ),
       ),
     );
   }

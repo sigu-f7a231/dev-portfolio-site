@@ -37,6 +37,14 @@ class AppSizes {
   static const Duration filterPaddingDuration = Duration(milliseconds: 150);
 
   /// フィルターパネルの開閉
+  /// フィルター / カテゴリのポップアップ：この幅以上は中央のダイアログ、未満は下から出るシート
+  static const double filterModalBreakpoint = 600;
+  static const double filterModalMaxWidth = 720;
+
+  /// ポップアップの最大の高さ（画面の高さに対する割合）
+  static const double filterDialogMaxHeightRatio = 0.85;
+  static const double filterSheetMaxHeightRatio = 0.9;
+
   static const Duration filterPanelDuration = Duration(milliseconds: 200);
 
   /// ダウンロード用の一時 URL を解放するまでの待ち時間
@@ -49,6 +57,15 @@ class AppSizes {
 
   /// 「描画が落ち着いた」とみなすまでに待つフレーム数（SettledReveal・起動時の app-ready 共通）
   static const int settleFrames = 6;
+
+  /// アップロード後の全画面ローディング：最低この時間は出す（読み込み・描き直しが終わるのを待つ）
+  static const Duration reloadMinDuration = Duration(seconds: 5);
+
+  /// 読み込みが終わらなくても、この時間で打ち切って画面を出す
+  static const Duration reloadMaxDuration = Duration(seconds: 8);
+
+  /// 確認画面の一覧の最大の高さ
+  static const double confirmListMaxHeight = 320;
 
   // ----------------------------------------------------------
   // 読み込み中（M3 Progress indicator・円形）
@@ -69,6 +86,10 @@ class AppSizes {
   // ダイアログ（YAML アップロード / 書き方の説明）
   // ----------------------------------------------------------
   static const double uploadDialogWidth = 450;
+
+  /// プロフィール入力画面：見出し右の ⓘ ボタンの幅・手順の番号の丸
+  static const double profileHelpButtonSize = 48;
+  static const double profileStepRadius = 12;
   static const double helpDialogWidth = 560;
 
   /// ボタン内のローディング表示
@@ -77,9 +98,6 @@ class AppSizes {
   // ----------------------------------------------------------
   // Projects
   // ----------------------------------------------------------
-  /// 一覧エリアの高さ（画面の高さに対する割合）
-  static const double projectsListHeightRatio = 0.7;
-
   /// ページネーションバーの高さ
   static const double paginationBarHeight = 60;
 

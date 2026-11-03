@@ -45,7 +45,15 @@ class SkillsCategoryButton extends StatelessWidget {
           Container(
             padding: SkillsHeaderConfig.currentCategoryPadding,
             decoration: AppStyles.countBadge(context),
-            child: Text(currentLabel, style: AppStyles.countBadgeText(context)),
+            constraints: const BoxConstraints(
+              maxWidth: SkillsHeaderConfig.currentCategoryMaxWidth,
+            ),
+            child: Text(
+              currentLabel,
+              style: AppStyles.countBadgeText(context),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
           ),
         ],
       ),
@@ -84,11 +92,11 @@ class _SkillsCategoryPanelState extends State<SkillsCategoryPanel> {
     return Container(
       width: double.infinity,
       padding: SkillsHeaderConfig.panelPadding,
-      decoration: AppStyles.filterPanel(context),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 見出し＋閉じる
+          // 見出し＋閉じる（固定）
           Row(
             children: [
               Expanded(
@@ -109,38 +117,48 @@ class _SkillsCategoryPanelState extends State<SkillsCategoryPanel> {
           ),
           const SizedBox(height: AppSizes.space8),
 
-          // グループ（幅があれば 2 列）
-          LayoutBuilder(
-            builder: (context, constraints) {
-              final twoColumns = constraints.maxWidth >=
-                  SkillsHeaderConfig.panelTwoColumnBreakpoint;
-              const gap = SkillsHeaderConfig.panelGroupGap;
-              final itemWidth = twoColumns
-                  ? (constraints.maxWidth - gap) / 2
-                  : constraints.maxWidth;
+          // 本文（高さが足りないときはここだけスクロール）
+          Flexible(
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                // グループ（幅があれば 2 列）
+                LayoutBuilder(
+                  builder: (context, constraints) {
+                    final twoColumns = constraints.maxWidth >=
+                        SkillsHeaderConfig.panelTwoColumnBreakpoint;
+                    const gap = SkillsHeaderConfig.panelGroupGap;
+                    final itemWidth = twoColumns
+                        ? (constraints.maxWidth - gap) / 2
+                        : constraints.maxWidth;
 
-              return Wrap(
-                spacing: gap,
-                runSpacing: AppSizes.space20,
-                children: widget.groups
-                    .map((g) => SizedBox(
-                          width: itemWidth,
-                          child: FilterChipsSection(
-                            title: g.title,
-                            items: g.categories,
-                            labelOf: widget.labelOf,
-                            selectedItems: [_pending],
-                            // 1 つだけ選択：押したものに置き換える
-                            onSelected: (c) => setState(() => _pending = c),
-                          ),
-                        ))
-                    .toList(),
-              );
-            },
+                    return Wrap(
+                      spacing: gap,
+                      runSpacing: AppSizes.space20,
+                      children: widget.groups
+                          .map((g) => SizedBox(
+                                width: itemWidth,
+                                child: FilterChipsSection(
+                                  title: g.title,
+                                  items: g.categories,
+                                  labelOf: widget.labelOf,
+                                  selectedItems: [_pending],
+                                  // 1 つだけ選択：押したものに置き換える
+                                  onSelected: (c) => setState(() => _pending = c),
+                                ),
+                              ))
+                          .toList(),
+                    );
+                  },
+                ),
+                ],
+              ),
+            ),
           ),
           const SizedBox(height: AppSizes.space20),
 
-          // フッター
+          // フッター（固定）
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [

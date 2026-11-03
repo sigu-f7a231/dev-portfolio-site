@@ -183,11 +183,11 @@ class _ProjectsFilterState extends State<ProjectsFilter> {
     return Container(
       width: double.infinity,
       padding: ProjectsSectionConfig.filterPanelPadding,
-      decoration: AppStyles.filterPanel(context),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 見出し＋閉じる
+          // 見出し＋閉じる（固定）
           Row(
             children: [
               Expanded(
@@ -205,40 +205,50 @@ class _ProjectsFilterState extends State<ProjectsFilter> {
           ),
           const SizedBox(height: AppSizes.space8),
 
-          // 期間（全幅）
-          _buildPeriod(context),
-          const SizedBox(height: AppSizes.space20),
+          // 本文（高さが足りないときはここだけスクロール）
+          Flexible(
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                // 期間（全幅）
+                _buildPeriod(context),
+                const SizedBox(height: AppSizes.space20),
 
-          // グループ（幅があれば 2 列）
-          LayoutBuilder(
-            builder: (context, constraints) {
-              final twoColumns = constraints.maxWidth >=
-                  ProjectsSectionConfig.filterTwoColumnBreakpoint;
-              final gap = ProjectsSectionConfig.filterGroupGap;
-              final itemWidth = twoColumns
-                  ? (constraints.maxWidth - gap) / 2
-                  : constraints.maxWidth;
+                // グループ（幅があれば 2 列）
+                LayoutBuilder(
+                  builder: (context, constraints) {
+                    final twoColumns = constraints.maxWidth >=
+                        ProjectsSectionConfig.filterTwoColumnBreakpoint;
+                    final gap = ProjectsSectionConfig.filterGroupGap;
+                    final itemWidth = twoColumns
+                        ? (constraints.maxWidth - gap) / 2
+                        : constraints.maxWidth;
 
-              return Wrap(
-                spacing: gap,
-                runSpacing: AppSizes.space20,
-                children: groups
-                    .map((e) => SizedBox(
-                          width: itemWidth,
-                          child: FilterChipsSection(
-                            title: e.group.title,
-                            items: e.items,
-                            selectedItems: _selected[e.group.key] ?? const [],
-                            onSelected: (v) => _toggle(e.group.key, v),
-                          ),
-                        ))
-                    .toList(),
-              );
-            },
+                    return Wrap(
+                      spacing: gap,
+                      runSpacing: AppSizes.space20,
+                      children: groups
+                          .map((e) => SizedBox(
+                                width: itemWidth,
+                                child: FilterChipsSection(
+                                  title: e.group.title,
+                                  items: e.items,
+                                  selectedItems: _selected[e.group.key] ?? const [],
+                                  onSelected: (v) => _toggle(e.group.key, v),
+                                ),
+                              ))
+                          .toList(),
+                    );
+                  },
+                ),
+                ],
+              ),
+            ),
           ),
           const SizedBox(height: AppSizes.space20),
 
-          // フッター
+          // フッター（固定）
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [

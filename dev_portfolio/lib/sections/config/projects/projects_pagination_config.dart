@@ -16,6 +16,12 @@ class ProjectsPaginationConfig {
   /// ページ番号ボタンの大きさ（丸いボタン）
   static const pageButtonSize = 40.0;
 
+  /// 前へ / 次へボタン 1 個ぶんの幅（IconButton の既定サイズ）
+  static const navButtonWidth = 48.0;
+
+  /// 番号ボタンを並べられる数がこれ未満なら「‹ 3 / 10 ›」の簡易表示にする
+  static const minNumberedButtons = 5;
+
   // =========================
   // Typography
   // =========================

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../config/header_config.dart';
 import 'desktop_header.dart';
@@ -10,6 +11,9 @@ class Header extends StatelessWidget {
   final VoidCallback onProjectsPressed;
   final VoidCallback? onYamlStateChanged; // ★ 追加
 
+  /// いま表示中のセクション（ナビの選択表示に使う）
+  final ValueListenable<String> activeSection;
+
   const Header({
     super.key,
     required this.onHomePressed,
@@ -17,6 +21,7 @@ class Header extends StatelessWidget {
     required this.onSkillsPressed,
     required this.onProjectsPressed,
     this.onYamlStateChanged, // ★ 追加
+    required this.activeSection,
   });
 
   @override
@@ -38,6 +43,7 @@ class Header extends StatelessWidget {
             onSkillsPressed: onSkillsPressed,
             onProjectsPressed: onProjectsPressed,
             onYamlStateChanged: onYamlStateChanged, // ★ DesktopHeaderに渡す
+            activeSection: activeSection,
           );
         }
       },

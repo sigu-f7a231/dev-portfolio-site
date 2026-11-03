@@ -25,8 +25,11 @@ class SkillsCard extends StatelessWidget {
 
     return Center(
       child: Container(
-        width: SkillsCardConfig.width,
-        height: SkillsCardConfig.height,
+        width: double.infinity,
+        constraints: const BoxConstraints(
+          maxWidth: SkillsCardConfig.maxWidth,
+          minHeight: SkillsCardConfig.minHeight,
+        ),
         padding: const EdgeInsets.all(SkillsCardConfig.padding),
         // 影はダークモードでは透明（＝影なし）になる
         decoration: AppStyles.card(

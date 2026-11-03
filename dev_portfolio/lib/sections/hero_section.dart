@@ -5,8 +5,10 @@ import '../theme/app_theme.dart';
 import '../theme/app_styles.dart';
 import '../constants/app_sizes.dart';
 import '../constants/app_texts.dart';
+import '../models/profile.dart';
+import '../utils/profile_store.dart';
 
-/// Home：名前・職種・紹介文 ＋ プロフィール YAML
+/// Home：名前・職種・紹介文 ＋ プロフィールのカード（中身はプロフィール YAML から）
 class HeroSection extends StatelessWidget {
   final VoidCallback? onSkillsPressed;
   final VoidCallback? onProjectsPressed;
@@ -19,6 +21,14 @@ class HeroSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return ValueListenableBuilder<Profile?>(
+      valueListenable: ProfileStore.instance,
+      builder: (context, profile, _) => _build(context, profile ?? Profile.empty),
+    );
+  }
+
+  Widget _build(BuildContext context, Profile profile) {
+    final hasCard = profile.card.isNotEmpty;
     return Container(
       width: double.infinity,
       constraints: BoxConstraints(minHeight: HeroSectionConfig.height(context)),
@@ -35,20 +45,21 @@ class HeroSection extends StatelessWidget {
             final showCode = width >= HeroSectionConfig.codeCardBreakpoint;
 
             final intro = _Intro(
+              profile: profile,
               isWide: isWide,
               onSkillsPressed: onSkillsPressed,
               onProjectsPressed: onProjectsPressed,
             );
 
-            if (isWide) {
+            if (isWide && hasCard) {
               return Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Expanded(child: intro),
                   const SizedBox(width: AppSizes.space48),
-                  const SizedBox(
+                  SizedBox(
                     width: HeroSectionConfig.codeCardWidth,
-                    child: _ProfileYaml(),
+                    child: _ProfileYaml(card: profile.card),
                   ),
                 ],
               );
@@ -59,9 +70,9 @@ class HeroSection extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 intro,
-                if (showCode) ...[
+                if (showCode && hasCard && !isWide) ...[
                   const SizedBox(height: AppSizes.space40),
-                  const _ProfileYaml(),
+                  _ProfileYaml(card: profile.card),
                 ],
               ],
             );
@@ -74,11 +85,13 @@ class HeroSection extends StatelessWidget {
 
 /// 左側：名前・職種・紹介文・ボタン
 class _Intro extends StatelessWidget {
+  final Profile profile;
   final bool isWide;
   final VoidCallback? onSkillsPressed;
   final VoidCallback? onProjectsPressed;
 
   const _Intro({
+    required this.profile,
     required this.isWide,
     this.onSkillsPressed,
     this.onProjectsPressed,
@@ -91,12 +104,12 @@ class _Intro extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         Text(
-          HeroContent.role,
+          profile.role,
           style: AppStyles.heroRole(context, HeroSectionConfig.roleFontSize),
         ),
         const SizedBox(height: AppSizes.space12),
         Text(
-          HeroContent.name,
+          profile.name,
           style: AppStyles.heroName(
             context,
             isWide
@@ -109,7 +122,7 @@ class _Intro extends StatelessWidget {
           constraints:
               const BoxConstraints(maxWidth: HeroSectionConfig.taglineMaxWidth),
           child: Text(
-            HeroContent.tagline,
+            profile.tagline,
             style: AppStyles.heroTagline(
                 context, HeroSectionConfig.taglineFontSize),
           ),
@@ -139,7 +152,9 @@ class _Intro extends StatelessWidget {
 /// 右側：プロフィールを YAML 風に表示するカード
 /// （このサイトのデータが YAML で書かれていることにちなんだ見せ方）
 class _ProfileYaml extends StatelessWidget {
-  const _ProfileYaml();
+  final Map<String, Object> card;
+
+  const _ProfileYaml({required this.card});
 
   @override
   Widget build(BuildContext context) {
@@ -147,7 +162,7 @@ class _ProfileYaml extends StatelessWidget {
     final valueStyle = AppStyles.heroCode(context);
 
     final lines = <InlineSpan>[];
-    HeroContent.profile.forEach((key, value) {
+    card.forEach((key, value) {
       lines.add(TextSpan(text: '$key:', style: keyStyle));
       if (value is List) {
         lines.add(const TextSpan(text: '\n'));

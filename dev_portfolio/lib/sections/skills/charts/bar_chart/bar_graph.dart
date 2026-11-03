@@ -37,9 +37,10 @@ class BarGraph extends StatelessWidget {
       topEntries.add(MapEntry(AppTexts.chartOthers, otherValue));
     }
 
-    return ListView.builder(
-      itemCount: topEntries.length,
-      itemBuilder: (context, i) {
+    // 最大 11 行なので自分ではスクロールしない（ページ全体でスクロール）
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: List.generate(topEntries.length, (i) {
         final e = topEntries[i];
         final isActive = i == touchedIndex;
 
@@ -104,7 +105,7 @@ class BarGraph extends StatelessWidget {
             ),
           ),
         );
-      },
+      }),
     );
   }
 }

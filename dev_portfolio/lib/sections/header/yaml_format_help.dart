@@ -1,9 +1,8 @@
 // lib/sections/header/yaml_format_help.dart
 //
-// YAML アップロードダイアログ（Work / Private）用の補助 UI
-// - フォーマットファイル（assets/data/format_*.yaml）を「名前を付けて保存」するボタン
-// - 書き方の説明を開く ⓘ ボタン
-// DesktopHeader / MobileHeader の両方から使う。
+// YAML アップロード画面（Work / Private）用の補助
+// - テンプレート（assets/data/format_*.yaml）を「名前を付けて保存」する処理（ボタンはアップロード画面だけ）
+// - ⓘ で開く書き方の説明ダイアログ（説明だけ。保存ボタンは置かない）
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../theme/app_theme.dart';
@@ -41,39 +40,6 @@ Future<void> saveYamlFormat(BuildContext context, String dataType) async {
         SnackBar(content: Text(AppTexts.downloadFailed(e))),
       );
     }
-  }
-}
-
-/// 「フォーマットを保存」ボタン + ⓘ ボタン
-class YamlFormatTools extends StatelessWidget {
-  final String dataType; // 'work' or 'private'
-
-  const YamlFormatTools({super.key, required this.dataType});
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Flexible(
-          child: Tooltip(
-            message: AppTexts.downloadFormatTooltip(yamlFormatFileName(dataType)),
-            child: TextButton.icon(
-              onPressed: () => saveYamlFormat(context, dataType),
-              icon: const Icon(Icons.save_alt),
-              label: const Text(
-                AppTexts.downloadFormat,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-          ),
-        ),
-        IconButton(
-          icon: Icon(Icons.info_outline, color: context.colors.textSecondary),
-          tooltip: AppTexts.formatHelpTooltip,
-          onPressed: () => showYamlFormatHelp(context, dataType),
-        ),
-      ],
-    );
   }
 }
 
@@ -148,16 +114,14 @@ void showYamlFormatHelp(BuildContext context, String dataType) {
                     style: AppStyles.helpHeading(context)),
                 const SizedBox(height: AppSizes.space6),
                 _YamlSample(dataType: dataType),
+                const SizedBox(height: AppSizes.space8),
+                Text(AppTexts.helpTemplateWhere, style: AppStyles.helpBody(context)),
               ],
             ),
           ),
         ),
+        // テンプレートの保存はアップロード画面の 1 か所だけにする（ここは説明だけ）
         actions: [
-          TextButton.icon(
-            onPressed: () => saveYamlFormat(context, dataType),
-            icon: const Icon(Icons.save_alt),
-            label: const Text(AppTexts.save),
-          ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
             child: const Text(AppTexts.close),

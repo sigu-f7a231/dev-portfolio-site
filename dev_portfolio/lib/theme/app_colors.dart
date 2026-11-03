@@ -55,6 +55,13 @@ class AppColors {
   final Color drawerHeaderBackground;
   final Color drawerHeaderForeground;
 
+  /// ナビの「選択中」インジケーター（M3 の Navigation の active indicator）
+  final Color navIndicator;
+  final Color navSelectedForeground;
+
+  /// ヘッダー下の区切り線
+  final Color headerDivider;
+
   // ----------------------------------------------------------
   // ダイアログ（YAML アップロード）
   // ----------------------------------------------------------
@@ -193,6 +200,9 @@ class AppColors {
     required this.headerForegroundMuted,
     required this.drawerHeaderBackground,
     required this.drawerHeaderForeground,
+    required this.navIndicator,
+    required this.navSelectedForeground,
+    required this.headerDivider,
     required this.dialogBackground,
     required this.codeBackground,
     required this.codeBorder,
@@ -314,6 +324,9 @@ class AppColors {
       headerForegroundMuted: s.onSurfaceVariant,
       drawerHeaderBackground: s.primaryContainer,
       drawerHeaderForeground: s.onPrimaryContainer,
+      navIndicator: s.secondaryContainer,
+      navSelectedForeground: s.onSecondaryContainer,
+      headerDivider: s.outlineVariant,
       // ダイアログ
       dialogBackground: s.surfaceContainerHigh,
       codeBackground: s.surfaceContainerHighest,

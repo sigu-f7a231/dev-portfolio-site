@@ -9,6 +9,7 @@ import 'dart:html' as html; // ブラウザへのイベント送信（このア�
 import 'package:flutter/widgets.dart';
 import 'work_yaml_loader.dart';
 import 'private_yaml_loader.dart';
+import 'profile_store.dart';
 import '../constants/app_sizes.dart';
 
 class AppReady {
@@ -23,6 +24,7 @@ class AppReady {
       await Future.wait([
         WorkYamlLoader.loadYamlString(),
         PrivateYamlLoader.loadYamlString(),
+        ProfileStore.instance.load(), // Home / About のプロフィール
       ]);
     } catch (_) {
       // 読み込みに失敗した場合は、各セクションが空の表示になる

@@ -8,6 +8,9 @@ class SkillsHeaderConfig {
   // セクション全体の余白（Projects と合わせる）
   static const EdgeInsets sectionPadding = EdgeInsets.all(AppSizes.space24);
 
+  /// カテゴリボタン内の「選択中カテゴリ」の最大幅（スマホではみ出さないように）
+  static const double currentCategoryMaxWidth = 160;
+
   // タイトル
   static const double titleFontSize = 28; // M3 headline medium（Projects と同じ）
   static const EdgeInsets titlePadding = EdgeInsets.symmetric(vertical: AppSizes.space8);

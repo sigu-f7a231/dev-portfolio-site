@@ -6,7 +6,9 @@ import 'widgets/skills_card.dart';
 import 'widgets/skills_chart_switch.dart';
 import 'widgets/skills_category_filter.dart';
 import '../config/skills/skills_widgets_header_config.dart';
+import '../config/skills/skills_widgets_card_config.dart';
 import '../../widgets/app_segment.dart';
+import '../../widgets/app_filter_modal.dart';
 import '../../theme/app_styles.dart';
 import '../../constants/app_sizes.dart';
 import '../../constants/app_texts.dart';
@@ -126,11 +128,30 @@ class _SkillsSectionState extends State<SkillsSection> {
     });
   }
 
+  /// カテゴリをポップアップで開く（1 つ選んで「反映」でグラフを切り替える）
+  Future<void> _openCategory(SkillsData? data) async {
+    setState(() => _categoryOpen = true);
+    await showAppFilterModal<void>(
+      context,
+      builder: (ctx) => SkillsCategoryPanel(
+        groups: _panelGroups(data),
+        current: _currentCategory,
+        labelOf: _label,
+        onApply: (c) {
+          Navigator.of(ctx).pop();
+          setState(() => _currentCategory = c);
+        },
+        onClose: () => Navigator.of(ctx).pop(),
+      ),
+    );
+    if (mounted) setState(() => _categoryOpen = false);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
+      // 高さは中身なり（スクロールはページ全体で 1 つにまとめる）
       padding: SkillsHeaderConfig.sectionPadding,
-      height: MediaQuery.of(context).size.height,
       child: FutureBuilder<List<SkillsData>>(
         future: _skillsFuture,
         builder: (context, snapshot) {
@@ -155,20 +176,21 @@ class _SkillsSectionState extends State<SkillsSection> {
                     value: _isWork,
                     onChanged: _selectTab,
                     items: const [
-                      AppSegmentItem(value: true, label: AppTexts.work),
-                      AppSegmentItem(value: false, label: AppTexts.private),
+                      AppSegmentItem(value: true, label: AppTexts.work, icon: Icons.work_outline),
+                      AppSegmentItem(value: false, label: AppTexts.private, icon: Icons.lock_outline),
                     ],
                   ),
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
+                  // 狭い画面では折り返す
+                  Wrap(
+                    spacing: AppSizes.space12,
+                    runSpacing: AppSizes.space12,
+                    crossAxisAlignment: WrapCrossAlignment.center,
                     children: [
                       SkillsCategoryButton(
                         currentLabel: _label(_currentCategory),
                         open: _categoryOpen,
-                        onPressed: () =>
-                            setState(() => _categoryOpen = !_categoryOpen),
+                        onPressed: () => _openCategory(data),
                       ),
-                      const SizedBox(width: AppSizes.space12),
                       SkillsChartSwitch(
                         showPie: _showPie,
                         onToggle: (v) => setState(() => _showPie = v),
@@ -178,38 +200,24 @@ class _SkillsSectionState extends State<SkillsSection> {
                 ],
               ),
 
-              // カテゴリパネル（ボタン操作に応じて開閉）
-              AnimatedSize(
-                duration: AppSizes.filterPanelDuration,
-                alignment: Alignment.topCenter,
-                child: _categoryOpen
-                    ? Padding(
-                        padding: SkillsHeaderConfig.panelMargin,
-                        child: SkillsCategoryPanel(
-                          key: ValueKey(_isWork),
-                          groups: _panelGroups(data),
-                          current: _currentCategory,
-                          labelOf: _label,
-                          onApply: (c) => setState(() {
-                            _currentCategory = c;
-                            _categoryOpen = false;
-                          }),
-                          onClose: () => setState(() => _categoryOpen = false),
-                        ),
-                      )
-                    : const SizedBox(width: double.infinity),
-              ),
               SkillsHeaderConfig.chartSpacing,
 
               // グラフ
-              Expanded(
+              SizedBox(
+                width: double.infinity,
                 child: !snapshot.hasData
-                    ? const Center(child: AppLoadingIndicator())
+                    ? const SizedBox(
+                        height: SkillsCardConfig.minHeight,
+                        child: Center(child: AppLoadingIndicator()),
+                      )
                     : categoryData.isEmpty
-                        ? Center(
+                        ? SizedBox(
+                            height: SkillsCardConfig.minHeight,
+                            child: Center(
                             child: Text(
                               AppTexts.noData,
                               style: AppStyles.secondary(context),
+                            ),
                             ),
                           )
                         : SkillsCard(

@@ -5,6 +5,8 @@ import '../theme/app_theme.dart';
 import '../theme/app_styles.dart';
 import '../constants/app_sizes.dart';
 import '../constants/app_texts.dart';
+import '../models/profile.dart';
+import '../utils/profile_store.dart';
 
 /// About：自己紹介 ＋ 得意な領域 / 強み / 開発スタイル ＋ 締めの一言
 class AboutSection extends StatelessWidget {
@@ -12,6 +14,13 @@ class AboutSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return ValueListenableBuilder<Profile?>(
+      valueListenable: ProfileStore.instance,
+      builder: (context, profile, _) => _build(context, profile ?? Profile.empty),
+    );
+  }
+
+  Widget _build(BuildContext context, Profile profile) {
     return Container(
       width: double.infinity,
       padding: AboutSectionConfig.padding,
@@ -36,41 +45,15 @@ class AboutSection extends StatelessWidget {
 
                 // 自己紹介
                 Text(
-                  AboutContent.intro,
+                  profile.intro,
                   style: AppStyles.aboutLead(
                       context, AboutSectionConfig.introFontSize),
                 ),
                 AboutSectionConfig.introSpacing,
 
-                // 得意な領域 / 強み / 開発スタイル
-                _AboutRow(
-                  isWide: isWide,
-                  label: AboutContent.domainsLabel,
-                  child: Wrap(
-                    spacing: AppStyles.skillTagSpacing,
-                    runSpacing: AppStyles.skillTagSpacing,
-                    children: AboutContent.domains
-                        .map((d) => Container(
-                              padding: AppStyles.skillTagPadding,
-                              decoration: AppStyles.skillTag(context),
-                              child: Text(d, style: AppStyles.skillTagText(context)),
-                            ))
-                        .toList(),
-                  ),
-                ),
-                _AboutRow(
-                  isWide: isWide,
-                  label: AboutContent.strengthsLabel,
-                  child: Text(AboutContent.strengths,
-                      style: AppStyles.aboutDescription(context)),
-                ),
-                _AboutRow(
-                  isWide: isWide,
-                  label: AboutContent.styleLabel,
-                  isLast: true,
-                  child: Text(AboutContent.style,
-                      style: AppStyles.aboutDescription(context)),
-                ),
+                // 得意な領域 / 強み / 開発スタイル（YAML に書いたものだけ）
+                ..._rows(context, profile, isWide),
+                if (profile.closing.isNotEmpty) ...[
                 AboutSectionConfig.closingSpacing,
 
                 // 締めの一言（左に縦線）
@@ -88,12 +71,13 @@ class AboutSection extends StatelessWidget {
                       ),
                       const SizedBox(width: AboutSectionConfig.closingBarGap),
                       Expanded(
-                        child: Text(AboutContent.closing,
+                        child: Text(profile.closing,
                             style: AppStyles.aboutClosing(context)),
                       ),
                     ],
                   ),
                 ),
+                ],
               ],
             );
           },
@@ -101,6 +85,47 @@ class AboutSection extends StatelessWidget {
       ),
     );
   }
+}
+
+/// 定義リストの行（空の項目は出さない。最後の行だけ下にも線を引く）
+List<Widget> _rows(BuildContext context, Profile profile, bool isWide) {
+  final items = <(String, Widget)>[
+    if (profile.domains.isNotEmpty)
+      (
+        AboutContent.domainsLabel,
+        Wrap(
+          spacing: AppStyles.skillTagSpacing,
+          runSpacing: AppStyles.skillTagSpacing,
+          children: profile.domains
+              .map((d) => Container(
+                    padding: AppStyles.skillTagPadding,
+                    decoration: AppStyles.skillTag(context),
+                    child: Text(d, style: AppStyles.skillTagText(context)),
+                  ))
+              .toList(),
+        ),
+      ),
+    if (profile.strengths.isNotEmpty)
+      (
+        AboutContent.strengthsLabel,
+        Text(profile.strengths, style: AppStyles.aboutDescription(context)),
+      ),
+    if (profile.style.isNotEmpty)
+      (
+        AboutContent.styleLabel,
+        Text(profile.style, style: AppStyles.aboutDescription(context)),
+      ),
+  ];
+
+  return [
+    for (var i = 0; i < items.length; i++)
+      _AboutRow(
+        isWide: isWide,
+        label: items[i].$1,
+        isLast: i == items.length - 1,
+        child: items[i].$2,
+      ),
+  ];
 }
 
 /// 「見出し｜説明」の 1 行。上下を細い線で区切る（狭い画面では縦に積む）

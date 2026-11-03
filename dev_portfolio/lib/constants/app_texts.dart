@@ -20,6 +20,8 @@ class AppTexts {
   static const String navSkills = 'Skills';
   static const String navProjects = 'Projects';
   static const String darkMode = 'Dark Mode';
+  static const String toLightMode = 'ライトモードにする';
+  static const String toDarkMode = 'ダークモードにする';
 
   // ----------------------------------------------------------
   // 共通ラベル
@@ -55,6 +57,35 @@ class AppTexts {
       '・アップロード時に `assets/data/format_private.yaml` の構造と照合され、セッションの `private` キーに保持されます。';
 
   static const String selectYamlFile = 'YAMLファイルを選択 (.yaml, .yml)';
+  static const String uploadYaml = 'YAML をアップロード';
+  static const String chooseFile = 'ファイルを選択';
+  static const String chooseAnotherFile = '別のファイルを選択';
+  static const String noFileChosen = 'まだファイルを選んでいません（.yaml / .yml）';
+  static String fileReady(String name) => '$name（読み込めます）';
+  static String fileRejected(String name) => '$name（読み込めません）';
+  static const String uploadNeedsFile = '「ファイルを選択」で正しい YAML を選ぶと、アップロードできます';
+
+  // アップロード前の確認画面
+  static const String confirmTitle = 'この内容でアップロードしますか？';
+  static String confirmFile(String name) => 'ファイル：$name';
+  static String confirmReplace(String what) => '今表示している $what の内容は、この内容に置き換わります。';
+  static String confirmProjectCount(int n) => 'プロジェクト $n 件';
+  static const String confirmBack = '戻る';
+  static const String confirmOk = 'OK（アップロード）';
+  static const String reloading = '読み込み中…';
+  static const String uploadFailedTitle = 'このファイルは読み込めません';
+  static const List<String> workUploadSteps = [
+    '「テンプレートを保存」で、ひな形のファイルを保存する',
+    '業務で関わったプロジェクトを書き換える（書き方は ⓘ）',
+    '「ファイルを選択」で選び、「アップロード」で内容を確認すると Skills と Projects に反映される',
+  ];
+  static const List<String> privateUploadSteps = [
+    '「テンプレートを保存」で、ひな形のファイルを保存する',
+    '個人開発のプロジェクトを書き換える（書き方は ⓘ）',
+    '「ファイルを選択」で選び、「アップロード」で内容を確認すると Skills と Projects に反映される',
+  ];
+  static String uploadSessionNote(String dataType) =>
+      '読み込んだ内容はこのタブの中だけで使います（セッションの「$dataType」に保存。サーバーには送りません）。';
   static const String upload = 'アップロード';
   static const String loading = '読み込み中';
   static String selectedFile(String name) => '選択中: $name';
@@ -67,7 +98,9 @@ class AppTexts {
   // ----------------------------------------------------------
   // フォーマットのダウンロード / 書き方の説明（ⓘ）
   // ----------------------------------------------------------
-  static const String downloadFormat = 'フォーマットを保存';
+  static const String downloadFormat = 'テンプレートを保存';
+  static const String helpTemplateWhere =
+      'このテンプレートは、アップロード画面の「テンプレートを保存」から保存できます。';
   static String downloadFormatTooltip(String fileName) => '$fileName を名前を付けて保存します';
   static String downloadFailed(Object e) => '保存に失敗しました: $e';
   static String formatSaved(String fileName) => '$fileName を保存しました';
@@ -116,6 +149,12 @@ class AppTexts {
   static const String viewListTooltip = 'リスト表示';
   static const String viewCollectionTooltip = 'コレクション表示';
   static const String noResultsHint = 'フィルターの条件を減らすと表示されます';
+
+  // ページネーション
+  static const String paginationEllipsis = '…';
+  static String paginationCompact(int current, int total) => '$current / $total';
+  static const String paginationPrev = '前のページ';
+  static const String paginationNext = '次のページ';
   static String moreTags(int count) => '+$count';
   static const String filterServerOS = 'Server OS';
   static const String filterDb = 'DB';
@@ -159,6 +198,12 @@ class AppTexts {
   static const String periodNow = '現在';
   static String periodSpan(String from, String to) => '$from → $to';
   static String yearMonth(DateTime d) => '${d.year}年${d.month}月';
+
+  /// List（年表）の左側：開始の年と月
+  static String listYear(DateTime d) => '${d.year}';
+  static String listMonth(DateTime d) => '${d.month}月';
+  static const String listNoDate = '—';
+  static const String listStartLabel = '開始';
 
   /// 期間の長さ（例：6か月 / 1年 / 1年3か月）
   static String durationLabel(int months) {
@@ -213,53 +258,95 @@ class AppTexts {
 }
 
 /// Home に表示する内容（★ここを自分の情報に書き換える）
+/// Home の固定の文言（名前・紹介文などは プロフィール YAML から読む）
 class HeroContent {
   HeroContent._();
-
-  static const String name = 'あなたの名前';
-  static const String role = 'Web / モバイルエンジニア';
-  static const String tagline =
-      'Flutter と Dart を中心に、Web とモバイルのフロントエンドを開発しています。'
-      'このサイトでは、業務と個人開発で使ってきた技術と、関わったプロジェクトをまとめています。';
-
-  /// 右側の「プロフィール YAML」に表示する項目（キー: 値。値が List なら箇条書きになる）
-  static const Map<String, Object> profile = {
-    'name': name,
-    'role': 'Web / Mobile Engineer',
-    'stack': ['Flutter', 'Dart', 'TypeScript'],
-    'focus': 'ユーザー視点の UI',
-  };
 
   static const String skillsButtonLabel = 'スキルを見る';
   static const String projectsButtonLabel = 'プロジェクトを見る';
 }
 
-/// About に表示する内容（★ここを自分の情報に書き換える）
+/// About の固定の文言（中身は プロフィール YAML から読む）
 class AboutContent {
   AboutContent._();
 
   static const String heading = 'About';
 
-  /// 自己紹介（名前・職種・簡単な経歴）
-  static const String intro =
-      'ここに自己紹介を書きます。名前、職種、これまでの経歴を 2〜3 文で。'
-      '例: 受託開発の会社で Web アプリの設計から実装・テストまでを担当し、'
-      '現在は Flutter を使ったモバイル / Web アプリの開発に取り組んでいます。';
-
-  /// 得意な開発領域（タグで表示）
-  static const List<String> domains = ['Web', 'モバイル', 'Flutter', 'Dart'];
-
-  /// 強み・スキル
-  static const String strengths = 'チーム開発、テストの設計と実施、UI の改善';
-
-  /// 開発スタイル・価値観
-  static const String style = 'コード品質を重視し、スクラムでの開発経験があります。レスポンシブ対応を前提に設計します。';
-
-  /// 締めの一言
-  static const String closing = 'ユーザー視点での開発を常に心がけています。';
-
   // 定義リストの見出し
   static const String domainsLabel = '得意な領域';
   static const String strengthsLabel = '強み';
   static const String styleLabel = '開発スタイル';
+}
+
+/// プロフィール（Home / About）の入力画面・説明・エラー
+class ProfileTexts {
+  ProfileTexts._();
+
+  static const String setupTitle = 'あなたのことを教えてください';
+  static const String setupLead =
+      'Home と About に表示するあなたのプロフィールを、YAML ファイルで読み込みます。'
+      '読み込むまでこの画面は閉じられません。';
+  static const List<String> setupSteps = [
+    '「テンプレートを保存」で、ひな形のファイルを保存する',
+    'ファイルを開き、名前・職種・自己紹介などを自分の内容に書き換える',
+    '「ファイルを選択」で書き換えたファイルを選び、「アップロード」で内容を確認して反映する',
+  ];
+  static const String setupNextTime = '次回からは、YAML を指定して起動するとこの画面は出ません：';
+  static const String runCommand = 'dart run tool/run.dart あなたのファイル.yaml';
+
+  static const String saveTemplate = 'テンプレートを保存';
+  static const String replaceTarget = 'プロフィール（Home / About）';
+  static const String confirmHome = 'Home';
+  static const String confirmAbout = 'About';
+  static const String fieldName = '名前';
+  static const String fieldRole = '職種';
+  static const String fieldTagline = '紹介文';
+  static const String fieldCard = '右側のカード';
+  static const String fieldIntro = '自己紹介';
+  static const String fieldClosing = '締めの一言';
+  static const String upload = 'YAML をアップロード';
+  static const String helpTooltip = '書き方の説明';
+  static const String templateFileName = 'format_profile.yaml';
+  static const String uploaded = 'プロフィールを読み込みました';
+  static const String uploadFailedTitle = 'このファイルは読み込めません';
+  static const String startupFailedTitle = '起動時に指定した YAML を読み込めませんでした';
+  static const String extensionOnly = '.yaml / .yml のファイルだけ選べます';
+
+  // 説明（ⓘ）
+  static const String helpTitle = 'プロフィール YAML の書き方';
+  static const String helpRules = '基本ルール';
+  static const List<String> helpRuleList = [
+    'home:（最初の画面）と about:（自己紹介）の 2 つに分けて書きます',
+    'インデントは半角スペース 2 つ',
+    '★ の項目は必須です。それ以外は書かなければ表示しません',
+    '複数行の文章は「|」のあとに改行して書きます',
+  ];
+  static const String helpFields = '各項目';
+  static const String required = '★ 必須';
+  static const String optional = '任意';
+  static const List<(String, bool, String)> helpFieldList = [
+    ('home.name', true, '名前（大きく表示）'),
+    ('home.role', true, '職種（名前の上に小さく表示）'),
+    ('home.tagline', true, '紹介文（名前の下に表示）'),
+    ('home.card', false, '右側のカード。「キー: 値」や「キー: のあとに - 箇条書き」で自由に書けます'),
+    ('about.intro', true, '自己紹介（名前・職種・経歴を 2〜3 文で）'),
+    ('about.domains', false, '得意な領域（- 箇条書き。タグで表示）'),
+    ('about.strengths', false, '強み'),
+    ('about.style', false, '開発スタイル・価値観'),
+    ('about.closing', false, '締めの一言'),
+  ];
+  static const String helpTemplate = 'ひな形（テンプレート）';
+  static const String helpTemplateNote =
+      '書き方の見本になるファイルです。前の画面の「テンプレートを保存」から保存して、書き換えてください。';
+
+  // エラー
+  static String errorSyntax(String m) => 'YAML の書き方に誤りがあります（$m）';
+  static const String errorNotMap = 'プロフィールの形式ではありません（home: と about: が必要です）';
+  static String errorUnknownKey(String k) => '使えない項目があります：$k';
+  static String errorMissingSection(String k) => '$k: がありません';
+  static String errorRequired(String k) => '必須の項目が空です：$k';
+  static String errorNotText(String k) => '$k は文章で書いてください';
+  static String errorNotList(String k) => '$k は「- 」の箇条書きで書いてください';
+  static String errorNotMapField(String k) => '$k は「キー: 値」の形で書いてください';
+  static String errorCardValue(String k) => '$k の値は文章か「- 」の箇条書きにしてください';
 }

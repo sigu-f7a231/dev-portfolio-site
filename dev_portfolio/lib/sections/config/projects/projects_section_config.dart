@@ -13,6 +13,9 @@ class ProjectsSectionConfig {
   // ツールバー〜一覧の間
   static const SizedBox toolbarSpacing = SizedBox(height: AppSizes.space16);
 
+  /// 読み込み中・0 件のときの一覧エリアの高さ
+  static const double loadingHeight = 240;
+
   // =========================
   // ツールバー（Work/Private・フィルター・表示切替）
   // =========================

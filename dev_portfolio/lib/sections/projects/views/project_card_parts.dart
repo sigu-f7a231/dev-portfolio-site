@@ -14,7 +14,15 @@ class ProjectSkillTags extends StatelessWidget {
   final Project project;
   final int? maxTags;
 
-  const ProjectSkillTags({super.key, required this.project, this.maxTags});
+  /// true なら 1 行に収め、はみ出す分は切る（高さが決まっている Collection のカード用）
+  final bool singleLine;
+
+  const ProjectSkillTags({
+    super.key,
+    required this.project,
+    this.maxTags,
+    this.singleLine = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -30,16 +38,39 @@ class ProjectSkillTags extends StatelessWidget {
           child: Text(text, style: AppStyles.skillTagText(context)),
         );
 
+    final children = [
+      ...shown.map(tag),
+      if (rest > 0) tag(AppTexts.moreTags(rest)),
+    ];
+
+    if (singleLine) {
+      return ClipRect(
+        child: SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          physics: const NeverScrollableScrollPhysics(),
+          child: Row(
+            children: [
+              for (var i = 0; i < children.length; i++) ...[
+                if (i > 0) const SizedBox(width: AppStyles.skillTagSpacing),
+                children[i],
+              ],
+            ],
+          ),
+        ),
+      );
+    }
+
     return Wrap(
       spacing: AppStyles.skillTagSpacing,
       runSpacing: AppStyles.skillTagRunSpacing,
-      children: [
-        ...shown.map(tag),
-        if (rest > 0) tag(AppTexts.moreTags(rest)),
-      ],
+      children: children,
     );
   }
 }
+
+/// プロジェクトごとに決まる色の番号（タイトルから計算するので、ページを変えても同じ色）
+int projectColorSeed(Project p) =>
+    p.title.codeUnits.fold<int>(0, (sum, c) => (sum * 31 + c) & 0x7fffffff);
 
 /// 「進行中」ラベル
 class OngoingTag extends StatelessWidget {
@@ -62,7 +93,18 @@ class OngoingTag extends StatelessWidget {
 class ProjectPeriod extends StatelessWidget {
   final Project project;
 
-  const ProjectPeriod({super.key, required this.project});
+  /// 長さ（6か月など）を横に出すか（Collection はカバーに出すので false）
+  final bool showDuration;
+
+  /// true なら長さを塗りの札で目立たせる（List 用）
+  final bool emphasizeDuration;
+
+  const ProjectPeriod({
+    super.key,
+    required this.project,
+    this.showDuration = true,
+    this.emphasizeDuration = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -98,7 +140,25 @@ class ProjectPeriod extends StatelessWidget {
               ],
             ),
           ),
-          Text(duration, style: AppStyles.cardPeriodDuration(context)),
+          if (showDuration)
+            emphasizeDuration
+                ? Container(
+                    padding: ProjectsListConfig.cardPeriodPadding,
+                    decoration: AppStyles.countBadge(context),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.schedule,
+                          size: ProjectsListConfig.scheduleIconSize,
+                          color: AppStyles.countBadgeText(context).color,
+                        ),
+                        const SizedBox(width: ProjectsListConfig.cardPeriodIconGap),
+                        Text(duration, style: AppStyles.countBadgeText(context)),
+                      ],
+                    ),
+                  )
+                : Text(duration, style: AppStyles.cardPeriodDuration(context)),
         ],
       ),
     );

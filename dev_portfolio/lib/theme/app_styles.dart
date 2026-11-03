@@ -433,4 +433,110 @@ class AppStyles {
 
   static TextStyle cardPeriodDuration(BuildContext context) =>
       _text(context).labelMedium!.copyWith(color: context.colors.textTertiary);
+
+  // ----------------------------------------------------------
+  // ヘッダー（M3 の Top app bar）
+  // ----------------------------------------------------------
+  static TextStyle headerTitle(BuildContext context) =>
+      _text(context).titleLarge!.copyWith(
+            fontWeight: FontWeight.w600,
+            color: context.colors.headerForeground,
+          );
+
+  /// ナビボタン：選択中は丸いインジケーター、それ以外は文字だけ
+  static ButtonStyle navButton(BuildContext context, {required bool selected}) {
+    final c = context.colors;
+    return ButtonStyle(
+      shape: const WidgetStatePropertyAll(StadiumBorder()),
+      // 選択していないときは背景なし（null）
+      backgroundColor: WidgetStatePropertyAll<Color?>(
+        selected ? c.navIndicator : null,
+      ),
+      foregroundColor: WidgetStatePropertyAll(
+        selected ? c.navSelectedForeground : c.headerForegroundMuted,
+      ),
+      iconColor: WidgetStatePropertyAll(
+        selected ? c.navSelectedForeground : c.headerForegroundMuted,
+      ),
+      textStyle: WidgetStatePropertyAll(
+        _text(context).labelLarge!.copyWith(
+              fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+            ),
+      ),
+    );
+  }
+
+  // ----------------------------------------------------------
+  // Projects：List（年表）
+  // ----------------------------------------------------------
+  /// 行をまとめる 1 枚の面（行どうしは区切り線で分ける）
+  static ShapeBorder listSurfaceShape(BuildContext context) => RoundedRectangleBorder(
+        side: BorderSide(color: context.colors.surfaceBorder),
+        borderRadius: BorderRadius.circular(radiusLg),
+      );
+
+  static TextStyle listYear(BuildContext context) =>
+      _text(context).titleMedium!.copyWith(
+            fontWeight: FontWeight.w700,
+            color: context.colors.textStrong,
+            height: 1.1,
+          );
+
+  static TextStyle listMonth(BuildContext context) =>
+      _text(context).labelMedium!.copyWith(color: context.colors.textSecondary);
+
+  static TextStyle listTitle(BuildContext context) =>
+      _text(context).titleSmall!.copyWith(
+            fontWeight: FontWeight.w600,
+            color: context.colors.textStrong,
+          );
+
+  /// 年表の縦線と点（進行中の点は primary）
+  static Color listRail(BuildContext context) => context.colors.surfaceBorder;
+  static Color listDot(BuildContext context, {required bool ongoing}) =>
+      ongoing ? context.colors.primary : context.colors.textTertiary;
+
+  // ----------------------------------------------------------
+  // Projects：Collection（カバー付きカード）
+  // ----------------------------------------------------------
+  static ShapeBorder collectionCardShape(BuildContext context) => RoundedRectangleBorder(
+        side: BorderSide(color: context.colors.surfaceBorder),
+        borderRadius: BorderRadius.circular(radiusXl),
+      );
+
+  /// カバー：プロジェクトごとに決まるグラフ用の色をうすく敷いたグラデーション
+  static BoxDecoration collectionCover(BuildContext context, int seed) {
+    final c = context.colors.seriesColor(seed);
+    final dark = context.isDark;
+    return BoxDecoration(
+      gradient: LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [
+          c.withOpacity(dark ? 0.38 : 0.28),
+          c.withOpacity(dark ? 0.14 : 0.08),
+        ],
+      ),
+    );
+  }
+
+  /// カバーに大きく出すタイトルの頭文字
+  static TextStyle collectionInitial(BuildContext context, int seed) =>
+      _text(context).displaySmall!.copyWith(
+            fontWeight: FontWeight.w800,
+            color: context.colors.seriesColor(seed),
+            height: 1,
+          );
+
+  /// カバー上の期間の長さ（小さな札）
+  static BoxDecoration collectionCoverBadge(BuildContext context) => BoxDecoration(
+        color: context.colors.collectionCardBackground.withOpacity(0.85),
+        borderRadius: BorderRadius.circular(radiusFull),
+      );
+
+  static TextStyle collectionCoverBadgeText(BuildContext context) =>
+      _text(context).labelSmall!.copyWith(
+            fontWeight: FontWeight.w600,
+            color: context.colors.textSecondary,
+          );
 }

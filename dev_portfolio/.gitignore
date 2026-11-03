@@ -49,3 +49,6 @@ android/
 windows/
 # web/ は起動時のローディング表示などを入れた index.html を管理するため Git に含める（CI の flutter create は既存ファイルを上書きしない）
 linux/
+
+# 起動時に指定したプロフィール（個人情報なので Git に含めない）
+assets/profile/profile.yaml

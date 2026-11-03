@@ -15,9 +15,13 @@ class PieGraph extends StatelessWidget {
   final Function(int?) onSelect;
   final int topN;
 
+  /// 円グラフの大きさ。PieChartLayout.pieSize を基準に、半径も同じ比率で縮める
+  final double size;
+
   const PieGraph({
     super.key,
     required this.data,
+    this.size = PieChartLayout.pieSize,
     this.hoveredIndex,
     this.selectedIndex,
     required this.onHover,
@@ -29,6 +33,7 @@ class PieGraph extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
     final isDark = context.isDark;
+    final scale = size / PieChartLayout.pieSize;
 
     // データを値順にソート
     final sortedEntries = data.entries.toList()
@@ -44,12 +49,12 @@ class PieGraph extends StatelessWidget {
     }
 
     return SizedBox(
-      width: PieChartLayout.pieSize,
-      height: PieChartLayout.pieSize,
+      width: size,
+      height: size,
       child: PieChart(
         PieChartData(
           sectionsSpace: PieChartLayout.pieSectionsSpace,
-          centerSpaceRadius: PieChartLayout.pieCenterRadius,
+          centerSpaceRadius: PieChartLayout.pieCenterRadius * scale,
           pieTouchData: PieTouchData(
             touchCallback: (event, pieTouchResponse) {
               final idx = pieTouchResponse?.touchedSection?.touchedSectionIndex;
@@ -84,9 +89,10 @@ class PieGraph extends StatelessWidget {
             return PieChartSectionData(
               value: entry.value,
               color: sectionColor,
-              radius: isSelected
-                  ? PieChartLayout.pieActiveRadius
-                  : PieChartLayout.pieRadius,
+              radius: (isSelected
+                      ? PieChartLayout.pieActiveRadius
+                      : PieChartLayout.pieRadius) *
+                  scale,
               borderSide: isSelected
                   ? BorderSide(
                       color: colors.chartHighlight,

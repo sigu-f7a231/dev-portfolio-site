@@ -36,14 +36,16 @@ class PieChartOpacity {
 class PieChartLayout {
   // ===== サイズ =====
 
-  /// 🔥 ここが追加分
   static const EdgeInsets padding = EdgeInsets.all(16.0);
 
-  /// 🔥 overflow防止用の最小サイズ
-  static const double minWidth = 400.0;
-  static const double minHeight = 300.0;
-
+  /// 円グラフの大きさ（基準）。狭い画面ではこれより小さくし、半径も同じ比率で縮める
   static const double pieSize = 300.0;
+
+  /// 縦並びのとき、選択して外側に広がった分が欠けないよう左右に取る余白
+  static const double pieStackedInset = 32.0;
+
+  /// 縦並びのときの円と凡例の間
+  static const double pieLegendSpacingColumn = 24.0;
 
   // ===== 円 =====
   static const double pieRadius = 100.0;

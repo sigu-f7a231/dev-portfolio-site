@@ -80,6 +80,27 @@ sessionStorage['work'|'private'] ─┘   優先順位: sessionStorage > メモ�
 - **プロジェクトのフィルタ**: `ProjectFilterState`（`selectedFilters`：キーは camelCase、例: `serverOS`, `backendFrameworks`／`fromYear`・`toYear`：期間（年）／`ongoingOnly`：進行中のみ）。`ProjectFilterLogic.apply` は選択した値をすべて含むか（AND、部分一致）で判定する。workflow は日本語ラベルを英語キーに変換してから照合する。
 - 一覧は `periodStart` の昇順で並ぶ。
 
+### Work / Private YAML のアップロード画面
+
+- `sections/header/yaml_upload_dialog.dart` の `showYamlUploadDialog`（PC / スマホのヘッダーで共通。検証は `isValidProjectsYaml`）。
+- 見た目と流れはプロフィール入力画面と同じ（部品は `widgets/upload_parts.dart`）：見出し＋ⓘ ／ 説明 ／ 番号付きの手順 ／ 選んだファイルの状態 ／［テンプレートを保存］［ファイルを選択］［アップロード］。
+  1. 「ファイルを選択」でその場で検証。間違っていれば理由を出し、「アップロード」は押せない。
+  2. 「アップロード」→ `confirmUpload` で中身（プロジェクト一覧 / プロフィールの各項目）を確認し、OK のときだけ反映。
+  3. 反映中は `runReloading`：起動時と同じ全画面ローディング（M3 Circular）を最低 `AppSizes.reloadMinDuration`（5 秒）、最大 `reloadMaxDuration`（8 秒）出してから画面に戻す。
+- **テンプレートの保存ボタンは各画面に 1 か所だけ**（ⓘ の説明画面には置かない。Work / Private・プロフィールとも）。
+
+### プロフィール YAML（Home / About、2026-11-03〜）
+
+- ひな形：`assets/data/format_profile.yaml`（`home:` name★ / role★ / tagline★ / card、`about:` intro★ / domains / strengths / style / closing。★は必須、ほかは空なら表示しない）。
+- 読み込み順（`utils/profile_store.dart` の `ProfileStore`）：
+  1. `dart run tool/run.dart xxx.yaml` で起動 → スクリプトが `assets/profile/profile.yaml` にコピーし `--dart-define=PROFILE_FROM_ARG=true` を付けて `flutter run -d chrome` を実行 → アプリはこの印があるときだけそのファイルを読む。
+  2. 入力画面でアップロード済み → `sessionStorage['profile']`。
+  3. どちらもない → `HomePage` が最初に `showProfileSetupDialog`（`widgets/profile_setup_dialog.dart`）を出す。正しい YAML を読み込むまで閉じられない（barrierDismissible: false / PopScope）。ⓘ で書き方の説明とテンプレートの保存。
+- 検証は `Profile.parse`（`models/profile.dart`）。知らないキー・必須の空・型違いはエラー（Work / Private の YAML を選んでも弾く）。
+- `assets/profile/profile.yaml` は個人情報なので `.gitignore` 済み（フォルダは `.gitkeep` で保持）。
+- `flutter run -d chrome xxx.yaml` のように flutter run へ直接 YAML は渡せない（引数は起動する Dart ファイル扱い）ため、`tool/run.dart` を使う。
+- 注意：CI（GitHub Pages）は印なしでビルドするので、公開サイトでは入力画面が出る。
+
 ### YAML スキーマ（1 プロジェクト）
 
 | キー | 型 | 備考 |
@@ -95,6 +116,8 @@ sessionStorage['work'|'private'] ─┘   優先順位: sessionStorage > メモ�
 
 ```bash
 flutter pub get
+dart run tool/run.dart my_profile.yaml   # プロフィール YAML を指定して起動（Home / About の内容）
+dart run tool/run.dart                   # 指定なし → 起動後に「あなたのことを教えてください」を表示
 flutter run -d chrome                 # ローカルで動作確認（Web 専用。dart:html を使っているため）
 flutter analyze
 flutter build web --release --base-href "/dev-portfolio-site/"
@@ -130,11 +153,21 @@ web/ ディレクトリがない環境では、先に `flutter create . --platfo
 - 状態管理は `setState` / `ValueNotifier` のみ（外部ライブラリは使っていない）。
 - ファイルは機能ごとに分ける（logic / state / ui / views / data / models）。
 
+### レスポンシブ（スマホ対応）の方針（2026-11-03）
+
+- **スクロールはページ全体（HomePage の SingleChildScrollView）の 1 つだけ。** セクションに画面の高さを固定したり、内側に ListView / GridView のスクロールを作ったりしない（スマホで内側だけスクロールされ、ページが動かなくなるため）。一覧は `shrinkWrap: true` と `NeverScrollableScrollPhysics` にする。
+- Projects Collection の 1 ページの件数は「列数 × 行数」で、どちらも**画面幅**で決める（`ProjectsCollectionConfig.columnsFor` / `rowsFor`）。
+- ページネーションは幅に合わせて「全部表示 → 1 … 4 5 6 … 10 → ‹ 3 / 10 ›」と切り替える（`ProjectsPaginationUI`）。
+- Skills のカードは最大幅 800・高さは中身なり。カード内の幅が `SkillsCardConfig.stackBreakpoint` 未満なら、グラフと凡例を縦に並べ、円グラフは幅に合わせて縮める（`PieGraph.size`）。
+- ツールバー類は `Row` ではなく `Wrap` にして、狭い画面では折り返す。
+- **ヘッダーは M3 の Small top app bar**（`sections/header/header_parts.dart`）：ナビは表示中のセクションに丸いインジケーター（`SectionScrollController.active` がスクロール位置から更新、Drawer も同じ値で選択表示）。テーマ切替は PC が太陽／月アイコン付き Switch、スマホがトグル式 IconButton。幅 900 未満でナビはアイコンのみ、760 未満でタイトルを隠す。Work / Private のアップロードは M3 の Filled tonal ボタン（`HeaderUploadButton`、幅 1100 以上で文字付き、それ未満とスマホはアイコンのみ）。
+- **Projects のフィルター・Skills のカテゴリはポップアップで開く**（`lib/widgets/app_filter_modal.dart` の `showAppFilterModal`）：幅 600 以上は中央のダイアログ、未満は下から出るシート。パネルは見出しとフッターを固定し、本文だけスクロールする。「反映」で反映、×・キャンセル・外側タップでは変えない。
+- **List と Collection は役割で見た目を分ける**：List＝年表（1 枚の面に行を並べ、左に開始の年・月と縦線＋点、説明文なし）／Collection＝カバー付きカードのギャラリー（色は `projectColorSeed` でタイトルから決める、頭文字・期間の長さ・説明 2 行）。
+
 ## 8. 既知の問題・技術的負債（2026-10-31 時点の調査）
 
 - **`test/widget_test.dart` が壊れている**: 存在しない `MyApp` を参照しているため、`flutter test` は失敗する。
 - **Web 専用**: `dart:html` を直接 import しているため（ローダー、両 Header）、Web 以外ではビルドできない。`dart:html` は非推奨なので、将来は `package:web` に移行することを検討する。
-- **アップロード処理の重複**: `desktop_header.dart` と `mobile_header.dart` に検証とダイアログがほぼ同じ形でコピーされている。また sessionStorage に直接書き込んでいて、`*YamlLoader.setCustomYaml` を使っていない。
 - **CSV 分割処理が複数ある**: `Project._split` / `ProjectFilterLogic.split` は `,` で分割、`utils/string_utils.parseToList` は `,`・`、`・空白で分割（スペースを含む値が分かれてしまう恐れ）。`utils/project_utils.parseList` もあるが未使用。
 - **未使用（と思われる）コード**: `skills/skills_tabs.dart`, `skills/models/skill_model.dart`, `skills/widgets/skills_tab_bar.dart`, `projects/project_detail_format.dart`, `projects/views/project_list/project_list_view.dart`（＋`project_list_sort.dart`、こちらは期間の形式が現在のデータと合っていない）, `config/projects/projects_tab_config.dart`, `config/skills/skills_section_config.dart`（古い `tools_fw` キー）, `utils/project_utils.dart`。依存パッケージの `shared_preferences` も未使用。
 - `lib/utils/theme_colors.dart` は不要（どこからも import されていない）なので削除してよい。

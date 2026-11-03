@@ -47,12 +47,15 @@ class ProjectsToolbar extends StatelessWidget {
           value: isWork,
           onChanged: onTabChanged,
           items: [
-            AppSegmentItem(value: true, label: AppTexts.work, count: workCount),
-            AppSegmentItem(value: false, label: AppTexts.private, count: privateCount),
+            AppSegmentItem(value: true, label: AppTexts.work, icon: Icons.work_outline, count: workCount),
+            AppSegmentItem(value: false, label: AppTexts.private, icon: Icons.lock_outline, count: privateCount),
           ],
         ),
-        Row(
-          mainAxisSize: MainAxisSize.min,
+        // 狭い画面では折り返す
+        Wrap(
+          spacing: AppSizes.space12,
+          runSpacing: AppSizes.space12,
+          crossAxisAlignment: WrapCrossAlignment.center,
           children: [
             OutlinedButton.icon(
               onPressed: onFilterPressed,
@@ -65,7 +68,6 @@ class ProjectsToolbar extends StatelessWidget {
               ),
               label: const Text(AppTexts.filter),
             ),
-            const SizedBox(width: AppSizes.space12),
             ProjectsViewSwitch(
               showCollection: showCollection,
               onToggle: onViewChanged,

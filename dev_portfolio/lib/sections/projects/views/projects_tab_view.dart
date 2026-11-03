@@ -9,6 +9,7 @@ import '../filters/state/project_filter_state.dart';
 import '../filters/logic/project_filter_logic.dart';
 import '../../config/projects/projects_views_list_config.dart';
 import '../../config/projects/projects_views_collection_config.dart';
+import '../../config/projects/projects_section_config.dart';
 import '../../../theme/app_theme.dart';
 import '../../../theme/app_styles.dart';
 import '../../../constants/app_sizes.dart';
@@ -55,7 +56,9 @@ class _ProjectsTabViewState extends State<ProjectsTabView> {
           ..sort((a, b) => a.periodStart.compareTo(b.periodStart));
 
     if (filteredProjects.isEmpty) {
-      return Center(
+      return SizedBox(
+        height: ProjectsSectionConfig.loadingHeight,
+        child: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -70,6 +73,7 @@ class _ProjectsTabViewState extends State<ProjectsTabView> {
             Text(AppTexts.noResultsHint, style: AppStyles.cardDescription(context)),
           ],
         ),
+        ),
       );
     }
 
@@ -81,13 +85,10 @@ class _ProjectsTabViewState extends State<ProjectsTabView> {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        // Collection：列数 × 収まる行数（グリッドの高さ = 全体 − ページネーション）
+        // Collection：列数 × 行数（どちらも画面幅で決まる＝行がそろう）
         // List：従来どおり ProjectsPaginationConfig.itemsPerPage
         final perPage = widget.showCollection
-            ? ProjectsCollectionConfig.itemsPerPage(
-                width: constraints.maxWidth,
-                height: constraints.maxHeight - AppSizes.paginationBarHeight,
-              )
+            ? ProjectsCollectionConfig.itemsPerPage(constraints.maxWidth)
             : null;
 
         final totalPages = ProjectsPaginationLogic.getTotalPages(
@@ -104,9 +105,8 @@ class _ProjectsTabViewState extends State<ProjectsTabView> {
 
         return Column(
           children: [
-            Expanded(
-              // List / Collection を切り替えたときは、描画が落ち着くまで Progress indicator を出してから表示する
-              child: SettledReveal(
+            // List / Collection を切り替えたときは、描画が落ち着くまで Progress indicator を出してから表示する
+            SettledReveal(
                 key: ValueKey(widget.showCollection),
                 child: widget.showCollection
                     ? ProjectCollectionView(
@@ -117,7 +117,6 @@ class _ProjectsTabViewState extends State<ProjectsTabView> {
                         projects: paginatedProjects,
                         onProjectTap: openDetail,
                       ),
-              ),
             ),
             SizedBox(
               height: AppSizes.paginationBarHeight,

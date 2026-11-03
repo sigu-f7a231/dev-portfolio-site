@@ -27,6 +27,27 @@ class ProjectsListConfig {
   static const periodIconSpacing = AppSizes.space4;
   static const chevronSize = 22.0;
 
+  // =========================
+  // List（年表）の行
+  // =========================
+  static const rowPadding = EdgeInsets.fromLTRB(
+      AppSizes.space12, AppSizes.space12, AppSizes.space12, AppSizes.space12);
+
+  /// 左の「年・月」の列の幅
+  static const double dateColumnWidth = 52;
+
+  /// 年表の縦線（点の位置）の列
+  static const double railWidth = 24;
+  static const double railLineWidth = 2;
+  static const double dotSize = 10;
+  static const double dotTop = 6; // 年の文字の中央あたりに点を置く
+
+  /// 行の区切り線の左端（年・月の列＋年表の線の列の右から）
+  static const double dividerIndent = AppSizes.space12 + dateColumnWidth + railWidth;
+
+  /// 行に出すタグの最大数（超えた分は「+N」）
+  static const int rowMaxTags = 4;
+
   static const smallSpacing = SizedBox(height: AppSizes.space6);
   static const mediumSpacing = SizedBox(height: AppSizes.space10);
 
