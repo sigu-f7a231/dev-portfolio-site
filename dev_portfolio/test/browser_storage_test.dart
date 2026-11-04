@@ -13,6 +13,7 @@ import 'package:dev_portfolio/utils/work_yaml_loader.dart';
 import 'package:dev_portfolio/utils/private_yaml_loader.dart';
 import 'package:dev_portfolio/utils/profile_store.dart';
 import 'package:dev_portfolio/models/profile.dart';
+import 'package:dev_portfolio/utils/asset_text.dart';
 
 String _asset(String name) => File('assets/data/$name').readAsStringSync();
 
@@ -94,6 +95,37 @@ void main() {
     test('Private のセッションには影響されない', () async {
       SessionStore.write('private', _privateYaml);
       expect(await WorkYamlLoader.loadYamlString(), _asset('format_work.yaml'));
+    });
+  });
+
+  group('アセットの読み込み（loadAssetText）', () {
+    tearDown(resetAssetTextLoader);
+
+    test('差し替えると、ローダーのサンプル読み込みもそれを使う', () async {
+      final asked = <String>[];
+      loadAssetText = (path) async {
+        asked.add(path);
+        return 'projects: []\n';
+      };
+      expect(await WorkYamlLoader.loadYamlString(), 'projects: []\n');
+      expect(await PrivateYamlLoader.loadYamlString(), 'projects: []\n');
+      expect(asked, ['assets/data/format_work.yaml', 'assets/data/format_private.yaml']);
+    });
+
+    test('アップロードしたものがあれば、アセットは読まない', () async {
+      var called = 0;
+      loadAssetText = (path) async {
+        called++;
+        return '';
+      };
+      SessionStore.write('work', 'projects: []\n');
+      await WorkYamlLoader.loadYamlString();
+      expect(called, 0);
+    });
+
+    test('元に戻すと rootBundle で読む（中身はファイルと同じ）', () async {
+      resetAssetTextLoader();
+      expect(await loadAssetText('assets/data/format_work.yaml'), _asset('format_work.yaml'));
     });
   });
 

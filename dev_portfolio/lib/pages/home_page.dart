@@ -33,7 +33,14 @@ class _HomePageState extends State<HomePage> {
     // YAML を指定せずに起動した（かつ未アップロード）ときは、最初に入力画面を出す
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted && ProfileStore.instance.value == null) {
-        showProfileSetupDialog(context);
+        // プロフィールに Work / Private も書かれていれば、Skills / Projects も作り直す
+        showProfileSetupDialog(
+          context,
+          onProjectsChanged: () => setState(() {
+            _refreshKey++;
+            _skillsRefreshKey++;
+          }),
+        );
       }
     });
   }

@@ -8,6 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:dev_portfolio/constants/app_texts.dart';
 import 'package:dev_portfolio/models/profile.dart';
+import 'package:dev_portfolio/utils/profile_bundle.dart';
 
 /// 必須項目だけを書いた最小の YAML
 const _minimal = '''
@@ -33,12 +34,14 @@ $about
 
 void main() {
   group('テンプレート（assets/data）', () {
-    test('format_profile.yaml はそのまま読み込める', () {
+    test('format_profile.yaml はそのまま読み込める（Work / Private も一緒に書いてある）', () {
       final text = File('assets/data/format_profile.yaml').readAsStringSync();
-      final result = Profile.parse(text);
+      final bundle = readProfileBundle(text, fileName: 'format_profile.yaml');
 
-      expect(result.errors, isEmpty);
-      final p = result.profile!;
+      expect(bundle.errors, isEmpty);
+      expect(bundle.workCount, 1);
+      expect(bundle.privateCount, 1);
+      final p = bundle.profile!;
       expect(p.name, '山田 太郎');
       expect(p.role, isNotEmpty);
       expect(p.tagline, isNotEmpty);
@@ -48,6 +51,18 @@ void main() {
       expect(p.strengths, isNotEmpty);
       expect(p.style, isNotEmpty);
       expect(p.closing, isNotEmpty);
+    });
+
+    test('プロフィール部分だけ（Profile.parse）は、work / private を知らない項目として扱う', () {
+      final text = File('assets/data/format_profile.yaml').readAsStringSync();
+      final result = Profile.parse(text);
+      expect(
+        result.errors,
+        unorderedEquals([
+          ProfileTexts.errorUnknownKey('work'),
+          ProfileTexts.errorUnknownKey('private'),
+        ]),
+      );
     });
 
     test('Work / Private の YAML はプロフィールとして読み込めない', () {

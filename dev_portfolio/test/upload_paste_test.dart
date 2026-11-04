@@ -12,6 +12,8 @@ import 'package:dev_portfolio/constants/app_texts.dart';
 import 'package:dev_portfolio/theme/app_theme.dart';
 import 'package:dev_portfolio/widgets/upload_parts.dart';
 
+import 'test_assets.dart';
+
 const _yaml = 'projects:\n  - title: 貼り付けた案件\n    workflow:\n      requirements: true\n';
 
 /// クリップボード（SystemChannels.platform）の代わり
@@ -63,6 +65,9 @@ FilledButton _applyButton(WidgetTester tester) => tester.widget<FilledButton>(
     );
 
 void main() {
+  // アセット（テンプレート）はファイルから直接読む（テスト中の読み込みで止まらないように。test_assets.dart を参照）
+  setUp(useFileAssets);
+
   group('テキストの貼り付け画面', () {
     testWidgets('空のときは「読み込む」を押せない', (tester) async {
       await _openPaste(tester, onResult: (_) {});
@@ -95,6 +100,33 @@ void main() {
       await tester.tap(find.text(AppTexts.cancel));
       await tester.pumpAndSettle();
       expect(result, isNull);
+    });
+
+    testWidgets('「クリア」で入力欄を空にでき、空のときは押せない', (tester) async {
+      await _openPaste(tester, initialText: _yaml, onResult: (_) {});
+      TextButton clear() => tester.widget<TextButton>(find.ancestor(
+            of: find.text(AppTexts.pasteClear),
+            matching: find.byWidgetPredicate((w) => w is TextButton),
+          ));
+      expect(clear().onPressed, isNotNull);
+
+      await tester.tap(find.text(AppTexts.pasteClear));
+      await tester.pump();
+      expect(find.text(_yaml), findsNothing);
+      expect(clear().onPressed, isNull);
+      expect(_applyButton(tester).onPressed, isNull);
+    });
+
+    testWidgets('入力欄の右の × でも空にできる（空のときは × を出さない）', (tester) async {
+      await _openPaste(tester, onResult: (_) {});
+      expect(find.byTooltip(AppTexts.pasteClear), findsNothing);
+
+      await tester.enterText(find.byType(TextField), _yaml);
+      await tester.pump();
+      await tester.tap(find.byTooltip(AppTexts.pasteClear));
+      await tester.pump();
+      expect(find.text(_yaml), findsNothing);
+      expect(find.byTooltip(AppTexts.pasteClear), findsNothing);
     });
 
     testWidgets('前に貼り付けたテキストが入った状態で開く（続きから直せる）', (tester) async {
@@ -155,6 +187,7 @@ void main() {
       await tester.pumpWidget(MaterialApp(
         home: Scaffold(
           body: UploadSourcePanel(
+            onTemplateFormatChanged: (f) => count('format:${f.name}'),
             onSaveTemplate: () => count('save'),
             onCopyTemplate: () => count('copy'),
             onPickFile: busy ? null : () => count('pick'),
@@ -184,6 +217,13 @@ void main() {
       await tester.tap(find.text(AppTexts.chooseFile));
       await tester.tap(find.text(AppTexts.pasteText));
       expect(calls, isEmpty);
+    });
+
+    testWidgets('テンプレートの形式（YAML / Markdown）を切り替えられる', (tester) async {
+      final calls = await pumpPanel(tester);
+      expect(find.text(AppTexts.formatYaml), findsOneWidget);
+      await tester.tap(find.text(AppTexts.formatMarkdown));
+      expect(calls, {'format:markdown': 1});
     });
 
     testWidgets('読み込んだ後は「別のファイルを選択」になる', (tester) async {

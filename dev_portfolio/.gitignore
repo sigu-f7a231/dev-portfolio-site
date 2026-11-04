@@ -52,3 +52,5 @@ linux/
 
 # 起動時に指定したプロフィール（個人情報なので Git に含めない）
 assets/profile/profile.yaml
+assets/profile/work.yaml
+assets/profile/private.yaml

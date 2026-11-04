@@ -41,12 +41,13 @@ Flutter Web で作った SPA で、GitHub Pages で公開しています。
 
 ```bash
 cd dev_portfolio
-dart run tool/run.dart my_profile.yaml
+dart run tool/run.dart my_profile.yaml   # Markdown なら my_profile.md
 ```
 
 - `flutter run -d chrome my_profile.yaml` のように flutter run へ直接 YAML は渡せない（引数は起動する Dart ファイルとして扱われる）ため、このスクリプトを使います。中で `flutter run -d chrome` を実行するので、`r`（ホットリロード）などもそのまま使えます。2 つ目以降の引数は flutter run に渡します（例：`dart run tool/run.dart my_profile.yaml --release`）
 - YAML を指定しない（`dart run tool/run.dart` や `flutter run -d chrome`）と、起動後に入力画面が出ます。**正しい YAML を読み込むまで閉じられません**
 - 指定した YAML は `assets/profile/profile.yaml` にコピーされます。個人情報なので Git には含めません（`.gitignore` 済み）
+- **プロフィールのファイルに Work / Private も書ける**：同じファイルに書いておくと、起動時の指定でも入力画面のアップロードでも、1 回で Home / About と Skills / Projects がまとめて切り替わります（あとで個別にアップロードしなくてよい。書き方は下の「データの書き方」）
 
 #### 2. プロジェクト（Work / Private）
 
@@ -55,16 +56,20 @@ dart run tool/run.dart my_profile.yaml
 
 #### アップロード画面の流れ（プロフィール / Work / Private 共通）
 
-1. **テンプレートを用意**：「テンプレートを保存」でひな形を「名前を付けて保存」（Chrome / Edge は保存ダイアログ、そのほかのブラウザは通常のダウンロード）、または「テンプレートをコピー」でクリップボードにコピー。ⓘ で書き方の説明を開けます
-2. **データを読み込む**：「ファイルを選択」（`.yaml` / `.yml` だけ）か、「テキストを貼り付け」で YAML の内容を貼り付けます。ファイルを保存・選択できない端末でも、コピー → メモアプリなどで書き換え → 貼り付け で使えます。読み込んだ時点で形式を確かめ、間違っていれば理由を表示します（このときは「アップロード」を押せません）
+1. **テンプレートを用意**：形式（YAML / Markdown）を選び、「テンプレートを保存」でひな形を「名前を付けて保存」（Chrome / Edge は保存ダイアログ、そのほかのブラウザは通常のダウンロード）、または「テンプレートをコピー」でクリップボードにコピー。ⓘ で書き方の説明を開けます
+2. **データを読み込む**：「ファイルを選択」（`.yaml` / `.yml` / `.md` / `.markdown`）か、「テキストを貼り付け」で内容を貼り付けます（YAML か Markdown かは自動で見分けます。貼り付け画面にはクリアボタンがあります）。ファイルを保存・選択できない端末でも、コピー → メモアプリなどで書き換え → 貼り付け で使えます。読み込んだ時点で形式を確かめ、間違っていれば理由を表示します（このときは「アップロード」を押せません）
 3. **アップロード**：確認画面で中身（プロフィールの各項目 / プロジェクトの一覧）を確認し、**OK のときだけ**反映します
-4. 反映中は全画面のローディングを数秒（5〜8 秒）表示し、描き直しが終わってから画面に戻ります
+4. **今の内容が上書きされるときは確かめる**：Work / Private（最初の入力画面で一緒に書いたものも）が今表示している内容と違うときは、なくなる・内容が変わる・追加されるプロジェクトを並べて「上書きされます」と知らせ、［上書きしてアップロード］を選んだときだけ反映します（［やめる］なら何も変えずに戻ります）。同じ内容なら確認は出しません
+5. 反映中は全画面のローディングを数秒（5〜8 秒）表示し、描き直しが終わってから画面に戻ります
 
 読み込んだデータはブラウザの **sessionStorage** にだけ保存されます。サーバーには送信されず、タブを閉じると消えます。
 
 ---
 
 ## データの書き方
+
+データは **YAML** と **Markdown** のどちらでも書けます（中身は同じ。Markdown は読み込むときに YAML と同じ形に変換します）。
+ひな形は `dev_portfolio/assets/data/` の `format_*.yaml` と `format_*.md` です。
 
 ### プロフィール（Home / About）
 
@@ -90,6 +95,72 @@ about:
 ```
 
 知らない項目・必須の空欄・型の違い（文章の場所に箇条書きなど）はエラーになり、読み込みません。
+
+Markdown で書く場合（`format_profile.md`）：
+
+```markdown
+# home
+- name: 山田 太郎
+- role: Web / モバイルエンジニア
+
+## tagline
+Flutter と Dart を中心に開発しています。
+
+## card
+- stack: Flutter, Dart
+
+# about
+- domains: Web, モバイル
+- strengths: チーム開発、テスト設計
+
+## intro
+受託開発の会社で Web アプリの設計から実装までを担当しています。
+```
+
+- `# home` と `# about` に分け、1 行の項目は `- キー: 値`、複数行の文章は `## キー` の下に書きます（`- キー: 値` は `##` より前に書く）
+- `card` は `## card` の下に `- キー: 値`（カンマ区切りは箇条書き）。`domains` はカンマ区切り
+- `<!-- -->` の中はメモとして読み飛ばします
+
+#### Work / Private も一緒に書く（任意）
+
+プロフィールのファイルに足すと、1 回のアップロードで Skills と Projects もまとめて読み込みます。
+
+YAML：トップに `work:` / `private:` を足し、その下に Work / Private のファイルの `projects:` の中身を書きます。
+
+```yaml
+home: ...
+about: ...
+work:
+  - title: 業務のプロジェクト名
+    workflow: { basic_design: true, implementation_unit_test: true }
+private:
+  - title: 個人開発のプロジェクト名
+```
+
+Markdown：`# work` / `# private` の見出しの下に、Work / Private のファイルより**見出しを 1 段深く**して書きます（プロジェクト名は `##`、詳細は `###`）。
+
+```markdown
+# home
+...
+# about
+...
+# work
+
+## 業務のプロジェクト名
+- workflow: 基本設計, 実装・単体テスト
+
+### details
+詳細
+
+# private
+
+## 個人開発のプロジェクト名
+- skills: Dart
+```
+
+Work / Private のアップロードと同じ確認をします（Work は `workflow` が必要、Private は書かない）。
+
+プロフィールのテンプレート（`format_profile.yaml` / `.md`）には、Work / Private のテンプレートと同じ全項目のサンプルが最初から入っています。書き換えて使い、要らないときは `work:` / `private:`（Markdown は `# work` / `# private`）ごと消してください。
 
 ### プロジェクト（Work / Private）
 
@@ -135,6 +206,27 @@ projects:
       maintenance_operation: false   # 保守・運用
 ```
 
+Markdown で書く場合（`format_work.md` / `format_private.md`）：
+
+```markdown
+# プロジェクト名
+- description: 一覧に出る一言説明
+- period: 2024-04 ~ 現在
+- link: https://example.com
+- skills: Python, TypeScript
+- workflow: 基本設計, 詳細設計, 実装・単体テスト
+
+## details
+詳細モーダルに出る説明（複数行）
+```
+
+- 1 件ごとに `# プロジェクト名` から書き始め、項目は `- キー: 値`（キーは YAML と同じ。複数あるときはカンマ区切り）
+- 期間は `2024-04 ~ 2024-09`（`〜` `→` も可）。詳細は `## details` の下
+- `workflow`（Work のみ）は担当した工程をカンマ区切りで（日本語の工程名でも英語のキーでも可）
+- 書き方の誤りは行番号付きで表示します
+
+YAML の注意：
+
 - インデントは半角スペース 2 つです（タブは使えません）
 - リストは `[a, b]` の形でも、1 行に 1 つ `- a` と書く形でもかまいません
 - Skills のグラフは、全プロジェクトでの各技術の出現割合です。`workflow` は true の割合を表示します
@@ -179,13 +271,18 @@ flutter test
 | `widget_test.dart` | テーマの切り替え・色・非推奨 API の置き換え結果 |
 | `profile_yaml_test.dart` | プロフィール YAML の検証（テンプレートが通るか・各エラー） |
 | `projects_yaml_validator_test.dart` | Work / Private YAML の検証 |
-| `browser_storage_test.dart` | sessionStorage（テストではメモリで代用）・データの読み込み順・プロフィールの保持 |
-| `upload_paste_test.dart` | テキストの貼り付け画面・テンプレートのコピー・読み込みボタン |
-| `upload_dialogs_test.dart` | Work / Private / 最初の入力画面：貼り付け → 確認画面 → OK で反映、間違った YAML を弾く、入力画面が閉じられない |
+| `browser_storage_test.dart` | sessionStorage（テストではメモリで代用）・データの読み込み順・プロフィールの保持・アセットの読み込みの差し替え |
+| `projects_diff_test.dart` | 今の内容とこれからの内容の違い（追加・削除・変更、書き方だけの違いは無視）・テンプレートがそろっているか |
+| `profile_bundle_test.dart` | プロフィールに Work / Private も書いたとき（YAML / Markdown）：分け方・確認・行番号付きのエラー |
+| `data_format_test.dart` | YAML / Markdown の見分け・Markdown の変換（テンプレートが YAML 版と同じ中身になるか・行番号付きのエラー。コメントがあっても元の行番号）・テンプレートが `pubspec.yaml` に登録されているか |
+| `upload_paste_test.dart` | テキストの貼り付け画面（クリアボタン）・テンプレートのコピー・形式の切り替え・読み込みボタン |
+| `upload_dialogs_test.dart` | Work / Private / 最初の入力画面：貼り付け（YAML / Markdown）→ 確認画面 → OK で反映、間違ったデータを弾く、入力画面が閉じられない、プロフィールと一緒に Work / Private も反映、上書きの確認（やめる / 上書き / 同じ内容なら出さない） |
 | `project_detail_navigation_test.dart` | 案件の詳細：‹ › / ← → で前後に移る・端では押せない・PC はダイアログ／タブレット・スマホは全画面 |
 | `min_width_scaler_test.dart` | 320px より狭い画面での縮小表示 |
 
 > ブラウザの機能（sessionStorage・ファイル保存）は、テストでは代わりの実装に自動で切り替わります（`lib/utils/browser/`・`lib/utils/file_saver.dart`）。ファイル選択の OS ダイアログはテストから操作できないので、同じ確認処理を通るテキストの貼り付けで確かめています。
+>
+> アセット（テンプレート・サンプル）は `lib/utils/asset_text.dart` の `loadAssetText` で読みます。画面を動かすテスト（testWidgets）の中では本物の読み込み（rootBundle）が終わらないことがあるため、`setUp(useFileAssets)`（`test/test_assets.dart`）でファイルを直接読む方法に差し替えています。
 
 本番と同じ設定でビルドする場合：
 
@@ -243,7 +340,7 @@ dev-portfolio-site/
 
 ## 現状と技術的な課題
 
-**現状**（2026-11-04）：非推奨の API（`dart:html`・`Color.withOpacity`）は置き換え済みです。2026-11-03 時点で `flutter analyze` は指摘なし、`flutter test` は全件成功。以降に追加した機能（詳細の前後移動・全画面表示・320px 未満の縮小・テキストの貼り付け）のテストは、手元での実行結果を確認中です。
+**現状**（2026-11-04）：非推奨の API（`dart:html`・`Color.withOpacity`）は置き換え済みです。2026-11-03 時点で `flutter analyze` は指摘なし、`flutter test` は全件成功。以降に追加した機能（詳細の前後移動・全画面表示・320px 未満の縮小・テキストの貼り付け・Markdown 対応・プロフィールと Work / Private のまとめての読み込み・上書きの確認）のテストは、テスト中のアセット読み込みが止まる問題を直した版の実行結果を確認中です。
 
 課題と今後の改善候補です（詳細は [CLAUDE.md](CLAUDE.md) の「現状と課題」）。
 

@@ -75,6 +75,9 @@ class AppSizes {
   static const int pasteMinLines = 8;
   static const int pasteMaxLines = 16;
 
+  /// 上書きの確認で、項目ごとに並べるタイトルの最大数（超えた分は「…ほか n 件」）
+  static const int overwriteMaxTitles = 8;
+
   // ----------------------------------------------------------
   // 読み込み中（M3 Progress indicator・円形）
   // ----------------------------------------------------------

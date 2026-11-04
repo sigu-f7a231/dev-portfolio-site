@@ -5,60 +5,42 @@
 // - できること：テンプレートを名前を付けて保存・コピー ／ ファイルを選択・テキストを貼り付け（その場で形式を確認）／
 //   アップロード（確認画面で中身を見て OK のときだけ。反映中は全画面ローディング）／ ⓘ で書き方の説明（説明だけ）
 // - 正しい YAML を読み込むまで閉じられない（外側のタップ・Esc・戻るでも閉じない）
+// - ファイルに work / private も書かれていれば一緒に読み込む（Skills / Projects も切り替わり、2 回目のアップロードは要らない）
 import 'dart:convert';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import '../models/profile.dart';
+import 'package:yaml/yaml.dart';
 import '../utils/profile_store.dart';
-import '../utils/file_saver.dart';
+import '../utils/profile_bundle.dart';
+import '../utils/projects_diff.dart';
+import '../utils/data_format.dart';
+import '../utils/browser/browser.dart';
+import '../utils/work_yaml_loader.dart';
+import '../utils/private_yaml_loader.dart';
 import '../theme/app_theme.dart';
 import '../theme/app_styles.dart';
 import '../constants/app_sizes.dart';
 import '../constants/app_texts.dart';
 import 'upload_parts.dart';
 
-const String _templateAsset = 'assets/data/format_profile.yaml';
-
 /// 入力画面を出す（読み込みが終わると閉じる）
-Future<void> showProfileSetupDialog(BuildContext context) {
+/// プロフィールのファイルに Work / Private も書かれていれば一緒に読み込み、[onProjectsChanged]
+/// （Skills / Projects の作り直し）を呼ぶ。2 回目以降のアップロードは要らない
+Future<void> showProfileSetupDialog(BuildContext context, {VoidCallback? onProjectsChanged}) {
   return showDialog<void>(
     context: context,
     barrierDismissible: false, // 外側をタップしても閉じない
-    builder: (_) => const PopScope(
+    builder: (_) => PopScope(
       canPop: false, // Esc・ブラウザの戻るでも閉じない
-      child: _ProfileSetupDialog(),
+      child: _ProfileSetupDialog(onProjectsChanged: onProjectsChanged),
     ),
   );
 }
 
-/// テンプレートを「名前を付けて保存」
-Future<void> _saveTemplate(BuildContext context) async {
-  try {
-    final content = await rootBundle.loadString(_templateAsset);
-    final result = await FileSaver.saveTextAs(
-      fileName: ProfileTexts.templateFileName,
-      text: content,
-      description: AppTexts.yamlFileDescription,
-      mimeType: 'text/yaml',
-      extensions: const ['.yaml', '.yml'],
-    );
-    if (result == FileSaveResult.saved && context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(AppTexts.formatSaved(ProfileTexts.templateFileName))),
-      );
-    }
-  } catch (e) {
-    if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(AppTexts.downloadFailed(e))),
-      );
-    }
-  }
-}
-
 class _ProfileSetupDialog extends StatefulWidget {
-  const _ProfileSetupDialog();
+  final VoidCallback? onProjectsChanged;
+
+  const _ProfileSetupDialog({this.onProjectsChanged});
 
   @override
   State<_ProfileSetupDialog> createState() => _ProfileSetupDialogState();
@@ -67,12 +49,15 @@ class _ProfileSetupDialog extends StatefulWidget {
 class _ProfileSetupDialogState extends State<_ProfileSetupDialog> {
   bool _picking = false;
   String? _fileName;
-  String? _text; // 形式が正しいときだけ入る
-  Profile? _profile;
+  /// 読み込めるときだけ入る（プロフィール＋一緒に書かれた Work / Private）
+  ProfileBundle? _bundle;
   List<String> _errors = const [];
 
   /// 前に貼り付けたテキスト（もう一度開いたときに続きから直せるように）
   String _pasted = '';
+
+  /// 保存・コピーするテンプレートの形式
+  DataFormat _templateFormat = DataFormat.yaml;
 
   /// 1. ファイルを選ぶ → その場で形式を確かめる（間違っていればアップロードできない）
   Future<void> _pick() async {
@@ -80,28 +65,25 @@ class _ProfileSetupDialogState extends State<_ProfileSetupDialog> {
     try {
       final picked = await FilePicker.platform.pickFiles(
         type: FileType.custom,
-        allowedExtensions: const ['yaml', 'yml'], // .yaml / .yml 以外は選べない
+        allowedExtensions: acceptedExtensions, // .yaml / .yml / .md / .markdown 以外は選べない
         withData: true,
       );
       final file = picked?.files.single;
       if (file == null || file.bytes == null) return; // キャンセル（前の選択はそのまま）
 
-      final name = file.name.toLowerCase();
-      if (!name.endsWith('.yaml') && !name.endsWith('.yml')) {
+      if (!hasAcceptedExtension(file.name)) {
         setState(() {
           _fileName = file.name;
-          _text = null;
-          _profile = null;
+          _bundle = null;
           _errors = [ProfileTexts.extensionOnly];
         });
         return;
       }
 
-      _apply(utf8.decode(file.bytes!), file.name);
+      _apply(utf8.decode(file.bytes!), fileName: file.name);
     } catch (e) {
       setState(() {
-        _text = null;
-        _profile = null;
+        _bundle = null;
         _errors = [AppTexts.fileReadFailed(e)];
       });
     } finally {
@@ -110,14 +92,20 @@ class _ProfileSetupDialogState extends State<_ProfileSetupDialog> {
   }
 
   /// 読み込んだテキスト（ファイル・貼り付け共通）の形式を確かめて、状態に反映する
-  void _apply(String text, String sourceName) {
-    final result = Profile.parse(text);
+  /// - YAML / Markdown を見分け、Markdown は同じ中身の JSON（＝YAML として読める）に変えてから確かめる
+  /// - work / private も書かれていれば、Work / Private として一緒に確かめる
+  /// - [fileName] がなければ貼り付けたテキスト（形式は中身から見分ける）
+  void _apply(String text, {String? fileName}) {
+    final bundle = readProfileBundle(text, fileName: fileName);
     setState(() {
-      _fileName = sourceName;
-      _text = result.isOk ? text : null;
-      _profile = result.profile;
-      _pasted = sourceName == AppTexts.pastedTextName ? text : _pasted;
-      _errors = result.errors;
+      _fileName = fileName ??
+          AppTexts.sourceWithFormat(
+            AppTexts.pastedTextName,
+            bundle.format == DataFormat.markdown ? AppTexts.formatMarkdown : AppTexts.formatYaml,
+          );
+      _bundle = bundle.isOk ? bundle : null;
+      if (fileName == null) _pasted = text; // 貼り付けた元のテキスト（次に開いたとき用）
+      _errors = bundle.errors;
     });
   }
 
@@ -125,28 +113,49 @@ class _ProfileSetupDialogState extends State<_ProfileSetupDialog> {
   Future<void> _paste() async {
     final text = await showPasteYamlDialog(context, initialText: _pasted);
     if (text == null || !mounted) return; // キャンセル
-    _apply(text, AppTexts.pastedTextName);
+    _apply(text);
   }
 
   /// 2. 確認画面 → OK なら 3. 全画面ローディングを出して反映
   Future<void> _upload() async {
-    final text = _text, profile = _profile;
-    if (text == null || profile == null) return;
+    final bundle = _bundle;
+    if (bundle == null) return;
+    final hasProjects = bundle.workText != null || bundle.privateText != null;
 
     final ok = await confirmUpload(
       context,
       fileName: _fileName!,
-      replaceTarget: ProfileTexts.replaceTarget,
-      summary: _ProfileSummary(profile: profile),
+      replaceTarget: hasProjects
+          ? '${ProfileTexts.replaceTarget}・${BundleTexts.includes(bundle.workCount, bundle.privateCount)}'
+          : ProfileTexts.replaceTarget,
+      summary: _ProfileSummary(bundle: bundle),
     );
     if (!ok || !mounted) return;
+
+    // 一緒に書いた Work / Private が今表示している内容と違えば、上書きしてよいかを確かめる
+    final diffs = <(String, ProjectsDiff)>[
+      if (bundle.workText != null)
+        (AppTexts.work, diffProjects(await WorkYamlLoader.loadYamlString(), bundle.workText!)),
+      if (bundle.privateText != null)
+        (AppTexts.private, diffProjects(await PrivateYamlLoader.loadYamlString(), bundle.privateText!)),
+    ];
+    if (!mounted) return;
+    final overwrite = await confirmOverwrite(context, diffs: diffs);
+    if (!overwrite || !mounted) return;
 
     final navigator = Navigator.of(context, rootNavigator: true);
     final messenger = ScaffoldMessenger.of(context);
     navigator.pop(); // 入力画面を閉じる（PopScope は戻る操作だけを止めるので、ここでは閉じられる）
 
     await runReloading(navigator, () async {
-      ProfileStore.instance.setUploaded(text, profile);
+      ProfileStore.instance.setUploaded(bundle.profileText!, bundle.profile!);
+      // Work / Private も書かれていれば、それぞれのアップロードと同じくセッションに保存して読み直す
+      if (bundle.workText != null) SessionStore.write('work', bundle.workText!);
+      if (bundle.privateText != null) SessionStore.write('private', bundle.privateText!);
+      if (hasProjects) {
+        widget.onProjectsChanged?.call();
+        await Future.wait([WorkYamlLoader.loadYamlString(), PrivateYamlLoader.loadYamlString()]);
+      }
     });
 
     messenger.showSnackBar(const SnackBar(content: Text(ProfileTexts.uploaded)));
@@ -205,11 +214,14 @@ class _ProfileSetupDialogState extends State<_ProfileSetupDialog> {
               ],
 
               UploadSourcePanel(
-                onSaveTemplate: () => _saveTemplate(context),
+                templateFormat: _templateFormat,
+                onTemplateFormatChanged: (f) => setState(() => _templateFormat = f),
+                onSaveTemplate: () =>
+                    saveTemplateFile(context, kind: DataKind.profile, format: _templateFormat),
                 onCopyTemplate: () => copyTemplateText(
                   context,
-                  assetPath: _templateAsset,
-                  fileName: ProfileTexts.templateFileName,
+                  assetPath: templateAssetPath(DataKind.profile, _templateFormat),
+                  fileName: templateFileName(DataKind.profile, _templateFormat),
                 ),
                 onPickFile: _picking ? null : _pick,
                 onPasteText: _picking ? null : _paste,
@@ -217,6 +229,26 @@ class _ProfileSetupDialogState extends State<_ProfileSetupDialog> {
               ),
               const SizedBox(height: AppSizes.space12),
               SelectedFileStatus(fileName: _fileName, errors: _errors),
+              // Work / Private も一緒に書かれていれば、それも読み込むことを知らせる
+              if (_bundle != null &&
+                  (_bundle!.workText != null || _bundle!.privateText != null)) ...[
+                const SizedBox(height: AppSizes.space8),
+                Row(
+                  children: [
+                    Icon(Icons.library_add_check_outlined,
+                        size: AppSizes.space20, color: colors.primary),
+                    const SizedBox(width: AppSizes.space8),
+                    Expanded(
+                      child: Text(
+                        BundleTexts.alsoLoads(
+                          BundleTexts.includes(_bundle!.workCount, _bundle!.privateCount),
+                        ),
+                        style: AppStyles.helpBody(context),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
               const SizedBox(height: AppSizes.space16),
 
               // 次回の起動方法
@@ -237,7 +269,7 @@ class _ProfileSetupDialogState extends State<_ProfileSetupDialog> {
       actions: [
         // 正しい YAML を読み込むまで押せない
         FilledButton.icon(
-          onPressed: _text == null || _picking ? null : _upload,
+          onPressed: _bundle == null || _picking ? null : _upload,
           icon: const Icon(Icons.upload_file),
           label: const Text(AppTexts.upload),
         ),
@@ -248,12 +280,26 @@ class _ProfileSetupDialogState extends State<_ProfileSetupDialog> {
 
 /// 確認画面の中身：プロフィールの各項目
 class _ProfileSummary extends StatelessWidget {
-  final Profile profile;
+  final ProfileBundle bundle;
 
-  const _ProfileSummary({required this.profile});
+  const _ProfileSummary({required this.bundle});
+
+  /// 一緒に読み込む Work / Private のタイトル一覧
+  List<Widget> _projects(BuildContext context, String label, String? text) {
+    if (text == null) return const [];
+    final projects = (loadYaml(text) as YamlMap)['projects'] as YamlList;
+    return [
+      const Divider(height: AppSizes.space24),
+      Text(BundleTexts.confirmSection(label, projects.length), style: AppStyles.helpHeading(context)),
+      const SizedBox(height: AppSizes.space8),
+      for (var i = 0; i < projects.length; i++)
+        Text('${i + 1}. ${projects[i]['title']}', style: AppStyles.helpBody(context)),
+    ];
+  }
 
   @override
   Widget build(BuildContext context) {
+    final profile = bundle.profile!;
     final card = profile.card.entries
         .map((e) => '${e.key}: ${e.value is List ? (e.value as List).join(', ') : e.value}')
         .join('\n');
@@ -275,6 +321,8 @@ class _ProfileSummary extends StatelessWidget {
         ConfirmField(AboutContent.strengthsLabel, profile.strengths),
         ConfirmField(AboutContent.styleLabel, profile.style),
         ConfirmField(ProfileTexts.fieldClosing, profile.closing),
+        ..._projects(context, AppTexts.work, bundle.workText),
+        ..._projects(context, AppTexts.private, bundle.privateText),
       ],
     );
   }
@@ -334,9 +382,31 @@ void showProfileHelp(BuildContext context) {
                   ),
                 const SizedBox(height: AppSizes.space8),
 
+                // Work / Private も一緒に
+                Text(ProfileTexts.helpBundleTitle, style: AppStyles.helpHeading(context)),
+                const SizedBox(height: AppSizes.space6),
+                for (final r in ProfileTexts.helpBundleRules)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: AppSizes.space4),
+                    child: Text('${AppTexts.bullet}$r', style: AppStyles.helpBody(context)),
+                  ),
+                const SizedBox(height: AppSizes.space16),
+
+                // Markdown で書く場合
+                Text(ProfileTexts.helpMarkdownTitle, style: AppStyles.helpHeading(context)),
+                const SizedBox(height: AppSizes.space6),
+                for (final r in ProfileTexts.helpMarkdownRules)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: AppSizes.space4),
+                    child: Text('${AppTexts.bullet}$r', style: AppStyles.helpBody(context)),
+                  ),
+                const SizedBox(height: AppSizes.space16),
+
                 Text(ProfileTexts.helpTemplate, style: AppStyles.helpHeading(context)),
                 const SizedBox(height: AppSizes.space6),
                 Text(ProfileTexts.helpTemplateNote, style: AppStyles.helpBody(context)),
+                const SizedBox(height: AppSizes.space4),
+                Text(ProfileTexts.helpMarkdownTemplate, style: AppStyles.helpBody(context)),
               ],
             ),
           ),

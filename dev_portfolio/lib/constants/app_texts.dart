@@ -68,10 +68,11 @@ class AppTexts {
   static const String copyFailed = 'コピーできませんでした。「テンプレートを保存」を使ってください';
   static const String pasteText = 'テキストを貼り付け';
   static const String pastedTextName = '貼り付けたテキスト';
-  static const String pasteTitle = 'YAML のテキストを貼り付け';
+  static const String pasteTitle = 'YAML / Markdown を貼り付け'; // 開くボタン（pasteText）と同じ文言にしない
   static const String pasteLead =
-      '書き換えた YAML の内容をそのまま貼り付けてください。インデント（半角スペース）も含めて貼り付けます。';
-  static const String pasteHint = '例）\nprojects:\n  - title: プロジェクト名';
+      '書き換えた YAML または Markdown の内容をそのまま貼り付けてください（形式は自動で見分けます）。'
+      'YAML はインデント（半角スペース）も含めて貼り付けます。';
+  static const String pasteHint = '例）YAML\nprojects:\n  - title: プロジェクト名\n\n例）Markdown\n# プロジェクト名\n- skills: Dart, Flutter';
   static const String pasteFromClipboard = 'クリップボードから貼り付け';
   static const String clipboardEmpty = 'クリップボードにテキストがありません';
   static const String clipboardDenied =
@@ -79,7 +80,13 @@ class AppTexts {
   static const String pasteApply = '読み込む';
   static const String pasteEmpty = 'テキストが空です';
   static const String chooseAnotherFile = '別のファイルを選択';
-  static const String noFileChosen = 'まだ読み込んでいません（.yaml / .yml のファイル、またはテキストの貼り付け）';
+  static const String noFileChosen =
+      'まだ読み込んでいません（.yaml / .yml / .md のファイル、またはテキストの貼り付け）';
+  static const String formatYaml = 'YAML';
+  static const String formatMarkdown = 'Markdown';
+  static String sourceWithFormat(String source, String format) => '$source（$format）';
+  static const String markdownFileDescription = 'Markdown ファイル';
+  static const String pasteClear = 'クリア';
   static String fileReady(String name) => '$name（読み込めます）';
   static String fileRejected(String name) => '$name（読み込めません）';
   static const String uploadNeedsFile = '「ファイルを選択」か「テキストを貼り付け」で正しい YAML を読み込むと、アップロードできます';
@@ -119,7 +126,8 @@ class AppTexts {
   // ----------------------------------------------------------
   static const String downloadFormat = 'テンプレートを保存';
   static const String helpTemplateWhere =
-      'このテンプレートは、アップロード画面の「テンプレートを保存」から保存できます。';
+      'テンプレートは、アップロード画面の「テンプレートを保存」「テンプレートをコピー」から用意できます'
+      '（形式を「Markdown」にすると Markdown のひな形になります）。';
   static String downloadFormatTooltip(String fileName) => '$fileName を名前を付けて保存します';
   static String downloadFailed(Object e) => '保存に失敗しました: $e';
   static String formatSaved(String fileName) => '$fileName を保存しました';
@@ -153,6 +161,19 @@ class AppTexts {
   static const String helpWorkflowFormat = '各工程を true / false で指定（必須）';
   static const String helpWorkflowNote = '担当した工程を true にします';
   static String helpSampleTitle(String fileName) => 'サンプル（$fileName の中身）';
+
+  // Markdown で書く場合（ⓘ）
+  static const String helpMarkdownTitle = 'Markdown で書く場合';
+  static const List<String> helpMarkdownProjects = [
+    '1 件ごとに「# プロジェクト名」から書き始めます',
+    '項目は「- キー: 値」（キーは YAML と同じ。複数あるときはカンマ区切り）',
+    '期間は「- period: 2024-04 ~ 2024-09」（続いているときは「~ 現在」）',
+    '詳細は「## details」の下に複数行で書きます（項目はそれより前に書く）',
+    '「<!-- -->」の中はメモとして読み飛ばします',
+  ];
+  static const String helpMarkdownWorkflow =
+      'workflow は担当した工程をカンマ区切りで書きます（例：- workflow: 基本設計, 詳細設計）';
+  static const String helpMarkdownPrivate = 'Private には workflow を書きません';
   static const String helpSampleLoadFailed = 'サンプルを読み込めませんでした';
   static const String bullet = '・';
 
@@ -312,7 +333,8 @@ class ProfileTexts {
 
   static const String setupTitle = 'あなたのことを教えてください';
   static const String setupLead =
-      'Home と About に表示するあなたのプロフィールを、YAML ファイルで読み込みます。'
+      'Home と About に表示するあなたのプロフィールを、YAML か Markdown で読み込みます。'
+      '同じファイルに Work / Private も書けば、Skills と Projects もまとめて読み込めます。'
       '読み込むまでこの画面は閉じられません。';
   static const List<String> setupSteps = [
     '「テンプレートを保存」か「テンプレートをコピー」で、ひな形を用意する',
@@ -320,7 +342,7 @@ class ProfileTexts {
     '「ファイルを選択」か「テキストを貼り付け」で読み込み、「アップロード」で内容を確認して反映する',
   ];
   static const String setupNextTime = '次回からは、YAML を指定して起動するとこの画面は出ません：';
-  static const String runCommand = 'dart run tool/run.dart あなたのファイル.yaml';
+  static const String runCommand = 'dart run tool/run.dart あなたのファイル.yaml（.md も可）';
 
   static const String saveTemplate = 'テンプレートを保存';
   static const String replaceTarget = 'プロフィール（Home / About）';
@@ -334,11 +356,10 @@ class ProfileTexts {
   static const String fieldClosing = '締めの一言';
   static const String upload = 'YAML をアップロード';
   static const String helpTooltip = '書き方の説明';
-  static const String templateFileName = 'format_profile.yaml';
   static const String uploaded = 'プロフィールを読み込みました';
   static const String uploadFailedTitle = 'このファイルは読み込めません';
   static const String startupFailedTitle = '起動時に指定した YAML を読み込めませんでした';
-  static const String extensionOnly = '.yaml / .yml のファイルだけ選べます';
+  static const String extensionOnly = '.yaml / .yml / .md / .markdown のファイルだけ選べます';
 
   // 説明（ⓘ）
   static const String helpTitle = 'プロフィール YAML の書き方';
@@ -364,6 +385,23 @@ class ProfileTexts {
     ('about.closing', false, '締めの一言'),
   ];
   static const String helpTemplate = 'ひな形（テンプレート）';
+  static const String helpMarkdownTitle = 'Markdown で書く場合';
+  static const List<String> helpMarkdownRules = [
+    '「# home」と「# about」の 2 つの見出しに分けて書きます',
+    '1 行の項目は「- キー: 値」（例：- name: 山田 太郎）',
+    '複数行の文章（tagline・intro）は「## キー」の下に書きます（「- キー: 値」はそれより前に書く）',
+    'card は「## card」の下に「- キー: 値」で書きます（カンマ区切りは箇条書きになる）',
+    'domains はカンマ区切りで書きます（例：- domains: Web, モバイル）',
+    '「<!-- -->」の中はメモとして読み飛ばします',
+  ];
+  static const String helpMarkdownTemplate = 'テンプレートの形式を「Markdown」にすると、Markdown のひな形を保存・コピーできます。';
+  static const String helpBundleTitle = 'Work / Private も一緒に読み込む（任意）';
+  static const List<String> helpBundleRules = [
+    '同じファイルに Work / Private も書くと、1 回のアップロードで Skills と Projects も切り替わります（あとで個別にアップロードしなくてよい）',
+    'YAML：トップに「work:」「private:」を足し、その下に Work / Private のテンプレートの「projects:」の中身（- title: …）を書きます',
+    'Markdown：「# work」「# private」の見出しの下に、1 件ごとに「## プロジェクト名」、詳細は「### details」（単独のファイルより見出しを 1 段深く）',
+    '書いたものは Work / Private のアップロードと同じように確かめます（Work は workflow が必要、Private は workflow を書かない）',
+  ];
   static const String helpTemplateNote =
       '書き方の見本になるファイルです。前の画面の「テンプレートを保存」から保存して、書き換えてください。';
 
@@ -378,3 +416,60 @@ class ProfileTexts {
   static String errorNotMapField(String k) => '$k は「キー: 値」の形で書いてください';
   static String errorCardValue(String k) => '$k の値は文章か「- 」の箇条書きにしてください';
 }
+
+/// Markdown で書いたデータの読み取りのエラー（lib/utils/data_format.dart）
+class MarkdownTexts {
+  MarkdownTexts._();
+
+  static String beforeFirstHeading(int line, String text) =>
+      '$line 行目：最初の「# 見出し」より前に書かれています（$text）';
+  static String strayLine(int line, String text) =>
+      '$line 行目：「- キー: 値」の形になっていません（$text）';
+  static String unknownKey(int line, String key) => '$line 行目：使えない項目があります：$key';
+  static String unknownSection(int line, String name) =>
+      '$line 行目：使えない見出しです：## $name（使えるのは ## details）';
+  static String unknownWorkflow(int line, String step) =>
+      '$line 行目：workflow の工程名が違います：$step（要件定義 / 基本設計 / 詳細設計 / 実装・単体テスト / 結合テスト / 総合テスト / 保守・運用）';
+  static String cardNeedsFields(int line, String name) =>
+      '$line 行目：## $name の下は「- キー: 値」の形で書いてください';
+  static const String noProjects = 'プロジェクトがありません（1 件ごとに「# プロジェクト名」から書き始めてください）';
+  static const String noProfileSections = '「# home」と「# about」の見出しがありません';
+}
+
+/// プロフィールのファイルに Work / Private も一緒に書いたとき（lib/utils/data_format.dart / profile_bundle.dart）
+class BundleTexts {
+  BundleTexts._();
+
+  static String notProjects(String key) =>
+      '$key: はプロジェクトの並び（- title: …）で書いてください';
+  static String noProjectsIn(String key) =>
+      '# $key の下にプロジェクトがありません（1 件ごとに「## プロジェクト名」から書き始めてください）';
+  static const String workInvalid =
+      'work の形式が違います（各プロジェクトに title と workflow が必要です）';
+  static const String privateInvalid =
+      'private の形式が違います（各プロジェクトに title が必要で、workflow は書きません）';
+  static String includes(int? work, int? private) => [
+        if (work != null) 'Work $work 件',
+        if (private != null) 'Private $private 件',
+      ].join('・');
+  static String alsoLoads(String what) => '$what も一緒に読み込みます（Skills と Projects も切り替わります）';
+  static String confirmSection(String label, int count) => '$label：プロジェクト $count 件';
+}
+
+/// アップロードで今の内容が上書きされるときの確認（lib/widgets/upload_parts.dart の confirmOverwrite）
+class OverwriteTexts {
+  OverwriteTexts._();
+
+  static const String title = '今の内容が上書きされます';
+  static String lead(String targets) =>
+      '今表示している $targets と、これからアップロードする内容に違いがあります。'
+      'アップロードすると今の内容は上書きされ、元には戻せません。';
+  static String added(int n) => '追加されるプロジェクト（$n 件）';
+  static String removed(int n) => 'なくなるプロジェクト（$n 件）';
+  static String changed(int n) => '内容が変わるプロジェクト（$n 件）';
+  static String more(int n) => '…ほか $n 件';
+  static const String question = 'それでもアップロードしますか？';
+  static const String cancel = 'やめる';
+  static const String overwrite = '上書きしてアップロード';
+}
+

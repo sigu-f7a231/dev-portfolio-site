@@ -6,9 +6,9 @@
 //   2. この画面でアップロード済み（同じタブ内）        → sessionStorage['profile']
 //   3. どちらもない                                  → null（入力画面を出す）
 import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart';
 import '../models/profile.dart';
 import 'browser/browser.dart'; // sessionStorage（Web は package:web、テストはメモリ）
+import 'asset_text.dart';
 
 class ProfileStore extends ValueNotifier<Profile?> {
   ProfileStore._() : super(null);
@@ -17,6 +17,22 @@ class ProfileStore extends ValueNotifier<Profile?> {
   /// tool/run.dart が YAML を指定して起動したときだけ true
   static const bool fromArg = bool.fromEnvironment('PROFILE_FROM_ARG');
   static const String assetPath = 'assets/profile/profile.yaml';
+
+  /// 起動時のプロフィールに work / private も書かれていたとき、tool/run.dart がここに書き出す
+  static const String workAssetPath = 'assets/profile/work.yaml';
+  static const String privateAssetPath = 'assets/profile/private.yaml';
+
+  /// 起動時に一緒に指定された Work / Private（なければ null）。ローダーが使う
+  static Future<String?> startupProjects(String dataType) async {
+    if (!fromArg) return null;
+    try {
+      return await loadAssetText(
+        dataType == 'work' ? workAssetPath : privateAssetPath,
+      );
+    } catch (_) {
+      return null; // 一緒に指定されていない
+    }
+  }
   static const String sessionKey = 'profile';
 
   /// 起動時に指定した YAML が読めなかったときの理由（入力画面に出す）
@@ -25,7 +41,7 @@ class ProfileStore extends ValueNotifier<Profile?> {
   Future<void> load() async {
     if (fromArg) {
       try {
-        final result = Profile.parse(await rootBundle.loadString(assetPath));
+        final result = Profile.parse(await loadAssetText(assetPath));
         if (result.isOk) {
           value = result.profile;
           return;

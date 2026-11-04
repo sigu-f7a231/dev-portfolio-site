@@ -1,47 +1,23 @@
 // lib/sections/header/yaml_format_help.dart
 //
 // YAML アップロード画面（Work / Private）用の補助
-// - テンプレート（assets/data/format_*.yaml）を「名前を付けて保存」する処理（ボタンはアップロード画面だけ）
+// - テンプレートの保存・コピーは widgets/upload_parts.dart（saveTemplateFile / copyTemplateText。ボタンはアップロード画面だけ）
 // - ⓘ で開く書き方の説明ダイアログ（説明だけ。保存ボタンは置かない）
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import '../../theme/app_theme.dart';
 import '../../theme/app_styles.dart';
 import '../../utils/language_utils.dart';
 import '../../constants/app_sizes.dart';
-import '../../utils/file_saver.dart';
 import '../../constants/app_texts.dart';
 import '../../widgets/app_loading_indicator.dart';
+import '../../utils/asset_text.dart';
 
 /// dataType（'work' / 'private'）に対応するフォーマットファイル名
 String yamlFormatFileName(String dataType) =>
     dataType == 'work' ? 'format_work.yaml' : 'format_private.yaml';
 
-/// フォーマットファイルを「名前を付けて保存」する（保存できたらメッセージを出す）
-Future<void> saveYamlFormat(BuildContext context, String dataType) async {
-  final fileName = yamlFormatFileName(dataType);
-  try {
-    final content = await rootBundle.loadString('assets/data/$fileName');
-    final result = await FileSaver.saveTextAs(
-      fileName: fileName,
-      text: content,
-      description: AppTexts.yamlFileDescription,
-      mimeType: 'text/yaml',
-      extensions: const ['.yaml', '.yml'],
-    );
-    if (result == FileSaveResult.saved && context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(AppTexts.formatSaved(fileName))),
-      );
-    }
-  } catch (e) {
-    if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(AppTexts.downloadFailed(e))),
-      );
-    }
-  }
-}
+String _markdownName(String dataType) =>
+    dataType == 'work' ? 'format_work.md' : 'format_private.md';
 
 /// 書き方の説明ダイアログ
 void showYamlFormatHelp(BuildContext context, String dataType) {
@@ -114,6 +90,22 @@ void showYamlFormatHelp(BuildContext context, String dataType) {
                     style: AppStyles.helpHeading(context)),
                 const SizedBox(height: AppSizes.space6),
                 _YamlSample(dataType: dataType),
+                const SizedBox(height: AppSizes.space16),
+
+                // ---------- Markdown で書く場合 ----------
+                Text(AppTexts.helpMarkdownTitle, style: AppStyles.helpHeading(context)),
+                const SizedBox(height: AppSizes.space6),
+                for (final r in AppTexts.helpMarkdownProjects) _bullet(context, r),
+                _bullet(
+                  context,
+                  isWork ? AppTexts.helpMarkdownWorkflow : AppTexts.helpMarkdownPrivate,
+                  emphasis: true,
+                ),
+                const SizedBox(height: AppSizes.space6),
+                Text(AppTexts.helpSampleTitle(_markdownName(dataType)),
+                    style: AppStyles.helpHeading(context)),
+                const SizedBox(height: AppSizes.space6),
+                _YamlSample(dataType: dataType, fileName: _markdownName(dataType)),
                 const SizedBox(height: AppSizes.space8),
                 Text(AppTexts.helpTemplateWhere, style: AppStyles.helpBody(context)),
               ],
@@ -162,7 +154,10 @@ Widget _field(BuildContext context, String key, String format, String note) {
 class _YamlSample extends StatefulWidget {
   final String dataType;
 
-  const _YamlSample({required this.dataType});
+  /// 表示するファイル（省略時は YAML のテンプレート）
+  final String? fileName;
+
+  const _YamlSample({required this.dataType, this.fileName});
 
   @override
   State<_YamlSample> createState() => _YamlSampleState();
@@ -170,7 +165,7 @@ class _YamlSample extends StatefulWidget {
 
 class _YamlSampleState extends State<_YamlSample> {
   late final Future<String> _future =
-      rootBundle.loadString('assets/data/${yamlFormatFileName(widget.dataType)}');
+      loadAssetText('assets/data/${widget.fileName ?? yamlFormatFileName(widget.dataType)}');
 
   @override
   Widget build(BuildContext context) {

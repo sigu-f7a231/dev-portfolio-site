@@ -61,6 +61,9 @@ flutter:
     - assets/data/format_work.yaml
     - assets/data/format_private.yaml
     - assets/data/format_profile.yaml
+    - assets/data/format_work.md
+    - assets/data/format_private.md
+    - assets/data/format_profile.md
     # 起動時に指定したプロフィール（dart run tool/run.dart xxx.yaml がここにコピーする。Git には含めない）
     - assets/profile/
 

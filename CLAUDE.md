@@ -57,7 +57,10 @@ dev-portfolio-site/
         ├── project_detail_navigation_test.dart # 詳細ダイアログの ‹ › / ← → での前後移動・全画面表示
         ├── min_width_scaler_test.dart         # 320px より狭い画面での縮小表示
         ├── upload_paste_test.dart             # テキストの貼り付け画面・テンプレートのコピー・読み込みボタン群
-        └── upload_dialogs_test.dart           # Work / Private / 入力画面：貼り付け → 確認画面 → OK で反映、弾く YAML、閉じられない
+        ├── upload_dialogs_test.dart           # Work / Private / 入力画面：貼り付け（YAML / Markdown）→ 確認画面 → OK で反映、弾くデータ、閉じられない
+        ├── data_format_test.dart              # YAML / Markdown の見分け・Markdown の変換・行番号付きのエラー
+        ├── profile_bundle_test.dart           # プロフィールに Work / Private も一緒に書いたとき
+        └── projects_diff_test.dart            # 上書きの確認に使う違いの判定・テンプレートがそろっているか
 ```
 
 `android/ ios/ macos/ linux/ windows/` は `dev_portfolio/.gitignore` で **Git 管理外**。`web/` はローディング表示を入れた `index.html` を管理するため Git に含める（CI の `flutter create . --platforms web` は既存ファイルを上書きせず、足りないファイルだけ作る）。
@@ -101,7 +104,11 @@ sessionStorage['work'|'private'] ─┘   優先順位: sessionStorage > メモ�
   1. 「ファイルを選択」でその場で検証。間違っていれば理由を出し、「アップロード」は押せない。
   2. 「アップロード」→ `confirmUpload` で中身（プロジェクト一覧 / プロフィールの各項目）を確認し、OK のときだけ反映。
   3. 反映中は `runReloading`：起動時と同じ全画面ローディング（M3 Circular）を最低 `AppSizes.reloadMinDuration`（5 秒）、最大 `reloadMaxDuration`（8 秒）出してから画面に戻す。
-- **ファイルを保存・選択できない人向けに、テキストでも使える**（3 画面共通、`UploadSourcePanel`）：テンプレートは［保存］か［コピー］（クリップボード）、データは［ファイルを選択］か［テキストを貼り付け］（`showPasteYamlDialog`）。貼り付けたテキストもファイルと同じ検証 → 確認画面 → 反映の流れ。ボタンは本文に置き、下のボタンは［キャンセル］［アップロード］だけ。
+- **上書きの確認**（`utils/projects_diff.dart` の `diffProjects`、画面は `upload_parts.dart` の `confirmOverwrite`）：Work / Private のアップロードと、入力画面で一緒に書いた Work / Private は、確認画面の OK のあと、今表示している内容（ローダーが返すもの。サンプルも含む）と比べ、違いがあれば「上書きされます」と追加・削除・変更のタイトルを出し、［上書きしてアップロード］のときだけ反映する。比べるときはタイトル（同名は出てきた順）で対応づけ、書き方だけの違い（YAML / JSON、末尾の改行、数値と文字列、空のリンク、キーの順番、並び順）は無視する。
+- **テンプレートはそろえておく**：プロフィールのテンプレートに入れた Work / Private と、単独の Work / Private のテンプレート（YAML / Markdown）は同じ内容にする（`projects_diff_test` などで確認。片方を変えたら全部そろえる）。
+- **プロフィールのファイルに Work / Private も書ける**（`utils/profile_bundle.dart` の `readProfileBundle`、分け方は `data_format.dart` の `normalizeProfileBundle`）：YAML はトップの `work:` / `private:`（プロジェクトの並び、または `projects:` を持つ形）、Markdown は `# work` / `# private` の下に見出しを 1 段深くして（`##` プロジェクト、`###` details）書く。プロフィールのテンプレート（`format_profile.yaml` / `.md`）には Work / Private のテンプレートと同じ全項目のサンプルを最初から入れてある（中身が単独のテンプレートと一致することをテストで確認）。入力画面は 1 回のアップロードでプロフィール・Work・Private を反映し、`onProjectsChanged`（HomePage が Skills / Projects を作り直す）を呼ぶ。`tool/run.dart` は `assets/profile/work.yaml` / `private.yaml` に書き出し（なければ前回分を消す）、ローダーは「セッション → 起動時の指定（`ProfileStore.startupProjects`）→ メモリ → サンプル」の順に読む。Markdown のエラーの行番号は元のファイルのまま（ほかの区切りを空行にして読む）。
+- **YAML と Markdown の両方に対応**（`utils/data_format.dart`。Flutter に依存しないので `tool/run.dart` からも使う）：`normalizeInput` が形式を見分け（拡張子 → なければ中身。YAML の「キー: 値」として読める・行頭に `projects:` などがある → YAML、`# 見出し` がある → Markdown）、Markdown は同じ中身の **JSON 文字列**（＝YAML として読める）に変換する。以降の検証・保存（sessionStorage）・表示は YAML と同じ処理。Markdown の書き方の誤りは `MarkdownTexts`（行番号付き）。テンプレートは `assets/data/format_*.md`（YAML 版と同じ中身になることをテストで確認）。アップロード画面のテンプレートは形式（YAML / Markdown）を切り替えて保存・コピーできる。
+- **ファイルを保存・選択できない人向けに、テキストでも使える**（3 画面共通、`UploadSourcePanel`）：テンプレートは［保存］か［コピー］（クリップボード）、データは［ファイルを選択］か［テキストを貼り付け］（`showPasteYamlDialog`。クリアボタン・入力欄の × 付き）。貼り付けたテキストもファイルと同じ検証 → 確認画面 → 反映の流れ。ボタンは本文に置き、下のボタンは［キャンセル］［アップロード］だけ。
 - **テンプレートの保存ボタンは各画面に 1 か所だけ**（ⓘ の説明画面には置かない。Work / Private・プロフィールとも）。
 
 ### プロフィール YAML（Home / About、2026-11-03〜）
@@ -184,7 +191,7 @@ web/ ディレクトリがない環境では、先に `flutter create . --platfo
 ## 8. 現状と課題（2026-11-03 時点）
 
 ### 現状
-- 2026-11-03 時点で `flutter analyze`：指摘 0 件、`flutter test`：全件成功（オーナーの手元で確認）。2026-11-04 に追加した詳細の前後移動・全画面表示・320px 未満の縮小・テキストの貼り付けとそのテスト（`project_detail_navigation_test` / `min_width_scaler_test` / `upload_paste_test` / `upload_dialogs_test`）は**未実行**。
+- 2026-11-03 時点で `flutter analyze`：指摘 0 件、`flutter test`：全件成功（オーナーの手元で確認）。2026-11-04 に追加した詳細の前後移動・全画面表示・320px 未満の縮小・テキストの貼り付け・Markdown 対応とそのテスト（`project_detail_navigation_test` / `min_width_scaler_test` / `upload_paste_test` / `upload_dialogs_test` / `data_format_test`）は**未実行**。
 - 非推奨 API は置き換え済み（Flutter stable 2026-10 のソースで `@Deprecated` を照合）:
   - `dart:html` → `package:web`（`web: ^1.1.1`）。sessionStorage とイベント送信は `utils/browser/browser.dart` 経由（Web は `browser_web.dart`、flutter test は `browser_stub.dart` のメモリ実装を条件付き export で自動選択）。ファイル保存も同じく `utils/file_saver.dart`（Web は `file_saver_web.dart`、テストは `file_saver_stub.dart`）。**`dart:html` / `package:web` を直接 import しない**（`*_web.dart` だけが使う）。これでアップロード画面などもテストから開ける。
   - `Color.withOpacity` → `withValues(alpha: …)`。
@@ -193,7 +200,7 @@ web/ ディレクトリがない環境では、先に `flutter create . --platfo
 
 ### 課題：優先度 高（不具合・データの安全に関わる）
 1. **画面での動作確認がまだ**：コミット `b2bd0ed` 以降の変更（レスポンシブ・M3 ヘッダー・ポップアップのフィルター・List / Collection・プロフィール入力画面・アップロードの確認画面と全画面ローディング・`tool/run.dart`）は、analyze / test は通ったが、PC 幅とスマホ幅での見た目・操作は未確認。
-2. **ローカルで `flutter build web` するとプロフィールが成果物に入る**：`assets/profile/` をアセットとして宣言しているため、`profile.yaml` が残っていると `build/web/assets` に含まれる（表示はしないが個人情報）。公開用にビルドする前に消す。ビルド前に自動で消す仕組みはまだない。
+2. **ローカルで `flutter build web` するとプロフィールが成果物に入る**：`assets/profile/` をアセットとして宣言しているため、`profile.yaml`（と一緒に指定した `work.yaml` / `private.yaml`）が残っていると `build/web/assets` に含まれる（表示はしないが個人情報）。公開用にビルドする前に消す。ビルド前に自動で消す仕組みはまだない。
 3. **Work / Private の検証が浅い**（`isValidProjectsYaml`）：`projects` 配列・`title`・`workflow` の有無だけ。各項目の型（List / 文字列）や `period` の形式は見ていないので、崩れた YAML でも通って表示がおかしくなる可能性がある。プロフィール（`Profile.parse`）と同じく項目単位のエラーを出す形にしたい。
 
 ### 課題：優先度 中（使い勝手・保守性）
@@ -216,6 +223,8 @@ web/ ディレクトリがない環境では、先に `flutter create . --platfo
 ### テストを書くときの注意
 - `flutter test` は VM で動くため、ブラウザの機能は `utils/browser/browser.dart` 経由にし、検証ロジックは Web に依存しないファイルに置く（`utils/projects_yaml_validator.dart` / `models/profile.dart`）。
 - MaterialApp のテーマ切り替えはアニメーションするので、テーマを変えたあとは `pumpAndSettle()` してから確かめる。
+- **アセットは `utils/asset_text.dart` の `loadAssetText` で読む（rootBundle を直接使わない）**：testWidgets の仮の時間の中では rootBundle の読み込みが終わらないことがあり、テンプレートのコピーや上書きの確認（ローダーがサンプルを読む）が止まる。アセットに頼る画面を開くテストは `setUp(useFileAssets)`（`test/test_assets.dart`。ファイルをその場で読む `SynchronousFuture` に差し替え、終わったら元に戻す）を使う。先に読んでおく（キャッシュに頼る）方法では直らなかった。
+- アセットを足したら `pubspec.yaml` にも書く（`data_format_test` の「アセットとして登録されている」で書き忘れを見つける）。
 
 ## 9. Claude の作業メモ
 
