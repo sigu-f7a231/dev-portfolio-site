@@ -59,15 +59,34 @@ class AppTexts {
   static const String selectYamlFile = 'YAMLファイルを選択 (.yaml, .yml)';
   static const String uploadYaml = 'YAML をアップロード';
   static const String chooseFile = 'ファイルを選択';
+
+  // テキストの貼り付け（ファイルを保存・選択できない人向け）
+  static const String templateGroup = 'テンプレート（ひな形）';
+  static const String inputGroup = 'データを読み込む';
+  static const String copyTemplate = 'テンプレートをコピー';
+  static String templateCopied(String fileName) => '$fileName の内容をコピーしました';
+  static const String copyFailed = 'コピーできませんでした。「テンプレートを保存」を使ってください';
+  static const String pasteText = 'テキストを貼り付け';
+  static const String pastedTextName = '貼り付けたテキスト';
+  static const String pasteTitle = 'YAML のテキストを貼り付け';
+  static const String pasteLead =
+      '書き換えた YAML の内容をそのまま貼り付けてください。インデント（半角スペース）も含めて貼り付けます。';
+  static const String pasteHint = '例）\nprojects:\n  - title: プロジェクト名';
+  static const String pasteFromClipboard = 'クリップボードから貼り付け';
+  static const String clipboardEmpty = 'クリップボードにテキストがありません';
+  static const String clipboardDenied =
+      'クリップボードを読めませんでした。入力欄を長押し（PC は Ctrl+V / ⌘V）して貼り付けてください';
+  static const String pasteApply = '読み込む';
+  static const String pasteEmpty = 'テキストが空です';
   static const String chooseAnotherFile = '別のファイルを選択';
-  static const String noFileChosen = 'まだファイルを選んでいません（.yaml / .yml）';
+  static const String noFileChosen = 'まだ読み込んでいません（.yaml / .yml のファイル、またはテキストの貼り付け）';
   static String fileReady(String name) => '$name（読み込めます）';
   static String fileRejected(String name) => '$name（読み込めません）';
-  static const String uploadNeedsFile = '「ファイルを選択」で正しい YAML を選ぶと、アップロードできます';
+  static const String uploadNeedsFile = '「ファイルを選択」か「テキストを貼り付け」で正しい YAML を読み込むと、アップロードできます';
 
   // アップロード前の確認画面
   static const String confirmTitle = 'この内容でアップロードしますか？';
-  static String confirmFile(String name) => 'ファイル：$name';
+  static String confirmFile(String name) => '読み込み元：$name';
   static String confirmReplace(String what) => '今表示している $what の内容は、この内容に置き換わります。';
   static String confirmProjectCount(int n) => 'プロジェクト $n 件';
   static const String confirmBack = '戻る';
@@ -75,14 +94,14 @@ class AppTexts {
   static const String reloading = '読み込み中…';
   static const String uploadFailedTitle = 'このファイルは読み込めません';
   static const List<String> workUploadSteps = [
-    '「テンプレートを保存」で、ひな形のファイルを保存する',
+    '「テンプレートを保存」か「テンプレートをコピー」で、ひな形を用意する',
     '業務で関わったプロジェクトを書き換える（書き方は ⓘ）',
-    '「ファイルを選択」で選び、「アップロード」で内容を確認すると Skills と Projects に反映される',
+    '「ファイルを選択」か「テキストを貼り付け」で読み込み、「アップロード」で内容を確認すると Skills と Projects に反映される',
   ];
   static const List<String> privateUploadSteps = [
-    '「テンプレートを保存」で、ひな形のファイルを保存する',
+    '「テンプレートを保存」か「テンプレートをコピー」で、ひな形を用意する',
     '個人開発のプロジェクトを書き換える（書き方は ⓘ）',
-    '「ファイルを選択」で選び、「アップロード」で内容を確認すると Skills と Projects に反映される',
+    '「ファイルを選択」か「テキストを貼り付け」で読み込み、「アップロード」で内容を確認すると Skills と Projects に反映される',
   ];
   static String uploadSessionNote(String dataType) =>
       '読み込んだ内容はこのタブの中だけで使います（セッションの「$dataType」に保存。サーバーには送りません）。';
@@ -205,6 +224,15 @@ class AppTexts {
   static const String listNoDate = '—';
   static const String listStartLabel = '開始';
 
+  /// 詳細ダイアログの前 / 次の案件
+  static const String prevProject = '前の案件';
+  static const String nextProject = '次の案件';
+  static const String prevShort = '前へ';
+  static const String nextShort = '次へ';
+  static const String noPrevProject = '最初の案件です';
+  static const String noNextProject = '最後の案件です';
+  static String projectPosition(int current, int total) => '$current / $total';
+
   /// 期間の長さ（例：6か月 / 1年 / 1年3か月）
   static String durationLabel(int months) {
     final y = months ~/ 12, m = months % 12;
@@ -287,9 +315,9 @@ class ProfileTexts {
       'Home と About に表示するあなたのプロフィールを、YAML ファイルで読み込みます。'
       '読み込むまでこの画面は閉じられません。';
   static const List<String> setupSteps = [
-    '「テンプレートを保存」で、ひな形のファイルを保存する',
-    'ファイルを開き、名前・職種・自己紹介などを自分の内容に書き換える',
-    '「ファイルを選択」で書き換えたファイルを選び、「アップロード」で内容を確認して反映する',
+    '「テンプレートを保存」か「テンプレートをコピー」で、ひな形を用意する',
+    '名前・職種・自己紹介などを自分の内容に書き換える（メモアプリなどでも OK）',
+    '「ファイルを選択」か「テキストを貼り付け」で読み込み、「アップロード」で内容を確認して反映する',
   ];
   static const String setupNextTime = '次回からは、YAML を指定して起動するとこの画面は出ません：';
   static const String runCommand = 'dart run tool/run.dart あなたのファイル.yaml';

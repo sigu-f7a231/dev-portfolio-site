@@ -5,7 +5,11 @@
 // - SelectedFileStatus … 選んだファイルの状態（未選択 / 読み込める / 読み込めない＋理由）
 // - confirmUpload      … アップロード前の確認画面（OK のときだけ true）
 // - runReloading       … アップロード後の全画面ローディング（起動時と同じ M3 の Circular progress indicator）
+// - UploadSourcePanel  … ［テンプレートを保存］［テンプレートをコピー］／［ファイルを選択］［テキストを貼り付け］
+// - copyTemplateText   … テンプレートの中身をクリップボードにコピー（ファイルを保存できない人向け）
+// - showPasteYamlDialog … YAML のテキストを貼り付ける画面（ファイルを選べない人向け）
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../theme/app_theme.dart';
 import '../theme/app_styles.dart';
 import '../constants/app_sizes.dart';
@@ -232,6 +236,201 @@ class _ReloadingScreen extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+/// テンプレートとデータの読み込み方法をまとめたボタン群
+/// - テンプレート：［テンプレートを保存］［テンプレートをコピー］
+/// - データを読み込む：［ファイルを選択］［テキストを貼り付け］
+class UploadSourcePanel extends StatelessWidget {
+  final VoidCallback onSaveTemplate;
+  final VoidCallback onCopyTemplate;
+  final VoidCallback? onPickFile; // null のときは押せない（読み込み中）
+  final VoidCallback? onPasteText;
+  final bool hasSource; // 何か読み込んだ後は「別のファイルを選択」にする
+
+  const UploadSourcePanel({
+    super.key,
+    required this.onSaveTemplate,
+    required this.onCopyTemplate,
+    required this.onPickFile,
+    required this.onPasteText,
+    required this.hasSource,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    Widget group(String title, List<Widget> buttons) => Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(title, style: AppStyles.filterGroupLabel(context)),
+            const SizedBox(height: AppSizes.space6),
+            Wrap(spacing: AppSizes.space8, runSpacing: AppSizes.space8, children: buttons),
+          ],
+        );
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        group(AppTexts.templateGroup, [
+          TextButton.icon(
+            onPressed: onSaveTemplate,
+            icon: const Icon(Icons.save_alt),
+            label: const Text(AppTexts.downloadFormat),
+          ),
+          TextButton.icon(
+            onPressed: onCopyTemplate,
+            icon: const Icon(Icons.content_copy),
+            label: const Text(AppTexts.copyTemplate),
+          ),
+        ]),
+        const SizedBox(height: AppSizes.space12),
+        group(AppTexts.inputGroup, [
+          OutlinedButton.icon(
+            onPressed: onPickFile,
+            icon: const Icon(Icons.attach_file),
+            label: Text(hasSource ? AppTexts.chooseAnotherFile : AppTexts.chooseFile),
+          ),
+          OutlinedButton.icon(
+            onPressed: onPasteText,
+            icon: const Icon(Icons.content_paste),
+            label: const Text(AppTexts.pasteText),
+          ),
+        ]),
+      ],
+    );
+  }
+}
+
+/// テンプレート（assets 内の YAML）の中身をクリップボードにコピーする
+Future<void> copyTemplateText(
+  BuildContext context, {
+  required String assetPath,
+  required String fileName,
+}) async {
+  final messenger = ScaffoldMessenger.of(context);
+  try {
+    final text = await rootBundle.loadString(assetPath);
+    await Clipboard.setData(ClipboardData(text: text));
+    messenger.showSnackBar(SnackBar(content: Text(AppTexts.templateCopied(fileName))));
+  } catch (_) {
+    messenger.showSnackBar(const SnackBar(content: Text(AppTexts.copyFailed)));
+  }
+}
+
+/// YAML のテキストを貼り付ける画面。「読み込む」で入力したテキストを返す（キャンセルは null）
+/// 形式の確認は呼び出し側で行う（ファイルを選んだときと同じ流れ）
+Future<String?> showPasteYamlDialog(BuildContext context, {String initialText = ''}) {
+  return showDialog<String>(
+    context: context,
+    builder: (_) => _PasteYamlDialog(initialText: initialText),
+  );
+}
+
+class _PasteYamlDialog extends StatefulWidget {
+  final String initialText;
+
+  const _PasteYamlDialog({required this.initialText});
+
+  @override
+  State<_PasteYamlDialog> createState() => _PasteYamlDialogState();
+}
+
+class _PasteYamlDialogState extends State<_PasteYamlDialog> {
+  late final TextEditingController _controller =
+      TextEditingController(text: widget.initialText);
+  String? _message;
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  /// クリップボードの中身を入力欄に入れる（ブラウザが許可しないときは手で貼り付けてもらう）
+  Future<void> _pasteFromClipboard() async {
+    try {
+      final data = await Clipboard.getData(Clipboard.kTextPlain);
+      final text = data?.text ?? '';
+      setState(() {
+        if (text.trim().isEmpty) {
+          _message = AppTexts.clipboardEmpty;
+        } else {
+          _controller.text = text;
+          _message = null;
+        }
+      });
+    } catch (_) {
+      setState(() => _message = AppTexts.clipboardDenied);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return AlertDialog(
+      backgroundColor: colors.dialogBackground,
+      insetPadding: const EdgeInsets.all(AppSizes.space16),
+      icon: Icon(Icons.content_paste, color: colors.primary),
+      title: Text(AppTexts.pasteTitle,
+          textAlign: TextAlign.center, style: AppStyles.dialogTitle(context)),
+      content: SizedBox(
+        width: AppSizes.helpDialogWidth,
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(AppTexts.pasteLead, style: AppStyles.helpBody(context)),
+              const SizedBox(height: AppSizes.space12),
+              ValueListenableBuilder<TextEditingValue>(
+                valueListenable: _controller,
+                builder: (context, value, _) => TextField(
+                  controller: _controller,
+                  autofocus: true,
+                  minLines: AppSizes.pasteMinLines,
+                  maxLines: AppSizes.pasteMaxLines,
+                  keyboardType: TextInputType.multiline,
+                  // YAML はインデントが大事なので、自動の書き換えをしない
+                  autocorrect: false,
+                  enableSuggestions: false,
+                  smartDashesType: SmartDashesType.disabled,
+                  smartQuotesType: SmartQuotesType.disabled,
+                  style: AppStyles.codeText(context),
+                  decoration: InputDecoration(
+                    hintText: AppTexts.pasteHint,
+                    border: const OutlineInputBorder(),
+                    errorText: _message,
+                  ),
+                ),
+              ),
+              const SizedBox(height: AppSizes.space8),
+              TextButton.icon(
+                onPressed: _pasteFromClipboard,
+                icon: const Icon(Icons.content_paste_go),
+                label: const Text(AppTexts.pasteFromClipboard),
+              ),
+            ],
+          ),
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text(AppTexts.cancel),
+        ),
+        // 空のときは押せない
+        ValueListenableBuilder<TextEditingValue>(
+          valueListenable: _controller,
+          builder: (context, value, _) => FilledButton(
+            onPressed: value.text.trim().isEmpty
+                ? null
+                : () => Navigator.of(context).pop(_controller.text),
+            child: const Text(AppTexts.pasteApply),
+          ),
+        ),
+      ],
     );
   }
 }

@@ -10,6 +10,7 @@ import '../filters/logic/project_filter_logic.dart';
 import '../../config/projects/projects_views_list_config.dart';
 import '../../config/projects/projects_views_collection_config.dart';
 import '../../config/projects/projects_section_config.dart';
+import '../../config/projects/projects_pagination_config.dart';
 import '../../../theme/app_theme.dart';
 import '../../../theme/app_styles.dart';
 import '../../../constants/app_sizes.dart';
@@ -77,12 +78,6 @@ class _ProjectsTabViewState extends State<ProjectsTabView> {
       );
     }
 
-    void openDetail(Project p) => showProjectDetailModal(
-          context,
-          p,
-          showWorkflow: p.workflow.isNotEmpty,
-        );
-
     return LayoutBuilder(
       builder: (context, constraints) {
         // Collection：列数 × 行数（どちらも画面幅で決まる＝行がそろう）
@@ -97,6 +92,20 @@ class _ProjectsTabViewState extends State<ProjectsTabView> {
         );
         // 画面サイズが変わって件数が増え、ページ数が減ったときは最終ページに合わせる
         final page = currentPage > totalPages ? totalPages : currentPage;
+        // 詳細を開く。‹ › で移れるのは絞り込み・並べ替え後の全件（ページをまたいで移れる）。
+        // 閉じたら、最後に見ていた案件のページに一覧を合わせる
+        Future<void> openDetail(Project p) async {
+          final last = await showProjectDetailModal(
+            context,
+            p,
+            projects: filteredProjects,
+          );
+          if (!mounted) return;
+          final size = perPage ?? ProjectsPaginationConfig.itemsPerPage;
+          final lastPage = last ~/ size + 1;
+          if (lastPage != currentPage) setState(() => currentPage = lastPage);
+        }
+
         final paginatedProjects = ProjectsPaginationLogic.getPaginatedProjects(
           filteredProjects,
           page,

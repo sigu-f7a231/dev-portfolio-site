@@ -8,6 +8,10 @@
 import 'package:flutter/material.dart';
 
 class AppSizes {
+  /// 対応する最小の画面幅（iPhone SE などの 320px）。
+  /// これより狭い画面では、この幅のレイアウトを画面幅に合わせて縮小して表示する（はみ出しエラーを防ぐ）
+  static const double minSupportedWidth = 320;
+
   AppSizes._();
 
   // ----------------------------------------------------------
@@ -66,6 +70,10 @@ class AppSizes {
 
   /// 確認画面の一覧の最大の高さ
   static const double confirmListMaxHeight = 320;
+
+  /// テキスト貼り付け画面の入力欄の行数（最小・最大。超えたら入力欄の中でスクロール）
+  static const int pasteMinLines = 8;
+  static const int pasteMaxLines = 16;
 
   // ----------------------------------------------------------
   // 読み込み中（M3 Progress indicator・円形）

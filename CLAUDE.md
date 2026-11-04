@@ -53,7 +53,11 @@ dev-portfolio-site/
         ├── widget_test.dart                   # テーマ（ThemeController / context.colors）
         ├── profile_yaml_test.dart             # プロフィール YAML の検証（Profile.parse・テンプレートが通るか）
         ├── projects_yaml_validator_test.dart  # Work / Private YAML の検証（isValidProjectsYaml・テンプレートが通るか）
-        └── browser_storage_test.dart          # sessionStorage（メモリで代用）・Work / Private ローダー・ProfileStore
+        ├── browser_storage_test.dart          # sessionStorage（メモリで代用）・Work / Private ローダー・ProfileStore
+        ├── project_detail_navigation_test.dart # 詳細ダイアログの ‹ › / ← → での前後移動・全画面表示
+        ├── min_width_scaler_test.dart         # 320px より狭い画面での縮小表示
+        ├── upload_paste_test.dart             # テキストの貼り付け画面・テンプレートのコピー・読み込みボタン群
+        └── upload_dialogs_test.dart           # Work / Private / 入力画面：貼り付け → 確認画面 → OK で反映、弾く YAML、閉じられない
 ```
 
 `android/ ios/ macos/ linux/ windows/` は `dev_portfolio/.gitignore` で **Git 管理外**。`web/` はローディング表示を入れた `index.html` を管理するため Git に含める（CI の `flutter create . --platforms web` は既存ファイルを上書きせず、足りないファイルだけ作る）。
@@ -70,6 +74,7 @@ dev-portfolio-site/
    - **List** = 年表（左に開始の年・月＋縦線と点、期間の枠＋長さの札、タグ 4 つまで）。5 件ずつ
    - **Collection** = カバー付きカード（`projectColorSeed` でタイトルから色、頭文字・期間の長さ）。1 ページ＝列数 × 行数（どちらも画面幅で決まる）
    - 状態（Work/Private・表示形式・フィルター）は `ProjectsSection` が持つ。タブ切替でフィルターはリセット
+   - **詳細ダイアログ**（`showProjectDetailModal(context, p, projects: 絞り込み後の全件)`）：PC（幅 1024 以上）は最大幅 760 のダイアログで ‹ › を左右に。タブレット・スマホ（1024 未満）は M3 の Full-screen dialog のように画面いっぱいで開き、文字を `ProjectsListConfig.fullscreenTextScale`（1.15 倍）に、‹ › は下に。← → キーでも移れる。前・次がないときはボタンを押せない（薄い表示）。ページをまたいで移れ、閉じると最後に見ていた案件のページに一覧を合わせる。ヘッダーに「3 / 12」。
 
 Header: M3 の Small top app bar。ナビ（表示中セクションにインジケーター）、Work / Private の YAML アップロード（Filled tonal）、テーマ切替（☀️/🌙 Switch、スマホは IconButton）。
 
@@ -96,6 +101,7 @@ sessionStorage['work'|'private'] ─┘   優先順位: sessionStorage > メモ�
   1. 「ファイルを選択」でその場で検証。間違っていれば理由を出し、「アップロード」は押せない。
   2. 「アップロード」→ `confirmUpload` で中身（プロジェクト一覧 / プロフィールの各項目）を確認し、OK のときだけ反映。
   3. 反映中は `runReloading`：起動時と同じ全画面ローディング（M3 Circular）を最低 `AppSizes.reloadMinDuration`（5 秒）、最大 `reloadMaxDuration`（8 秒）出してから画面に戻す。
+- **ファイルを保存・選択できない人向けに、テキストでも使える**（3 画面共通、`UploadSourcePanel`）：テンプレートは［保存］か［コピー］（クリップボード）、データは［ファイルを選択］か［テキストを貼り付け］（`showPasteYamlDialog`）。貼り付けたテキストもファイルと同じ検証 → 確認画面 → 反映の流れ。ボタンは本文に置き、下のボタンは［キャンセル］［アップロード］だけ。
 - **テンプレートの保存ボタンは各画面に 1 か所だけ**（ⓘ の説明画面には置かない。Work / Private・プロフィールとも）。
 
 ### プロフィール YAML（Home / About、2026-11-03〜）
@@ -165,6 +171,7 @@ web/ ディレクトリがない環境では、先に `flutter create . --platfo
 
 ### レスポンシブ（スマホ対応）の方針（2026-11-03）
 
+- **対応する最小の幅は 320px**（`AppSizes.minSupportedWidth`）。320px で崩れないように作る。それより狭い画面は `MinWidthScaler`（`main.dart` の MaterialApp の builder）が 320px のレイアウトを画面幅に合わせて縮小する（はみ出しエラー防止。ダイアログも含む）。
 - **スクロールはページ全体（HomePage の SingleChildScrollView）の 1 つだけ。** セクションに画面の高さを固定したり、内側に ListView / GridView のスクロールを作ったりしない（スマホで内側だけスクロールされ、ページが動かなくなるため）。一覧は `shrinkWrap: true` と `NeverScrollableScrollPhysics` にする。
 - Projects Collection の 1 ページの件数は「列数 × 行数」で、どちらも**画面幅**で決める（`ProjectsCollectionConfig.columnsFor` / `rowsFor`）。
 - ページネーションは幅に合わせて「全部表示 → 1 … 4 5 6 … 10 → ‹ 3 / 10 ›」と切り替える（`ProjectsPaginationUI`）。
@@ -177,9 +184,9 @@ web/ ディレクトリがない環境では、先に `flutter create . --platfo
 ## 8. 現状と課題（2026-11-03 時点）
 
 ### 現状
-- `flutter analyze`：指摘 0 件。`flutter test`：全件成功（テーマ・非推奨 API の置き換え結果・プロフィール YAML・Work / Private YAML・sessionStorage / ローダー / `ProfileStore`）。オーナーの手元で確認済み。
+- 2026-11-03 時点で `flutter analyze`：指摘 0 件、`flutter test`：全件成功（オーナーの手元で確認）。2026-11-04 に追加した詳細の前後移動・全画面表示・320px 未満の縮小・テキストの貼り付けとそのテスト（`project_detail_navigation_test` / `min_width_scaler_test` / `upload_paste_test` / `upload_dialogs_test`）は**未実行**。
 - 非推奨 API は置き換え済み（Flutter stable 2026-10 のソースで `@Deprecated` を照合）:
-  - `dart:html` → `package:web`（`web: ^1.1.1`）。sessionStorage とイベント送信は `utils/browser/browser.dart` 経由（Web は `browser_web.dart`、flutter test は `browser_stub.dart` のメモリ実装を条件付き export で自動選択）。**`dart:html` / `package:web` を直接 import しない**（`file_saver.dart` だけは Web 専用の保存処理なので直接使う）。
+  - `dart:html` → `package:web`（`web: ^1.1.1`）。sessionStorage とイベント送信は `utils/browser/browser.dart` 経由（Web は `browser_web.dart`、flutter test は `browser_stub.dart` のメモリ実装を条件付き export で自動選択）。ファイル保存も同じく `utils/file_saver.dart`（Web は `file_saver_web.dart`、テストは `file_saver_stub.dart`）。**`dart:html` / `package:web` を直接 import しない**（`*_web.dart` だけが使う）。これでアップロード画面などもテストから開ける。
   - `Color.withOpacity` → `withValues(alpha: …)`。
   - 例外：`ProgressIndicatorThemeData.year2023` / `SliderThemeData.year2023`（`app_theme.dart`）は非推奨だが、既定値がまだ true（旧デザイン）で、M3 2024 版の見た目にする方法がこれしかないため `// ignore: deprecated_member_use` 付きで残す。既定値が false になったら消す。
 - Claude の作業環境には Flutter がない。静的解析・テスト・画面での確認はオーナーの手元で行う。
@@ -196,14 +203,15 @@ web/ ディレクトリがない環境では、先に `flutter create . --platfo
 7. **スマホでのグラフ操作**：棒グラフの強調は `MouseRegion` だけなのでタップに反応しない。
 8. **`tool/run.dart` は起動時に 1 回コピーするだけ**：YAML を書き換えたら起動し直す必要がある（ホットリロードでは反映されない）。`dev_portfolio/` で実行する前提。
 9. **全画面ローディングは時間で待っている**：アップロード後は最低 5 秒（`AppSizes.reloadMinDuration`）、最大 8 秒。描画完了を厳密に検知しているわけではない。
+10. **Android で Google Drive のファイルを選べないことがある**：Android のファイル選択画面は MIME タイプで絞り込み、Drive 側の種類（`application/octet-stream` など）が `.yaml` と合わないと選べない。テキストの貼り付けで回避できる。根本的に直すなら、Android では `FileType.any` にして選んだ後に拡張子を確かめる。
 
 ### 課題：優先度 低（仕様として受け入れているもの・整理）
-10. **公開ページ（GitHub Pages）では必ずプロフィールの入力画面が出る**：CI は YAML なしでビルドする。ローカルに落として使う前提なので仕様。
-11. **アップロードしたデータは sessionStorage だけ**：タブを閉じると消える（仕様）。
-12. **Web 専用**：`file_saver.dart`（`dart:js_interop` / `package:web`）と `main.dart` 経由のため、Web 以外ではビルドできない（テストは VM で動く）。
-13. **未使用のファイル**（どこからも import されていない）：`skills/skills_tabs.dart`、`skills/models/skill_model.dart`、`skills/widgets/skills_tab_bar.dart`、`projects/project_detail_format.dart`、`projects/views/project_list/project_list_view.dart`（＋`project_list_sort.dart`）、`config/projects/projects_tab_config.dart`、`config/skills/skills_section_config.dart`、`utils/project_utils.dart`。依存パッケージの `shared_preferences` も未使用。
-14. **未使用の定数・スタイル**（作り直しで使わなくなったもの。参照 0 件を確認済み）：`AppSizes.filterPanelDuration`、`AppStyles.filterPanel` / `toggle` / `toggleText`、`AppTexts.selectYamlFile` / `selectedFile` / `uploadYaml` / `workUploadNote` / `privateUploadNote` / `darkMode` / `save`、`ProfileTexts.upload`、`ProjectsListConfig.separator` / `cardPadding`、`SkillsHeaderConfig.panelMargin`、`PieChartLayout.pieInactiveBorderWidth`、ローダーの `setCustomYaml`（テストからのみ使用）。
-15. `pubspec.yaml` の `description` が Flutter テンプレートのまま（`"A new Flutter project."`）。
+11. **公開ページ（GitHub Pages）では必ずプロフィールの入力画面が出る**：CI は YAML なしでビルドする。ローカルに落として使う前提なので仕様。
+12. **アップロードしたデータは sessionStorage だけ**：タブを閉じると消える（仕様）。
+13. **Web 専用**：`file_saver.dart`（`dart:js_interop` / `package:web`）と `main.dart` 経由のため、Web 以外ではビルドできない（テストは VM で動く）。
+14. **未使用のファイル**（どこからも import されていない）：`skills/skills_tabs.dart`、`skills/models/skill_model.dart`、`skills/widgets/skills_tab_bar.dart`、`projects/project_detail_format.dart`、`projects/views/project_list/project_list_view.dart`（＋`project_list_sort.dart`）、`config/projects/projects_tab_config.dart`、`config/skills/skills_section_config.dart`、`utils/project_utils.dart`。依存パッケージの `shared_preferences` も未使用。
+15. **未使用の定数・スタイル**（作り直しで使わなくなったもの。参照 0 件を確認済み）：`AppSizes.filterPanelDuration`、`AppStyles.filterPanel` / `toggle` / `toggleText`、`AppTexts.selectYamlFile` / `selectedFile` / `uploadYaml` / `workUploadNote` / `privateUploadNote` / `darkMode` / `save`、`ProfileTexts.upload`、`ProjectsListConfig.separator` / `cardPadding`、`SkillsHeaderConfig.panelMargin`、`PieChartLayout.pieInactiveBorderWidth`、ローダーの `setCustomYaml`（テストからのみ使用）。
+16. `pubspec.yaml` の `description` が Flutter テンプレートのまま（`"A new Flutter project."`）。
 
 ### テストを書くときの注意
 - `flutter test` は VM で動くため、ブラウザの機能は `utils/browser/browser.dart` 経由にし、検証ロジックは Web に依存しないファイルに置く（`utils/projects_yaml_validator.dart` / `models/profile.dart`）。

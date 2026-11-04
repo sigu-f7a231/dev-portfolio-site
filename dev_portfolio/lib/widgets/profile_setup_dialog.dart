@@ -2,7 +2,7 @@
 //
 // 「あなたのことを教えてください」：プロフィール YAML の入力画面
 // - YAML を指定せずに起動したときだけ出す（HomePage から呼ぶ）
-// - できること：テンプレートを名前を付けて保存 ／ ファイルを選択（その場で形式を確認）／
+// - できること：テンプレートを名前を付けて保存・コピー ／ ファイルを選択・テキストを貼り付け（その場で形式を確認）／
 //   アップロード（確認画面で中身を見て OK のときだけ。反映中は全画面ローディング）／ ⓘ で書き方の説明（説明だけ）
 // - 正しい YAML を読み込むまで閉じられない（外側のタップ・Esc・戻るでも閉じない）
 import 'dart:convert';
@@ -71,6 +71,9 @@ class _ProfileSetupDialogState extends State<_ProfileSetupDialog> {
   Profile? _profile;
   List<String> _errors = const [];
 
+  /// 前に貼り付けたテキスト（もう一度開いたときに続きから直せるように）
+  String _pasted = '';
+
   /// 1. ファイルを選ぶ → その場で形式を確かめる（間違っていればアップロードできない）
   Future<void> _pick() async {
     setState(() => _picking = true);
@@ -94,14 +97,7 @@ class _ProfileSetupDialogState extends State<_ProfileSetupDialog> {
         return;
       }
 
-      final text = utf8.decode(file.bytes!);
-      final result = Profile.parse(text);
-      setState(() {
-        _fileName = file.name;
-        _text = result.isOk ? text : null;
-        _profile = result.profile;
-        _errors = result.errors;
-      });
+      _apply(utf8.decode(file.bytes!), file.name);
     } catch (e) {
       setState(() {
         _text = null;
@@ -111,6 +107,25 @@ class _ProfileSetupDialogState extends State<_ProfileSetupDialog> {
     } finally {
       if (mounted) setState(() => _picking = false);
     }
+  }
+
+  /// 読み込んだテキスト（ファイル・貼り付け共通）の形式を確かめて、状態に反映する
+  void _apply(String text, String sourceName) {
+    final result = Profile.parse(text);
+    setState(() {
+      _fileName = sourceName;
+      _text = result.isOk ? text : null;
+      _profile = result.profile;
+      _pasted = sourceName == AppTexts.pastedTextName ? text : _pasted;
+      _errors = result.errors;
+    });
+  }
+
+  /// 1'. テキストを貼り付ける（ファイルを選べない人向け）→ ファイルと同じく形式を確かめる
+  Future<void> _paste() async {
+    final text = await showPasteYamlDialog(context, initialText: _pasted);
+    if (text == null || !mounted) return; // キャンセル
+    _apply(text, AppTexts.pastedTextName);
   }
 
   /// 2. 確認画面 → OK なら 3. 全画面ローディングを出して反映
@@ -189,6 +204,18 @@ class _ProfileSetupDialogState extends State<_ProfileSetupDialog> {
                 const SizedBox(height: AppSizes.space8),
               ],
 
+              UploadSourcePanel(
+                onSaveTemplate: () => _saveTemplate(context),
+                onCopyTemplate: () => copyTemplateText(
+                  context,
+                  assetPath: _templateAsset,
+                  fileName: ProfileTexts.templateFileName,
+                ),
+                onPickFile: _picking ? null : _pick,
+                onPasteText: _picking ? null : _paste,
+                hasSource: _fileName != null,
+              ),
+              const SizedBox(height: AppSizes.space12),
               SelectedFileStatus(fileName: _fileName, errors: _errors),
               const SizedBox(height: AppSizes.space16),
 
@@ -208,17 +235,7 @@ class _ProfileSetupDialogState extends State<_ProfileSetupDialog> {
       ),
       actionsOverflowButtonSpacing: AppSizes.space8,
       actions: [
-        TextButton.icon(
-          onPressed: () => _saveTemplate(context),
-          icon: const Icon(Icons.save_alt),
-          label: const Text(ProfileTexts.saveTemplate),
-        ),
-        OutlinedButton.icon(
-          onPressed: _picking ? null : _pick,
-          icon: const Icon(Icons.attach_file),
-          label: Text(_fileName == null ? AppTexts.chooseFile : AppTexts.chooseAnotherFile),
-        ),
-        // 正しいファイルを選ぶまで押せない
+        // 正しい YAML を読み込むまで押せない
         FilledButton.icon(
           onPressed: _text == null || _picking ? null : _upload,
           icon: const Icon(Icons.upload_file),

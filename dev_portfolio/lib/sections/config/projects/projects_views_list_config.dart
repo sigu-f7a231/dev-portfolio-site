@@ -81,6 +81,20 @@ class ProjectsListConfig {
   static const double periodIconSize = 18;
   static const modalMaxHeight = 600.0;
 
+  /// 詳細ダイアログの最大幅（左右の ‹ › ボタンをダイアログのすぐ横に置くため）
+  static const double modalMaxWidth = 760;
+
+  /// この幅未満（タブレット・スマホ）は詳細を全画面で開き、‹ › を下に置く。
+  /// 以上（PC）はダイアログで開き、‹ › をダイアログの左右に置く
+  static const double modalFullscreenBreakpoint = 1024;
+
+  /// 全画面のときの文字の大きさ（端末の文字サイズ設定にさらに掛ける倍率）
+  static const double fullscreenTextScale = 1.15;
+
+  /// 左右の ‹ › ボタン
+  static const double modalNavIconSize = 28;
+  static const double modalNavGap = AppSizes.space12;
+
   static const fieldPadding = EdgeInsets.symmetric(vertical: AppSizes.space6);
 
   static const closeButtonSize = 24.0;

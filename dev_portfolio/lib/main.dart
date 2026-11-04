@@ -4,6 +4,7 @@ import 'pages/home_page.dart';
 import 'theme/app_theme.dart';
 import 'constants/app_texts.dart';
 import 'utils/app_ready.dart';
+import 'widgets/min_width_scaler.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -33,6 +34,8 @@ class DevPortfolioApp extends StatelessWidget {
           darkTheme: AppTheme.dark,
           themeMode: themeMode,
           home: const HomePage(),
+          // 対応する最小の幅（320px）より狭い画面では、その幅のレイアウトを縮小して表示する
+          builder: (context, child) => MinWidthScaler(child: child ?? const SizedBox()),
         );
       },
     );

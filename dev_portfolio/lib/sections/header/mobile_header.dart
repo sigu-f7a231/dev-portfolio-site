@@ -34,7 +34,12 @@ class MobileHeader extends StatelessWidget {
     final iconColor = context.colors.headerForeground;
 
     return AppBar(
-      title: Text(AppTexts.appTitle, style: AppStyles.headerTitle(context)),
+      title: Text(
+        AppTexts.appTitle,
+        style: AppStyles.headerTitle(context),
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+      ),
       backgroundColor: context.colors.headerBackground,
       surfaceTintColor: context.colors.headerBackground,
       iconTheme: IconThemeData(color: iconColor),
