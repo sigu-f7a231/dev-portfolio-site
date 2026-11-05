@@ -4,6 +4,9 @@ projects:
     details: |
       要件定義を元にした詳細設計、バックエンドのAPI実装、フロントエンドのUI調整を実施。
       単体テストの作成やコードレビューを通じて品質担保に貢献。
+    role:                         # 役割（PM・PL・SE・PG など。複数可）
+      - PG
+    scale: ""                     # 規模（例：全体 20名（チーム 5名）。人数で絞り込めます）
     server_os:
       - Linux
       - Windows

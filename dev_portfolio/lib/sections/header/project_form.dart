@@ -5,6 +5,7 @@
 // - 技術は項目ごとの小さなボタン。押すと入力欄とすでにある項目の一覧が開く（TagPickerPanel。一覧を押すと追加）。
 //   入力欄はタグ入力（lib/widgets/tag_input_field.dart）：途中まで打つと、すでにある項目が候補に出る。
 //   カンマか Enter で区切る。空の欄で Backspace 1 回目で直前を強調、2 回目で消す。空なら「利用なし」として保存する
+// - 役割（PM・PL・SE・PG など。タグ入力と候補）と規模（文章。例：全体 20名（チーム 5名））
 // - Work だけ「担当した工程」（workflow）を選ぶ
 // - 入力した内容は [ProjectFormState.collect] で、YAML と同じ形の Map にして受け取る（正しくなければ null）
 import 'package:flutter/material.dart';
@@ -32,6 +33,9 @@ final _skillGroupKeys = [for (final g in SkillGroup.values) g.key];
 final _toolGroupKeys = [for (final g in ToolGroup.values) g.key];
 final _allInputKeys = [..._skillGroupKeys, ..._toolGroupKeys, ..._otherListKeys];
 
+/// 役割の欄のキー（YAML の role）
+const _roleKey = 'role';
+
 /// 入力の欄のキー → 同じものを見分けるときの分類（Skills・Tools のグループはまとめて 1 つ）
 String _categoryOf(String key) =>
     _skillGroupKeys.contains(key) ? 'skills' : (_toolGroupKeys.contains(key) ? 'tools' : key);
@@ -56,8 +60,10 @@ class ProjectFormState extends State<ProjectForm> {
   final _start = TextEditingController();
   final _end = TextEditingController();
   final _link = TextEditingController();
+  final _scale = TextEditingController();
   final Map<String, TagInputController> _lists = {
     for (final k in _allInputKeys) k: TagInputController(category: _categoryOf(k)),
+    _roleKey: TagInputController(category: _roleKey),
   };
   bool _ongoing = false;
 
@@ -68,7 +74,7 @@ class ProjectFormState extends State<ProjectForm> {
 
   @override
   void dispose() {
-    for (final c in [_title, _description, _details, _start, _end, _link]) {
+    for (final c in [_title, _description, _details, _start, _end, _link, _scale]) {
       c.dispose();
     }
     for (final c in _lists.values) {
@@ -131,6 +137,8 @@ class ProjectFormState extends State<ProjectForm> {
       'title': _title.text.trim(),
       'description': _description.text.trim(),
       if (_details.text.trim().isNotEmpty) 'details': _details.text.trim(),
+      'role': _lists[_roleKey]!.values,
+      'scale': _scale.text.trim(),
       'skills': merged(_skillGroupKeys, 'skills'),
       'tools': merged(_toolGroupKeys, 'tools'),
       for (final k in _otherListKeys) k: list(k),
@@ -193,7 +201,8 @@ class ProjectFormState extends State<ProjectForm> {
     );
   }
 
-  String _label(String key) => AppTexts.skillCategoryLabels[key] ?? key;
+  String _label(String key) =>
+      key == _roleKey ? DataTexts.formRole : (AppTexts.skillCategoryLabels[key] ?? key);
 
   /// 項目のボタン（フィルターのボタンと同じ見た目。入れた数をバッジで出す）
   Widget _techButton(String key) => ListenableBuilder(
@@ -225,12 +234,20 @@ class ProjectFormState extends State<ProjectForm> {
       builder: (ctx) => TagPickerPanel(
         title: _label(key),
         controller: controller,
-        suggestions: widget.suggestions[key] ?? const [],
+        suggestions: key == _roleKey
+            ? _roleSuggestions
+            : widget.suggestions[key] ?? const [],
         onDone: () => Navigator.of(ctx).pop(),
       ),
     );
     controller.commitPending(); // 打ちかけの文字もタグにする
   }
+
+  /// 役割の候補：今の Work / Private にあるもの＋よく使う役割（同じものは 1 つ）
+  List<String> get _roleSuggestions => uniqueSkillNames(
+        [...widget.suggestions[_roleKey] ?? const <String>[], ...DataTexts.roleSuggestions],
+        category: _roleKey,
+      );
 
   @override
   Widget build(BuildContext context) {
@@ -286,6 +303,33 @@ class ProjectFormState extends State<ProjectForm> {
             controller: _link,
             keyboardType: TextInputType.url,
             decoration: _decoration(DataTexts.formLink),
+          ),
+          const SizedBox(height: AppSizes.space16),
+
+          // 役割（タグ）と規模（文章）
+          Text(DataTexts.formRole, style: AppStyles.filterGroupLabel(context)),
+          const SizedBox(height: AppSizes.space4),
+          Text(DataTexts.formRoleNote, style: AppStyles.cardMeta(context)),
+          const SizedBox(height: AppSizes.space8),
+          Row(
+            children: [
+              _techButton(_roleKey),
+              const SizedBox(width: AppSizes.space12),
+              Expanded(
+                child: ListenableBuilder(
+                  listenable: _lists[_roleKey]!,
+                  builder: (context, _) => Text(
+                    _lists[_roleKey]!.values.join(', '),
+                    style: AppStyles.helpBody(context),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          gap,
+          TextFormField(
+            controller: _scale,
+            decoration: _decoration(DataTexts.formScale, hint: DataTexts.formScaleHint),
           ),
           const SizedBox(height: AppSizes.space16),
 

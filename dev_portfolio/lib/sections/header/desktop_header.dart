@@ -4,6 +4,7 @@ import '../config/header_config.dart';
 import '../../theme/app_theme.dart';
 import '../../theme/app_styles.dart';
 import 'project_data_dialog.dart';
+import 'download_menu.dart';
 import 'header_parts.dart';
 import '../../constants/app_sizes.dart';
 import '../../constants/app_texts.dart';
@@ -92,6 +93,9 @@ class DesktopHeader extends StatelessWidget {
                   showLabel: showUploadLabel,
                   onPressed: () => _showDataDialog(context),
                 ),
+                const SizedBox(width: HeaderConfig.uploadGap),
+                // スキルシート（Excel / PDF）のダウンロード
+                HeaderDownloadButton(showLabel: showUploadLabel),
                 VerticalDivider(
                   width: AppSizes.space24,
                   indent: HeaderConfig.actionsDividerIndent,

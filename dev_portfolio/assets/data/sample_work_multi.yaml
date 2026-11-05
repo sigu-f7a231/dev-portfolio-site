@@ -10,6 +10,8 @@ projects:
     details: |
       要件定義を元にした詳細設計、バックエンドのAPI実装、フロントエンドのUI調整を実施。
       単体テストの作成やコードレビューを通じて品質担保に貢献。
+    role: [PG]
+    scale: ""
     server_os: [Linux, Windows]
     db: [PostgreSQL]
     tools: [Git, GitLab, VSCode]
@@ -41,6 +43,8 @@ projects:
     details: |
       既存の画面と API の機能追加・不具合修正を担当。
       オンプレミスから AWS への移行に合わせて、コンテナ化と動作確認を実施。
+    role: [SE, PL]
+    scale: 全体 12名（チーム 4名）
     server_os: [Linux]
     db: [Oracle]
     tools: [Git, GitHub, Jira]
@@ -72,6 +76,8 @@ projects:
     details: |
       問い合わせの分類と回答案の作成を生成 AI で自動化する仕組みを開発。
       要件定義から運用・改善までを担当。
+    role: [SE]
+    scale: 5名
     server_os: [Linux]
     db: [PostgreSQL]
     tools: [Git, GitHub, Slack]

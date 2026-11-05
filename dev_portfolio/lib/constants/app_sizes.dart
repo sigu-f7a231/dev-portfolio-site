@@ -101,6 +101,9 @@ class AppSizes {
   /// プロジェクトの入力フォームの期間（開始・終了）の欄の幅（狭い画面では縦に並ぶ）
   static const double projectFormPeriodWidth = 180;
 
+  /// スキルシートを作る前に、ローディングを描くための待ち時間
+  static const Duration downloadStartDelay = Duration(milliseconds: 80);
+
   /// 年と月を選ぶ画面（lib/widgets/year_month_picker.dart）
   static const double yearMonthPickerWidth = 360;
   static const double yearMonthPickerGridHeight = 232;

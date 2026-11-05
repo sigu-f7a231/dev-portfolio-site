@@ -502,13 +502,14 @@ class _DetailCard extends StatelessWidget {
 }
 
 /// 本文の各項目（プロジェクト名と Workflow は別に表示するので除く）
-/// - 説明・詳細：文章のまま／期間：開始 → 終了・長さ
+/// - 説明・詳細・規模：文章のまま（役割は枠に入れて並べる）／期間：開始 → 終了・長さ
 /// - それ以外（使用技術など）：カンマ区切りの値を 1 つずつ枠に入れて並べる
 /// - 中身が空、または「利用なし」だけの項目は出さない
 List<Widget> _buildDetailSections(Project project, {required bool showWorkflow}) {
   const textFields = {
     AppTexts.fieldDescription,
     AppTexts.fieldDetails,
+    AppTexts.fieldScale,
   };
   const skipFields = {AppTexts.fieldTitle, AppTexts.fieldWorkflow};
 

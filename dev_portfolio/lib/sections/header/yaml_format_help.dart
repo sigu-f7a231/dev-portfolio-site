@@ -60,6 +60,8 @@ void showYamlFormatHelp(BuildContext context, String dataType) {
                 _field(context, 'details', AppTexts.helpDetailsFormat, AppTexts.helpDetailsNote),
                 _field(context, 'period', AppTexts.helpPeriodFormat, AppTexts.helpPeriodNote),
                 _field(context, 'link', AppTexts.helpLinkFormat, AppTexts.helpLinkNote),
+                _field(context, 'role', AppTexts.helpRoleFormat, AppTexts.helpRoleNote),
+                _field(context, 'scale', AppTexts.helpScaleFormat, AppTexts.helpScaleNote),
                 _field(
                   context,
                   'server_os / db / tools / backend_frameworks / frontend_frameworks / '

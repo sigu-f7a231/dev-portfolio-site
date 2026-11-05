@@ -12,14 +12,11 @@ class HeroSectionConfig {
   static double height(BuildContext context) =>
       math.max(560.0, MediaQuery.of(context).size.height - 72);
 
-  /// この幅以上で「テキスト左・YAML 右」の 2 カラムにする
+  /// この幅以上で名前を大きくする
   static const double wideBreakpoint = 900;
 
-  /// この幅未満では YAML カードを出さない（スマホ）
-  static const double codeCardBreakpoint = 600;
-
-  /// 中身の最大幅
-  static const double maxContentWidth = 1080;
+  /// 中身の最大幅（すべて中央寄せ）
+  static const double maxContentWidth = 960;
 
   static const EdgeInsets padding = EdgeInsets.symmetric(horizontal: 32, vertical: 48);
 
@@ -32,5 +29,23 @@ class HeroSectionConfig {
   /// 紹介文の最大幅（1 行が長くなりすぎないように）
   static const double taglineMaxWidth = 560;
 
-  static const double codeCardWidth = 380;
+  /// ボタンとまとめの間
+  static const double summaryGap = 48;
+
+  /// まとめ：この幅以上で 3 つを横に並べる（未満は縦に積む）
+  static const double summaryRowBreakpoint = 720;
+
+  /// まとめを縦に積むときの最大幅
+  static const double summaryColumnMaxWidth = 420;
+
+  /// まとめの 1 枚の中の余白・最低の高さ・アイコンの大きさ
+  static const EdgeInsets summaryCardPadding = EdgeInsets.symmetric(horizontal: 20, vertical: 18);
+  static const double summaryCardMinHeight = 132;
+  static const double summaryIconSize = 20;
+
+  // まとめの文字の大きさ（M3：label medium / headline small / body small）
+  static const double summaryLabelFontSize = 12;
+  static const double summaryValueFontSize = 24;
+  static const double summaryValueSmallFontSize = 17; // 直近のプロジェクト名（長いので小さめ）
+  static const double summarySubFontSize = 12;
 }

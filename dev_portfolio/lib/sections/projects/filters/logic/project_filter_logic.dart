@@ -106,6 +106,9 @@ class ProjectFilterLogic {
         case 'skills':
           return split(p.skills);
 
+        case 'role':
+          return split(p.role);
+
         default:
           return [];
       }
@@ -152,6 +155,13 @@ class ProjectFilterLogic {
       final okSkills =
           match(f['skills'] ?? [], getValues(p, 'skills'));
 
+      // 役割：選んだものをすべて担当した案件
+      final okRole = match(f['role'] ?? [], getValues(p, 'role'));
+
+      // 規模：選んだ区分のどれかに入る案件（1 件の規模は 1 つの区分なので「または」）
+      final scales = f['scale'] ?? const [];
+      final okScale = scales.isEmpty || scales.contains(p.scaleBucket);
+
       final okWorkflow =
           matchWorkflow(f['workflow'] ?? [], p.workflow);
 
@@ -165,6 +175,8 @@ class ProjectFilterLogic {
 
       return okPeriod &&
           okOngoing &&
+          okRole &&
+          okScale &&
           okServer &&
           okDb &&
           okTools &&

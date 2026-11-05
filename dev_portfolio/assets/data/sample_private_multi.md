@@ -9,6 +9,8 @@
 - description: 個人開発によるWebアプリケーション制作
 - period: 2024-01 ~ 2024-06
 - link: https://sigu-f7a231.github.io/my-portfolio/
+- role: PG
+- scale:
 - server_os: Windows
 - db: 利用なし
 - tools: GitHub, VSCode
@@ -33,6 +35,8 @@ UI/UXの設計からレスポンシブ対応、コンテナ化までを一人で
 - description: 毎日の支出を記録してグラフで見られるスマートフォンアプリ
 - period: 2023-05 ~ 2023-08
 - link:
+- role: フルスタック
+- scale: 1名
 - server_os: macOS
 - db: Firestore
 - tools: GitHub, Android Studio, Xcode
@@ -57,6 +61,8 @@ Flutter で iOS / Android の両方に対応。
 - description: 学んだことをまとめる個人の技術ブログ
 - period: 2024-08 ~ 現在
 - link:
+- role: フルスタック
+- scale: 1名
 - server_os: 利用なし
 - db: 利用なし
 - tools: GitHub, VSCode

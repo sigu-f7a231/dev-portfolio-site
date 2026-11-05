@@ -7,8 +7,10 @@
 // 読み取る場所（セルの位置ではなく、見出しの文字で探す。行や列が多少ずれても読める）
 //   Home / About   … 「氏名」の右のセル ／ 「過去の開発経験」「直近の開発経験」を含むセル
 //                    （それぞれの「主な使用技術・開発環境：」より下は「言語：A、B」の形の技術の一覧）
+//   sheet          … 「ふりがな」「性別」「年齢」「生年月日」「国籍」「配偶者」「最寄駅」「学歴」の右のセル
+//                    （画面には出さず、［ダウンロード］のスキルシートにそのまま書く。年齢は生年月日が読めないときだけ）
 //   Work / Private … 「プロジェクト名」の見出しの行から下。「No.」の列に番号がある行から次の番号の前までが 1 件
-//                    期間 ／ プロジェクト名（1 行目）と業務概要（2 行目以降）／ サーバ OS ／ DB ／ FW・MW ツール等 ／
+//                    期間 ／ プロジェクト名（1 行目）と業務概要（2 行目以降）／ 役割・規模 ／ サーバ OS ／ DB ／ FW・MW ツール等 ／
 //                    使用言語 ／ 作業工程（要件定義〜保守・運用の列に ● など何か書いてあれば担当）
 //                    プロジェクト名に「プライベート」か「個人開発」が入っているものだけ Private（作業工程は使わない）
 //
@@ -111,9 +113,12 @@ SkillSheetResult _convert(XlsxSheet sheet, {String? fileName}) {
     }
   }
 
+  final sheetInfo = _sheetInfo(sheet);
+
   final data = <String, Object?>{
     'home': _home(name!, exp),
     'about': _about(exp),
+    if (sheetInfo.isNotEmpty) 'sheet': sheetInfo,
     if (work.isNotEmpty) 'work': work,
     if (private.isNotEmpty) 'private': private,
   };
@@ -233,6 +238,88 @@ List<String> _languages(Map<String, List<String>> tech) {
 }
 
 // ============================================================
+// スキルシートだけの個人の項目（ふりがな・性別・年齢・生年月日・国籍・配偶者・最寄駅・学歴）
+// ============================================================
+/// 見出しの右の値（右に次の見出しがあれば空）。書かれていない項目は入れない
+Map<String, String> _sheetInfo(XlsxSheet sheet) {
+  final labels = {ExcelTexts.labelName, ...ExcelTexts.sheetLabels.values};
+  final result = <String, String>{};
+  for (final e in ExcelTexts.sheetLabels.entries) {
+    final cell = sheet.cells
+        .where((c) => _compact(c.value) == e.value || _compact(c.value) == e.value.replaceAll('寄', '寄り'))
+        .firstOrNull;
+    if (cell == null) continue;
+    final row = sheet.rows[cell.row]!;
+    final cols = row.keys.where((c) => c > cell.col).toList()..sort();
+    if (cols.isEmpty) continue;
+    var value = row[cols.first]!.trim();
+    if (labels.contains(_compact(value))) continue; // 値が空で、次の見出しまで来た
+    if (e.key == 'birthday') {
+      // 日付の書式のセル（Excel の日付は 1899-12-30 からの日数）
+      final serial = double.tryParse(value);
+      if (serial != null && serial > 1000) {
+        final d = DateTime.utc(1899, 12, 30).add(Duration(days: serial.floor()));
+        value = sheetDateText(d.year, d.month, d.day);
+      }
+    }
+    if (value.isNotEmpty) result[e.key] = value;
+  }
+  // 年齢は生年月日から出せる（［ダウンロード］では出力した日の年齢にする）ので、生年月日が読めるときは持たない
+  if (parseSheetDate(result['birthday'] ?? '') != null) result.remove('age');
+  return result;
+}
+
+/// 生年月日の書き方（テンプレートと同じ「1990年04月01日」）
+String sheetDateText(int y, int m, int d) =>
+    '$y年${'$m'.padLeft(2, '0')}月${'$d'.padLeft(2, '0')}日';
+
+/// 「1990年04月01日」「1990/4/1」「1990-04-01」などを (年, 月, 日) に（読めなければ null）
+(int, int, int)? parseSheetDate(String s) {
+  final m = RegExp(r'(\d{4})\s*[-/.年]\s*(\d{1,2})\s*[-/.月]\s*(\d{1,2})').firstMatch(toHalfWidth(s));
+  if (m == null) return null;
+  final (y, mo, d) = (int.parse(m.group(1)!), int.parse(m.group(2)!), int.parse(m.group(3)!));
+  if (mo < 1 || mo > 12 || d < 1 || d > 31) return null;
+  return (y, mo, d);
+}
+
+// ============================================================
+// 役割・規模（「役割 / 規模」の列）
+// ============================================================
+/// 列の中身（枠の中のセルをすべて）から、役割と規模に分ける
+/// - 「役割：PG」「規模：10名」のような見出しがあればそれに従う
+/// - 見出しのない行は、人数（「10名」「5人」）や「規模」「体制」などの言葉があれば規模、それ以外は役割
+///   （役割は「 / 」「・」「、」「,」で分ける：PL / SE → PL, SE）
+({List<String> role, String scale}) roleAndScaleOf(List<String> cells) {
+  final roles = <String>[];
+  final scales = <String>[];
+  final labelRe = RegExp(r'^([^：:]{1,10})\s*[：:]\s*(.*)$');
+  final peopleRe = RegExp(r'\d+\s*(名|人)');
+  void addRoles(String s) {
+    for (final r in s.split(RegExp(r'\s*[/／・、,，]\s*'))) {
+      final v = r.trim();
+      if (v.isNotEmpty && !roles.contains(v)) roles.add(v);
+    }
+  }
+
+  for (final raw in cells.expand((c) => c.split('\n'))) {
+    final line = raw.trim();
+    if (line.isEmpty) continue;
+    final m = labelRe.firstMatch(line);
+    final label = m?.group(1)?.trim() ?? '';
+    if (m != null && ExcelTexts.roleLabels.any(label.contains)) {
+      addRoles(m.group(2)!);
+    } else if (m != null && ExcelTexts.scaleLabels.any(label.contains)) {
+      if (m.group(2)!.trim().isNotEmpty) scales.add(m.group(2)!.trim());
+    } else if (peopleRe.hasMatch(toHalfWidth(line)) || ExcelTexts.scaleLabels.any(line.contains)) {
+      scales.add(line);
+    } else {
+      addRoles(line);
+    }
+  }
+  return (role: roles, scale: scales.join(' / '));
+}
+
+// ============================================================
 // Work / Private
 // ============================================================
 /// 作業工程の列見出し（先頭一致）→ workflow のキー
@@ -261,7 +348,7 @@ const _workflowKeys = [
 class _ProjectTable {
   final int headerRow;
   final int nameCol;
-  final int? noCol, periodCol, osCol, dbCol, toolsCol, langCol;
+  final int? noCol, periodCol, roleCol, osCol, dbCol, toolsCol, langCol;
 
   /// 列 → workflow のキー
   final Map<int, String> workflowCols;
@@ -271,6 +358,7 @@ class _ProjectTable {
     required this.nameCol,
     required this.noCol,
     required this.periodCol,
+    required this.roleCol,
     required this.osCol,
     required this.dbCol,
     required this.toolsCol,
@@ -285,7 +373,7 @@ class _ProjectTable {
     if (header == null) return null;
     final row = header.row;
 
-    int? no, period, os, db, tools, lang;
+    int? no, period, role, os, db, tools, lang;
     for (final c in sheet.cells.where((c) => c.row == row)) {
       final t = _compact(c.value);
       if (c.col == header.col) continue;
@@ -293,6 +381,8 @@ class _ProjectTable {
         no ??= c.col;
       } else if (t.contains('期間')) {
         period ??= c.col;
+      } else if (t.contains('役割') || t.contains('規模')) {
+        role ??= c.col;
       } else if (t.contains('サーバ') || t.endsWith('OS')) {
         os ??= c.col;
       } else if (t.contains('FW') || t.contains('ツール')) {
@@ -321,6 +411,7 @@ class _ProjectTable {
       nameCol: header.col,
       noCol: no,
       periodCol: period,
+      roleCol: role,
       osCol: os,
       dbCol: db,
       toolsCol: tools,
@@ -356,6 +447,7 @@ class _ProjectTable {
         name: nameCells.first.trim(),
         summary: nameCells.skip(1).join('\n').trim(),
         period: column(periodCol),
+        roleCells: column(roleCol),
         os: column(osCol).join('\n'),
         db: column(dbCol).join('\n'),
         tools: column(toolsCol).join('\n'),
@@ -374,6 +466,7 @@ class _SheetProject {
   final String name;
   final String summary;
   final List<String> period;
+  final List<String> roleCells;
   final String os, db, tools, languages;
   final Map<String, bool> workflow;
 
@@ -381,6 +474,7 @@ class _SheetProject {
     required this.name,
     required this.summary,
     required this.period,
+    required this.roleCells,
     required this.os,
     required this.db,
     required this.tools,
@@ -426,11 +520,14 @@ class _SheetProject {
 
     final dates = _periodOf(period);
     final link = _url.firstMatch(summary)?.group(0) ?? '';
+    final roleScale = roleAndScaleOf(roleCells);
 
     return {
       'title': _cleanTitle(name),
       'description': _descriptionOf(summary),
       if (summary.isNotEmpty) 'details': summary,
+      'role': roleScale.role,
+      'scale': roleScale.scale,
       for (final k in _listKeys)
         k: categories[k]!.isEmpty ? [ExcelTexts.notUsed] : categories[k]!,
       if (dates != null) 'period': dates,

@@ -19,7 +19,10 @@ class _FilterGroup {
   /// AWS などのサービスの分類名（候補をまとめるときに先頭の「AWS」などを外す）
   final String? category;
 
-  const _FilterGroup(this.key, this.title, this.values, {this.category});
+  /// 候補を名前でまとめず、この順に並べる（規模の区分など）
+  final List<String>? order;
+
+  const _FilterGroup(this.key, this.title, this.values, {this.category, this.order});
 }
 
 /// フィルターパネル（ツールバーの「フィルター」で開閉。開閉は親が管理）
@@ -73,6 +76,10 @@ class _ProjectsFilterState extends State<ProjectsFilter> {
 
   /// 並びは Skills のカテゴリと同じ。候補のない分類は出さない
   List<_FilterGroup> get _groups => [
+        // 役割・規模（スキルシートの「役割 / 規模」）
+        _FilterGroup('role', AppTexts.filterRole, (p) => p.roleList),
+        _FilterGroup('scale', AppTexts.filterScale, (p) => [?p.scaleBucket],
+            order: [for (final (_, label) in AppTexts.scaleBuckets) label]),
         _FilterGroup('serverOS', AppTexts.filterServerOS, (p) => p.serverOSList),
         _FilterGroup('db', AppTexts.filterDb, (p) => p.dbList),
         // Tools はグループ（バージョン管理・開発ツール・環境…。名前から推測）ごとに見出しを分ける
@@ -120,7 +127,15 @@ class _ProjectsFilterState extends State<ProjectsFilter> {
 
   /// 候補（表記ゆれ「MAC / mac / mac.」などは 1 つにまとめる。lib/utils/skill_name.dart）
   /// AWS などのサービスは、先頭の「AWS」などを外してまとめる（AWS Lambda / Lambda → Lambda）
-  List<String> _candidates(_FilterGroup g) => uniqueSkillNames(
+  List<String> _candidates(_FilterGroup g) {
+    if (g.order case final order?) {
+      final present = widget.projects.expand(g.values).toSet();
+      return [for (final v in order) if (present.contains(v)) v];
+    }
+    return _uniqueCandidates(g);
+  }
+
+  List<String> _uniqueCandidates(_FilterGroup g) => uniqueSkillNames(
         widget.projects.expand(g.values).where((v) => cleanSkillName(v) != Project.notUsed),
         category: g.category,
       );

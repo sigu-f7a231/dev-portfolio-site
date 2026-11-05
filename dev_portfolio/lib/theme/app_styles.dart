@@ -249,18 +249,39 @@ class AppStyles {
         textStyle: _text(context).labelLarge,
       );
 
-  static BoxDecoration heroCodeCard(BuildContext context) => BoxDecoration(
-        color: context.colors.heroCodeBackground,
-        border: Border.all(color: context.colors.heroCodeBorder),
+  /// ボタンの下のまとめの 1 枚（背景より少し明るい面＋細い枠）
+  static ShapeBorder heroSummaryShape(BuildContext context) => RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(radiusXl),
+        side: BorderSide(color: context.colors.heroCodeBorder),
       );
 
-  static TextStyle heroCode(BuildContext context, {bool isKey = false}) => TextStyle(
-        fontFamily: 'monospace',
-        fontSize: 15,
-        height: 1.7,
-        color: isKey ? context.colors.heroCodeKey : context.colors.heroCodeValue,
-      );
+  static Color heroSummaryBackground(BuildContext context) => context.colors.heroCodeBackground;
+
+  /// まとめの見出し（開発経験・プロジェクト…）とアイコンの色
+  static TextStyle heroSummaryLabel(BuildContext context, double fontSize) =>
+      _text(context).labelMedium!.copyWith(
+            fontSize: fontSize,
+            letterSpacing: 0.5,
+            color: context.colors.heroCodeKey,
+          );
+
+  static Color heroSummaryIcon(BuildContext context) => context.colors.heroCodeKey;
+
+  /// まとめの値（7年4か月・21件・プロジェクト名）
+  static TextStyle heroSummaryValue(BuildContext context, double fontSize) =>
+      _text(context).headlineSmall!.copyWith(
+            fontSize: fontSize,
+            fontWeight: FontWeight.w700,
+            height: 1.25,
+            color: context.colors.heroForeground,
+          );
+
+  /// まとめの補足（2019年7月から・業務 20件・個人開発 1件）
+  static TextStyle heroSummarySub(BuildContext context, double fontSize) =>
+      _text(context).bodySmall!.copyWith(
+            fontSize: fontSize,
+            color: context.colors.heroForegroundMuted,
+          );
 
   // ----------------------------------------------------------
   // About

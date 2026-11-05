@@ -41,6 +41,18 @@ class ProjectModalFormat {
       ),
 
       // =========================
+      // 役割・規模
+      // =========================
+      ProjectModalField(
+        label: AppTexts.fieldRole,
+        valueGetter: (p) => '\n${p.role}',
+      ),
+      ProjectModalField(
+        label: AppTexts.fieldScale,
+        valueGetter: (p) => '\n${p.scale}',
+      ),
+
+      // =========================
       // CORE INFRA
       // =========================
       ProjectModalField(

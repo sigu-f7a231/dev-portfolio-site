@@ -10,6 +10,8 @@ projects:
     details: |
       モダンな技術スタックを用いたフルスタック開発の検証。
       UI/UXの設計からレスポンシブ対応、コンテナ化までを一人で担当。
+    role: [PG]
+    scale: ""
     server_os: [Windows]
     db: [利用なし]
     tools: [GitHub, VSCode]
@@ -33,6 +35,8 @@ projects:
     details: |
       Flutter で iOS / Android の両方に対応。
       データは Firebase に保存し、月ごとの集計をグラフで表示。
+    role: [フルスタック]
+    scale: 1名
     server_os: [macOS]
     db: [Firestore]
     tools: [GitHub, Android Studio, Xcode]
@@ -56,6 +60,8 @@ projects:
     details: |
       Markdown で記事を書き、静的サイトとして公開。
       記事の下書きの見直しに生成 AI を活用。
+    role: [フルスタック]
+    scale: 1名
     server_os: [利用なし]
     db: [利用なし]
     tools: [GitHub, VSCode]

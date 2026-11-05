@@ -156,6 +156,10 @@ class AppTexts {
   static const String helpPeriodNote = '進行中なら終了を `現在` にします（例: `- 2024-04` / `- 現在`）';
   static const String helpLinkFormat = 'URL';
   static const String helpLinkNote = '公開ページ。ない場合は `""`';
+  static const String helpRoleFormat = '文字の並び（例：[PL, SE]）';
+  static const String helpRoleNote = '役割（PM・PL・SE・PG など）。詳細に表示し、フィルターで絞り込めます。なければ []';
+  static const String helpScaleFormat = '文字（例：全体 20名（チーム 5名））';
+  static const String helpScaleNote = '規模。最初に書いた人数（○名 / ○人）でフィルターの「規模（人数）」に分けます。なければ ""';
   static const String helpListFormat = 'リスト（1 行に 1 つ `- 値`）';
   static const String helpListNote = 'Skills のグラフ集計とフィルターに使われます';
   static const String helpWorkflowFormat = '各工程を true / false で指定（必須）';
@@ -196,6 +200,8 @@ class AppTexts {
   static const String paginationPrev = '前のページ';
   static const String paginationNext = '次のページ';
   static String moreTags(int count) => '+$count';
+  static const String filterRole = '役割';
+  static const String filterScale = '規模（人数）';
   static const String filterServerOS = 'Server OS';
   static const String filterDb = 'DB';
   static const String filterTools = 'Tools';
@@ -261,6 +267,17 @@ class AppTexts {
   static const String fieldAi = 'AI Services';
   static const String fieldSkills = 'Skills';
   static const String fieldPeriod = '期間';
+  static const String fieldRole = '役割';
+  static const String fieldScale = '規模';
+
+  /// 規模（人数）のフィルターの区分（[上限, 名前]。上限は含む。最後は上限なし）
+  static const List<(int?, String)> scaleBuckets = [
+    (5, '〜5名'),
+    (10, '6〜10名'),
+    (30, '11〜30名'),
+    (100, '31〜100名'),
+    (null, '101名〜'),
+  ];
   static const String periodNow = '現在';
   static String periodSpan(String from, String to) => '$from → $to';
   static String yearMonth(DateTime d) => '${d.year}年${d.month}月';
@@ -354,6 +371,18 @@ class HeroContent {
 
   static const String skillsButtonLabel = 'スキルを見る';
   static const String projectsButtonLabel = 'プロジェクトを見る';
+
+  // ---------- ボタンの下のまとめ（lib/utils/hero_summary.dart） ----------
+  static const String summaryExperience = '開発経験';
+  static String experienceSince(DateTime d) => '${d.year}年${d.month}月から';
+  static const String summaryProjects = 'プロジェクト';
+  static String projectsCount(int n) => '$n件';
+  static String projectsBreakdown(int work, int private) => '業務 $work件・個人開発 $private件';
+  static const String summaryLatest = '直近のプロジェクト';
+  static String latestPeriod(String from, String to) => '$from 〜 $to';
+  static const String latestPrivate = '個人開発';
+  static const String projectsTooltip = 'Projects を見る';
+  static const String latestTooltip = 'このプロジェクトの詳細を見る';
 }
 
 /// About の固定の文言（中身は プロフィール YAML から読む）
@@ -549,12 +578,30 @@ class ExcelTexts {
   static const String howItMaps = 'Excel から読み取る項目';
   static const List<String> mapping = [
     'Home / About：氏名、過去の開発経験・主な技術、直近の開発経験・主な技術',
-    'Work / Private：プロジェクト名、期間、業務概要、サーバ OS、DB、FW・MW ツール等、使用言語、作業工程',
+    'Home / About のほか：ふりがな・性別・年齢・生年月日・国籍・配偶者・最寄駅・学歴（［ダウンロード］のスキルシートにそのまま書きます）',
+    'Work / Private：プロジェクト名、期間、業務概要、役割・規模、サーバ OS、DB、FW・MW ツール等、使用言語、作業工程',
     'プロジェクト名に「プライベート」か「個人開発」が入っているものは Private（作業工程は使いません）',
   ];
 
   // ---------- Excel の見出し・値 ----------
   static const String labelName = '氏名';
+
+  /// スキルシートだけにある個人の項目（YAML の sheet のキー → Excel の見出し）
+  /// 読み込んだ Excel のものをそのまま持っておき、［ダウンロード］でそのまま書く
+  static const Map<String, String> sheetLabels = {
+    'furigana': 'ふりがな',
+    'gender': '性別',
+    'age': '年齢',
+    'birthday': '生年月日',
+    'nationality': '国籍',
+    'spouse': '配偶者',
+    'station': '最寄駅',
+    'education': '学歴',
+  };
+
+  /// プロジェクトの「役割・規模」の列の中の見出し（「役割：PG」「規模：10名」など）
+  static const List<String> roleLabels = ['役割', 'ポジション', '担当'];
+  static const List<String> scaleLabels = ['規模', '体制', '人数', 'チーム'];
   static const List<String> privateMarkers = ['プライベート', '個人開発'];
   static const String notUsed = '利用なし';
   static const String periodOngoing = '現在';
@@ -659,6 +706,15 @@ class DataTexts {
   static const String tagPickerDone = '完了';
   static String tagPickerTooltip(String label) => '$label を入力・選択';
   static const String formWorkflow = '担当した工程';
+  static const String formRole = '役割';
+  static const String formRoleNote = '押すと入力欄と候補（PM・PL・SE・PG など）が開きます';
+  static const String formScale = '規模';
+  static const String formScaleHint = '例：全体 20名（チーム 5名）';
+
+  /// 役割の候補（今の Work / Private にあるものに足す）
+  static const List<String> roleSuggestions = [
+    'PM', 'PMO', 'PL', 'TL', 'SE', 'PG', 'テスター', 'インフラ', '運用・保守', 'デザイナー', 'フルスタック',
+  ];
   static const String formTitleRequired = 'プロジェクト名を入れてください';
   static const String formPeriodInvalid = '「2024-04」の形で入れてください';
   static const String formPeriodEndMissing = '終了を入れるか、「進行中」にチェックしてください';
@@ -700,5 +756,59 @@ class DataTexts {
   static String appendTitle(String target) => '$target に追加（ファイル・貼り付け）';
   static const String appendDescription =
       '読み込んだプロジェクトを、今の一覧の後ろに足します（今の一覧は消えません）。';
+}
+
+/// スキルシート（Excel / PDF）の書き出し（lib/utils/skill_sheet_writer.dart・skill_sheet_pdf.dart・
+/// lib/sections/header/download_menu.dart）
+/// セルに書く見出しは、読み込み（skill_sheet.dart）で同じ分類として読み直せる書き方にしてある
+class SkillSheetTexts {
+  SkillSheetTexts._();
+
+  // ---------- テンプレートの見出し（探すとき） ----------
+  static const String labelName = '氏名';
+  static const String headerProjectName = 'プロジェクト名';
+
+  // ---------- セルに書く文字 ----------
+  static const String pastHeading = '過去の開発経験';
+  static const String recentHeading = '直近の開発経験';
+  static const String techHeading = '主な使用技術・開発環境：';
+  static String months(int n) => '（$nヶ月）';
+  static const String privateMark = '【個人開発】';
+  static const String summaryHeading = '概要：';
+  static const String detailsHeading = '内容：';
+  static const String urlHeading = 'URL：';
+  static const String osHeading = 'サーバOS：';
+  static const String dbHeading = 'DB：';
+  static const String none = 'なし';
+  static const String toolsHeading = 'その他ツール・技術：';
+  static const String cloudHeading = 'クラウド：';
+  static const String awsHeading = 'AWS Service：';
+  static const String azureHeading = 'Azure Service：';
+  static const String gcpHeading = 'GCP Service：';
+  static const String containerHeading = 'コンテナ：';
+  static const String orchestrationHeading = 'コンテナオーケストレーション：';
+  static const String aiHeading = 'AI：';
+  static const String languageHeading = '使用言語/ライブラリー：';
+  static const String frameworkHeading = 'FW・MW・ツール等：';
+  static const String check = '●';
+  static const String scaleHeading = '規模：';
+
+  // ---------- ヘッダーの［ダウンロード］ ----------
+  static const String button = 'ダウンロード';
+  static const String buttonTooltip = 'スキルシート（Work / Private を含む）を Excel か PDF で保存';
+  static const String excel = 'Excel（.xlsx）で名前を付けて保存…';
+  static const String pdf = 'PDF で名前を付けて保存…';
+  static const String making = 'スキルシートを作っています…';
+  static String fileName(DateTime d, String ext) =>
+      'skill_sheet_${d.year}${'${d.month}'.padLeft(2, '0')}${'${d.day}'.padLeft(2, '0')}.$ext';
+  static const String excelDescription = 'Excel ブック';
+  static const String pdfDescription = 'PDF ファイル';
+  static const String pdfMimeType = 'application/pdf';
+  static String saved(String what, String name) => '$what を保存しました（$name）';
+  static String downloaded(String what, String name) => '$what をダウンロードしました（$name）';
+  static String cancelled(String what) => '$what の保存をやめました';
+  static String failed(String what, Object e) => '$what を出力できませんでした：$e';
+  static const String excelShort = 'スキルシート（Excel）';
+  static const String pdfShort = 'スキルシート（PDF）';
 }
 

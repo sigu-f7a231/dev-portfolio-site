@@ -1,23 +1,80 @@
 // lib/sections/hero_section.dart
+//
+// Home：すべて中央寄せで、上から
+//   職種 → 名前 → 紹介文 → ［スキルを見る］［プロジェクトを見る］ → まとめ（開発経験・プロジェクトの件数・直近のプロジェクト）
+// まとめは Skills・Projects の中身をくり返さず、全体の大きさと、いちばん新しい案件だけを出す（lib/utils/hero_summary.dart）
+// - プロジェクトの件数を押す → Projects へ。直近のプロジェクトを押す → その案件の詳細
+// - 幅があれば 3 つを横に、狭ければ縦に積む
+// 名前などはプロフィール（ProfileStore）、まとめは今の Work / Private（WorkYamlLoader / PrivateYamlLoader）から作る。
+// ［データ］で案件を変えたときは home_page.dart が [refreshKey] を変えて読み直させる
 import 'package:flutter/material.dart';
-import 'config/hero_section_config.dart';
-import '../theme/app_theme.dart';
-import '../theme/app_styles.dart';
+
 import '../constants/app_sizes.dart';
 import '../constants/app_texts.dart';
 import '../models/profile.dart';
+import '../theme/app_styles.dart';
+import '../theme/app_theme.dart';
+import '../utils/hero_summary.dart';
+import '../utils/private_yaml_loader.dart';
 import '../utils/profile_store.dart';
+import '../utils/project_append.dart';
+import '../utils/work_yaml_loader.dart';
+import 'config/hero_section_config.dart';
+import 'projects/models/projects_model.dart';
+import 'projects/views/project_list/project_list_modal_function.dart';
 
-/// Home：名前・職種・紹介文 ＋ プロフィールのカード（中身はプロフィール YAML から）
-class HeroSection extends StatelessWidget {
+class HeroSection extends StatefulWidget {
   final VoidCallback? onSkillsPressed;
   final VoidCallback? onProjectsPressed;
+
+  /// 変わったら Work / Private を読み直す（［データ］で追加・更新したとき）
+  final int refreshKey;
 
   const HeroSection({
     super.key,
     this.onSkillsPressed,
     this.onProjectsPressed,
+    this.refreshKey = 0,
   });
+
+  @override
+  State<HeroSection> createState() => _HeroSectionState();
+}
+
+class _HeroSectionState extends State<HeroSection> {
+  HeroSummary? _summary;
+
+  @override
+  void initState() {
+    super.initState();
+    // プロフィールと一緒に Work / Private を読み込んだときも作り直す
+    ProfileStore.instance.addListener(_load);
+    _load();
+  }
+
+  @override
+  void didUpdateWidget(HeroSection old) {
+    super.didUpdateWidget(old);
+    if (old.refreshKey != widget.refreshKey) _load();
+  }
+
+  @override
+  void dispose() {
+    ProfileStore.instance.removeListener(_load);
+    super.dispose();
+  }
+
+  Future<void> _load() async {
+    try {
+      final texts =
+          await Future.wait([WorkYamlLoader.loadYamlString(), PrivateYamlLoader.loadYamlString()]);
+      List<Project> projects(String text) => [for (final p in projectsOf(text)) Project.fromMap(p)];
+      final summary = HeroSummary.of(projects(texts[0]), projects(texts[1]));
+      if (mounted) setState(() => _summary = summary);
+    } catch (_) {
+      if (mounted) setState(() => _summary = null); // 読めなければまとめを出さない
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +85,7 @@ class HeroSection extends StatelessWidget {
   }
 
   Widget _build(BuildContext context, Profile profile) {
-    final hasCard = profile.card.isNotEmpty;
+    final summary = _summary;
     return Container(
       width: double.infinity,
       constraints: BoxConstraints(minHeight: HeroSectionConfig.height(context)),
@@ -36,43 +93,22 @@ class HeroSection extends StatelessWidget {
       padding: HeroSectionConfig.padding,
       alignment: Alignment.center,
       child: ConstrainedBox(
-        constraints:
-            const BoxConstraints(maxWidth: HeroSectionConfig.maxContentWidth),
+        constraints: const BoxConstraints(maxWidth: HeroSectionConfig.maxContentWidth),
         child: LayoutBuilder(
           builder: (context, constraints) {
-            final width = constraints.maxWidth;
-            final isWide = width >= HeroSectionConfig.wideBreakpoint;
-            final showCode = width >= HeroSectionConfig.codeCardBreakpoint;
-
-            final intro = _Intro(
-              profile: profile,
-              isWide: isWide,
-              onSkillsPressed: onSkillsPressed,
-              onProjectsPressed: onProjectsPressed,
-            );
-
-            if (isWide && hasCard) {
-              return Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Expanded(child: intro),
-                  const SizedBox(width: AppSizes.space48),
-                  SizedBox(
-                    width: HeroSectionConfig.codeCardWidth,
-                    child: _ProfileYaml(card: profile.card),
-                  ),
-                ],
-              );
-            }
-
+            final isWide = constraints.maxWidth >= HeroSectionConfig.wideBreakpoint;
             return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                intro,
-                if (showCode && hasCard && !isWide) ...[
-                  const SizedBox(height: AppSizes.space40),
-                  _ProfileYaml(card: profile.card),
+                _Intro(
+                  profile: profile,
+                  isWide: isWide,
+                  onSkillsPressed: widget.onSkillsPressed,
+                  onProjectsPressed: widget.onProjectsPressed,
+                ),
+                if (summary != null && !summary.isEmpty) ...[
+                  const SizedBox(height: HeroSectionConfig.summaryGap),
+                  _Summary(summary: summary, onProjectsPressed: widget.onProjectsPressed),
                 ],
               ],
             );
@@ -83,7 +119,7 @@ class HeroSection extends StatelessWidget {
   }
 }
 
-/// 左側：名前・職種・紹介文・ボタン
+/// 職種・名前・紹介文・ボタン（中央寄せ）
 class _Intro extends StatelessWidget {
   final Profile profile;
   final bool isWide;
@@ -100,35 +136,34 @@ class _Intro extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
         Text(
           profile.role,
+          textAlign: TextAlign.center,
           style: AppStyles.heroRole(context, HeroSectionConfig.roleFontSize),
         ),
         const SizedBox(height: AppSizes.space12),
         Text(
           profile.name,
+          textAlign: TextAlign.center,
           style: AppStyles.heroName(
             context,
-            isWide
-                ? HeroSectionConfig.nameFontSizeWide
-                : HeroSectionConfig.nameFontSizeNarrow,
+            isWide ? HeroSectionConfig.nameFontSizeWide : HeroSectionConfig.nameFontSizeNarrow,
           ),
         ),
         const SizedBox(height: AppSizes.space24),
         ConstrainedBox(
-          constraints:
-              const BoxConstraints(maxWidth: HeroSectionConfig.taglineMaxWidth),
+          constraints: const BoxConstraints(maxWidth: HeroSectionConfig.taglineMaxWidth),
           child: Text(
             profile.tagline,
-            style: AppStyles.heroTagline(
-                context, HeroSectionConfig.taglineFontSize),
+            textAlign: TextAlign.center,
+            style: AppStyles.heroTagline(context, HeroSectionConfig.taglineFontSize),
           ),
         ),
         const SizedBox(height: AppSizes.space36),
         Wrap(
+          alignment: WrapAlignment.center,
           spacing: AppSizes.space12,
           runSpacing: AppSizes.space12,
           children: [
@@ -149,38 +184,152 @@ class _Intro extends StatelessWidget {
   }
 }
 
-/// 右側：プロフィールを YAML 風に表示するカード
-/// （このサイトのデータが YAML で書かれていることにちなんだ見せ方）
-class _ProfileYaml extends StatelessWidget {
-  final Map<String, Object> card;
+/// ボタンの下のまとめ：開発経験・プロジェクトの件数・直近のプロジェクト
+class _Summary extends StatelessWidget {
+  final HeroSummary summary;
+  final VoidCallback? onProjectsPressed;
 
-  const _ProfileYaml({required this.card});
+  const _Summary({required this.summary, this.onProjectsPressed});
 
   @override
   Widget build(BuildContext context) {
-    final keyStyle = AppStyles.heroCode(context, isKey: true);
-    final valueStyle = AppStyles.heroCode(context);
+    final since = summary.since;
+    final latest = summary.latest;
+    final cards = <Widget>[
+      if (since != null)
+        _SummaryCard(
+          icon: Icons.timeline,
+          label: HeroContent.summaryExperience,
+          value: AppTexts.durationLabel(summary.experienceMonths),
+          sub: HeroContent.experienceSince(since),
+        ),
+      _SummaryCard(
+        icon: Icons.folder_open_outlined,
+        label: HeroContent.summaryProjects,
+        value: HeroContent.projectsCount(summary.totalCount),
+        sub: HeroContent.projectsBreakdown(summary.workCount, summary.privateCount),
+        tooltip: HeroContent.projectsTooltip,
+        onTap: onProjectsPressed,
+      ),
+      if (latest != null)
+        _SummaryCard(
+          icon: latest.isOngoing ? Icons.play_circle_outline : Icons.history,
+          label: HeroContent.summaryLatest,
+          value: latest.title,
+          smallValue: true,
+          sub: [
+            HeroContent.latestPeriod(
+              AppTexts.yearMonth(latest.periodStart),
+              latest.isOngoing ? AppTexts.periodNow : AppTexts.yearMonth(latest.periodEnd),
+            ),
+            if (summary.latestIsPrivate) HeroContent.latestPrivate,
+          ].join('・'),
+          tooltip: HeroContent.latestTooltip,
+          onTap: () => showProjectDetailModal(context, latest),
+        ),
+    ];
 
-    final lines = <InlineSpan>[];
-    card.forEach((key, value) {
-      lines.add(TextSpan(text: '$key:', style: keyStyle));
-      if (value is List) {
-        lines.add(const TextSpan(text: '\n'));
-        for (final item in value) {
-          lines.add(TextSpan(text: '  - $item\n', style: valueStyle));
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        if (constraints.maxWidth >= HeroSectionConfig.summaryRowBreakpoint) {
+          return IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                for (var i = 0; i < cards.length; i++) ...[
+                  if (i > 0) const SizedBox(width: AppSizes.space16),
+                  Expanded(child: cards[i]),
+                ],
+              ],
+            ),
+          );
         }
-      } else {
-        lines.add(TextSpan(text: ' $value\n', style: valueStyle));
-      }
-    });
+        return ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: HeroSectionConfig.summaryColumnMaxWidth),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              for (var i = 0; i < cards.length; i++) ...[
+                if (i > 0) const SizedBox(height: AppSizes.space12),
+                cards[i],
+              ],
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
 
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(AppSizes.space24),
-      decoration: AppStyles.heroCodeCard(context),
-      child: SelectableText.rich(
-        TextSpan(children: lines),
+/// まとめの 1 枚（見出し・値・補足。押せるものは右上に › を出す）
+class _SummaryCard extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final String value;
+  final String sub;
+  final bool smallValue;
+  final String? tooltip;
+  final VoidCallback? onTap;
+
+  const _SummaryCard({
+    required this.icon,
+    required this.label,
+    required this.value,
+    required this.sub,
+    this.smallValue = false,
+    this.tooltip,
+    this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final content = ConstrainedBox(
+      constraints: const BoxConstraints(minHeight: HeroSectionConfig.summaryCardMinHeight),
+      child: Padding(
+        padding: HeroSectionConfig.summaryCardPadding,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Row(
+              children: [
+                Icon(icon,
+                    size: HeroSectionConfig.summaryIconSize, color: AppStyles.heroSummaryIcon(context)),
+                const SizedBox(width: AppSizes.space8),
+                Expanded(
+                  child: Text(label,
+                      style: AppStyles.heroSummaryLabel(context, HeroSectionConfig.summaryLabelFontSize)),
+                ),
+                if (onTap != null)
+                  Icon(Icons.chevron_right,
+                      size: HeroSectionConfig.summaryIconSize, color: AppStyles.heroSummaryIcon(context)),
+              ],
+            ),
+            const SizedBox(height: AppSizes.space12),
+            Text(
+              value,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: AppStyles.heroSummaryValue(
+                context,
+                smallValue
+                    ? HeroSectionConfig.summaryValueSmallFontSize
+                    : HeroSectionConfig.summaryValueFontSize,
+              ),
+            ),
+            const SizedBox(height: AppSizes.space4),
+            Text(sub, style: AppStyles.heroSummarySub(context, HeroSectionConfig.summarySubFontSize)),
+          ],
+        ),
       ),
     );
+
+    final card = Material(
+      color: AppStyles.heroSummaryBackground(context),
+      shape: AppStyles.heroSummaryShape(context),
+      clipBehavior: Clip.antiAlias,
+      child: onTap == null ? content : InkWell(onTap: onTap, child: content),
+    );
+    return tooltip == null ? card : Tooltip(message: tooltip!, child: card);
   }
 }

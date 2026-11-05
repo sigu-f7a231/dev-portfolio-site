@@ -3,6 +3,7 @@
   - 「# 」で始まる行がプロジェクト名（1 件ごとに「# 」から書き始める）
   - 「- キー: 値」で項目を書く（複数あるときはカンマ区切り。該当しないものは「利用なし」）
   - 「## details」の下に詳細（複数行）を書く。項目（- キー: 値）は「## details」より前に書く
+  - role（役割）：PM・PL・SE・PG などをカンマ区切り。scale（規模）：文章で（例：全体 20名（チーム 5名）。人数で絞り込めます）
   - Private には workflow を書かない
   - 期間が続いているときは「period: 2024-01 ~ 現在」
   - この囲み（コメント）の中はメモ。読み込まれない
@@ -12,6 +13,8 @@
 - description: 個人開発によるWebアプリケーション制作
 - period: 2024-01 ~ 2024-06
 - link: https://sigu-f7a231.github.io/my-portfolio/
+- role: PG
+- scale:
 - server_os: Windows
 - db: 利用なし
 - tools: GitHub, VSCode

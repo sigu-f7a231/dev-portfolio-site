@@ -9,6 +9,8 @@
 - description: チーム開発における設計から実装、テストまでのアジャイル開発を担当
 - period: 2023-04 ~ 2023-09
 - link:
+- role: PG
+- scale:
 - server_os: Linux, Windows
 - db: PostgreSQL
 - tools: Git, GitLab, VSCode
@@ -34,6 +36,8 @@
 - description: 既存の社内システムの機能追加とクラウドへの移行を担当
 - period: 2023-10 ~ 2024-06
 - link:
+- role: SE, PL
+- scale: 全体 12名（チーム 4名）
 - server_os: Linux
 - db: Oracle
 - tools: Git, GitHub, Jira
@@ -59,6 +63,8 @@
 - description: 生成 AI を使った問い合わせ対応の自動化を、要件定義から運用まで担当
 - period: 2024-07 ~ 現在
 - link:
+- role: SE
+- scale: 5名
 - server_os: Linux
 - db: PostgreSQL
 - tools: Git, GitHub, Slack

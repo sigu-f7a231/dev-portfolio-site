@@ -106,6 +106,7 @@ class _HomePageState extends State<HomePage> {
                     key: scroll.keys['home'],
                     onSkillsPressed: () => scroll.scrollTo('skills'),
                     onProjectsPressed: () => scroll.scrollTo('projects'),
+                    refreshKey: _refreshKey, // 案件を変えたら、まとめ（件数・直近）も作り直す
                   ),
                   AboutSection(key: scroll.keys['about']),
                   // ★ スクロール用キーは外側のContainerに持たせ、

@@ -192,9 +192,9 @@ String _subText(List<String> lines) {
 const _projectListKeys = {
   'server_os', 'db', 'tools', 'backend_frameworks', 'frontend_frameworks', 'ui_frameworks',
   'testing_frameworks', 'cloud_platforms', 'aws_services', 'azure_services', 'gcp_services',
-  'container', 'container_orchestration', 'ai_services', 'skills',
+  'container', 'container_orchestration', 'ai_services', 'skills', 'role',
 };
-const _projectTextKeys = {'description', 'link', 'details'};
+const _projectTextKeys = {'description', 'link', 'details', 'scale'};
 
 ({Map<String, Object> data, List<String> errors}) _projectsFromLines(List<String> lines, {int level = 1}) {
   final parsed = _parseBlocks(lines, level: level);

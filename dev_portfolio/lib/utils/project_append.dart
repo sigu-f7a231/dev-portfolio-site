@@ -148,6 +148,8 @@ Map<String, List<String>> tagSuggestions(Iterable<String> yamlTexts) {
     for (final g in ToolGroup.values)
       g.key: uniqueSkillNames([for (final v in raw('tools')) if (toolGroupOf(v) == g) v],
           category: 'tools'),
+    // 役割（PM・PL・SE・PG など）
+    'role': uniqueSkillNames(raw('role'), category: 'role'),
     for (final key in projectListKeys)
       key: uniqueSkillNames(
         [

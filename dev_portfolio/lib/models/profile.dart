@@ -29,6 +29,11 @@ class Profile {
   final Map<String, List<String>> recentTech;
   final Map<String, List<String>> pastTech;
 
+  // ---------- スキルシートだけの項目（画面には出さない） ----------
+  /// ふりがな・性別・年齢・生年月日・国籍・配偶者・最寄駅・学歴（キーは ExcelTexts.sheetLabels）
+  /// スキルシート（Excel）から読み込んだときに入り、［ダウンロード］でスキルシートにそのまま書く
+  final Map<String, String> sheet;
+
   const Profile({
     required this.name,
     required this.role,
@@ -43,13 +48,14 @@ class Profile {
     this.past = '',
     this.recentTech = const {},
     this.pastTech = const {},
+    this.sheet = const {},
   });
 
   /// まだ読み込んでいないとき（入力画面の後ろに出す空の表示）
   static const Profile empty = Profile(name: '', role: '', tagline: '', intro: '');
 
   // YAML で使えるキー
-  static const _topKeys = {'home', 'about'};
+  static const _topKeys = {'home', 'about', 'sheet'};
   static const _homeKeys = {'name', 'role', 'tagline', 'card'};
   static const _aboutKeys = {
     'intro', 'domains', 'strengths', 'style', 'closing',
@@ -134,6 +140,25 @@ class Profile {
       return result;
     }
 
+    // スキルシートだけの項目（任意）
+    final sheet = <String, String>{};
+    final rawSheet = doc['sheet'];
+    if (rawSheet != null) {
+      if (rawSheet is! YamlMap) {
+        errors.add(ProfileTexts.errorNotMapField('sheet'));
+      } else {
+        rawSheet.forEach((k, v) {
+          if (!ExcelTexts.sheetLabels.containsKey('$k')) {
+            errors.add(ProfileTexts.errorUnknownKey('sheet.$k'));
+          } else if (v is YamlMap || v is YamlList) {
+            errors.add(ProfileTexts.errorNotText('sheet.$k'));
+          } else if (v != null && '$v'.trim().isNotEmpty) {
+            sheet['$k'] = '$v'.trim();
+          }
+        });
+      }
+    }
+
     final card = <String, Object>{};
     final rawCard = home['card'];
     if (rawCard != null) {
@@ -166,6 +191,7 @@ class Profile {
       past: text_(about, 'about', 'past'),
       recentTech: groups_(about, 'about', 'recent_tech'),
       pastTech: groups_(about, 'about', 'past_tech'),
+      sheet: sheet,
     );
 
     return errors.isEmpty ? ProfileParseResult.ok(profile) : ProfileParseResult.error(errors);

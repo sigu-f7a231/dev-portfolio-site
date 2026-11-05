@@ -56,6 +56,8 @@ class ProjectFilterState {
   factory ProjectFilterState.initial() {
     return ProjectFilterState(
       selectedFilters: {
+        'role': [],
+        'scale': [],
         'serverOS': [],
         'db': [],
         'tools': [],

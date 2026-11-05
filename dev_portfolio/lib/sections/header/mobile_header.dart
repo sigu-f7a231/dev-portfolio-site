@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../theme/app_theme.dart';
 import '../../theme/app_styles.dart';
 import 'project_data_dialog.dart';
+import 'download_menu.dart';
 import 'header_parts.dart';
 import '../../constants/app_texts.dart';
 
@@ -50,6 +51,8 @@ class MobileHeader extends StatelessWidget {
           showLabel: false,
           onPressed: () => _showDataDialog(context),
         ),
+        // スキルシート（Excel / PDF）のダウンロード
+        const HeaderDownloadButton(showLabel: false),
         // ライト / ダーク切替（太陽 ⇄ 月）
         const ThemeModeSwitch(compact: true),
       ],

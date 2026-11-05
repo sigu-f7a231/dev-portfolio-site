@@ -24,7 +24,8 @@ dev-portfolio-site/
     │   ├── format_work.yaml       # Work 用のデフォルトデータ兼フォーマット定義
     │   ├── format_private.yaml    # Private 用のデフォルトデータ兼フォーマット定義
     │   ├── format_profile.yaml    # プロフィール（Home / About）のひな形
-    │   └── format_skill_sheet.xlsx # スキルシート（Excel）のひな形（入力画面の「Excel テンプレートを保存」）
+    │   └── format_skill_sheet.xlsx # スキルシート（Excel）のひな形（入力画面の「Excel テンプレートを保存」・［ダウンロード］の書き込み先）
+    ├── assets/fonts/ipagp.ttf     # PDF に埋め込む日本語フォント（IPA P ゴシック。IPA フォントライセンス v1.0、同じフォルダーに条文）
     ├── assets/profile/            # tool/run.dart がコピーするプロフィール（profile.yaml は Git 管理外）
     ├── tool/run.dart              # プロフィール YAML を指定して flutter run -d chrome する
     ├── web/index.html             # 起動時のローディング表示（Git 管理）
@@ -66,6 +67,12 @@ dev-portfolio-site/
         ├── project_sort_test.dart             # Projects の並び替え
         ├── tech_catalog_test.dart             # Skills・Tools に書かれた技術の振り分け
         ├── skill_sheet_test.dart              # スキルシート（Excel）→ YAML：テンプレート・振り分け・エラー・YAML の書き出し
+        ├── project_role_scale_test.dart       # 役割・規模（Excel からの読み分け・人数の区分・フィルター）とプロフィールの sheet
+        ├── skill_sheet_writer_test.dart       # ［ダウンロード］の Excel：セルごとの中身・結合 / 入力規則 / 行・個人の項目・開発経験の文章・0 件・読み直すと同じ
+        ├── skill_sheet_pdf_test.dart          # PDF：縮める倍率・ページの分け方（行の切れ目・長い行）・フッター・出力
+        ├── xlsx_layout_test.dart              # Excel の見た目の読み取り（番地・列幅・行の高さ・結合・書式・余白・フッター）
+        ├── download_menu_test.dart            # ［ダウンロード］のボタン・メニュー・名前を付けて保存・ローディング・知らせ・失敗
+        ├── test_xlsx.dart                     # テスト用の小さな .xlsx を作る（テストではない）
         └── projects_diff_test.dart            # 上書きの確認に使う違いの判定・テンプレートがそろっているか
 ```
 
@@ -75,7 +82,8 @@ dev-portfolio-site/
 
 `HomePage` に Header（固定）＋ `SingleChildScrollView`（**スクロールはこの 1 本だけ**）で以下を縦に並べる:
 
-1. **Hero（Home）** — 職種・名前・紹介文・「スキルを見る／プロジェクトを見る」ボタン＋右にプロフィールのカード（`home.card`。幅 900 以上で 2 カラム、600 未満でカード非表示）
+1. **Hero（Home）** — すべて中央寄せで、職種・名前・紹介文・「スキルを見る／プロジェクトを見る」ボタン → その下にまとめ 3 枚（開発経験＝業務のいちばん古い開始から今日まで／プロジェクトの件数＝業務・個人開発の内訳。押すと Projects へ／直近のプロジェクト＝開始がいちばん新しい案件と期間。押すとその詳細）。幅 720 以上で横に 3 つ、未満は縦に積む。計算は `utils/hero_summary.dart`（`HeroSummary.of`）。［データ］で案件を変えると `refreshKey` で作り直す。
+   - 2026-11-05 に、右側の YAML 風のカード（`home.card`）は表示をやめた（Skills・Projects と同じことを書いていて「なぜここに？」となるため。オーナーの指摘）。`home.card` は今までの YAML が読めるよう、書いてもエラーにはしない（表示には使わない）
 2. **About** — 自己紹介＋「得意な領域／強み／開発スタイル」の定義リスト＋締めの一言（空の項目は出さない）
    - Home / About の中身はプロフィール YAML（`ProfileStore`）。固定の見出しは `AppTexts` の `HeroContent` / `AboutContent`
 3. **Skills** — ツールバー（Work/Private セグメント・「カテゴリ」ボタン＝今のカテゴリ名・Bar/Pie 切替）→ カテゴリはポップアップ（1 つ選んで「反映」）→ グラフ（カード最大幅 800、狭いと縦並び）
@@ -86,7 +94,7 @@ dev-portfolio-site/
    - **詳細ダイアログ**（`showProjectDetailModal(context, p, projects: 絞り込み後の全件)`）：PC（幅 1024 以上）は最大幅 760 のダイアログで ‹ › を左右に。タブレット・スマホ（1024 未満）は M3 の Full-screen dialog のように画面いっぱいで開き、文字を `ProjectsListConfig.fullscreenTextScale`（1.15 倍）に、‹ › は下に。← → キーでも移れる。前・次がないときはボタンを押せない（薄い表示）。ページをまたいで移れ、閉じると最後に見ていた案件のページに一覧を合わせる。ヘッダーに「3 / 12」。
    - **画面共有向けの表示の大きさ**（Google Meet・Teams・Slack ハドルなどで小さく見える対策）：ヘッダーに［A−］［100%］（押すと既定に戻す）［A＋］と、PC だけ［大きく表示］（PC でも全画面のレイアウトにする）。文字の倍率は `ProjectsListConfig.modalZoomLevels`（1.0〜2.5）、PC のダイアログは最大の幅・高さも同じ倍率で広げる。キーボードは − ＋ 0（文字だけ戻す）F、⌘（Mac）/ Ctrl（Windows など）＋ 0 で大きく表示も含めて元に戻す、⌘ / Ctrl ＋ ＋ −（JIS の「;」も）で拡大・縮小（修飾キーは `utils/platform_keys.dart` の `isApplePlatform` で OS に合わせる。ブラウザの拡大と同じキーなので、ダイアログを開いている間は `utils/browser/browser.dart` の `blockBrowserZoomKeys`（window の keydown を capture で受けて preventDefault。閉じると外す）でブラウザ側を止める）。［100%］ボタンも大きく表示を含めて元に戻す。選んだ大きさは `ProjectDetailView`（static）に持ち、ページを開いている間は次に開いたときも引き継ぐ（テストは `tearDown(ProjectDetailView.reset)`）。
 
-Header: M3 の Small top app bar。ナビ（表示中セクションにインジケーター）、［データ］（Filled tonal。Work / Private の追加・更新）、テーマ切替（☀️/🌙 Switch、スマホは IconButton）。
+Header: M3 の Small top app bar。ナビ（表示中セクションにインジケーター）、［データ］（Filled tonal。Work / Private の追加・更新）、［ダウンロード］（Filled tonal、スマホはアイコン。スキルシートを Excel / PDF で保存）、テーマ切替（☀️/🌙 Switch、スマホは IconButton）。
 
 ### ［データ］：プロジェクトの追加・更新（2026-11-05〜、`sections/header/project_data_dialog.dart`）
 
@@ -147,15 +155,36 @@ sessionStorage['work'|'private'] ─┘   優先順位: sessionStorage > メモ�
 - 変換のルール（見出しの文字で探す。セル番地に依存しない）：
   - 氏名＝「氏名」の右のセル。経験＝「過去の開発経験」「直近の開発経験」を含むセル（表の見出しより上）。それぞれ「領域：説明」の行 → `about.past` / `about.recent`、「主な使用技術・開発環境：」以降の「分類：A、B」→ `about.past_tech` / `recent_tech`。
   - Excel にない Home の項目は作る：`role`＝`ExcelTexts.defaultRole`、`tagline`＝直近の「言語」、`card`＝直近の技術（`SkillSheetLimits`）、`intro`・`domains`＝経験の領域。
+  - 個人の項目：「ふりがな」「性別」「年齢」「生年月日」「国籍」「配偶者」「最寄駅」「学歴」（`ExcelTexts.sheetLabels`）の右の値 → プロフィールの `sheet:`（右が次の見出しなら空。年齢は生年月日が読めないときだけ持つ）。画面には出さず、［ダウンロード］で書く。
+  - 役割・規模（「役割」「規模」を含む見出しの列。`roleAndScaleOf`）：枠の中のセルを行ごとに見て、「役割：」「規模：」などの見出しがあればそれに従い、なければ人数（「10名」「5人」）や「規模」「体制」を含む行を規模（`scale`、複数行は「 / 」でつなぐ）、ほかを役割（`role`。「 / 」「・」「、」で分ける）。
   - プロジェクト＝「プロジェクト名」で始まる見出しの行（作業工程の小見出しは次の行）。「No.」の列に値がある行から次の番号の前までが 1 件。名前の列の 1 行目＝title、2 行目以降＝業務概要（description は「概要：」の 1 行目、details は全体、link は URL）。期間は最初の 2 つの年月（全角の数字・1 つのセルに「2020/03～2020/10」も可。終わりがなければ `現在`）。
   - 技術：セル内の見出し（「使用言語：」「FW・MW・ツール等：」「AI：」「AWS Service;」など。区切りは `：` `:` `；` `;`。`;` はわかる見出しのときだけ見出し扱いで、「Git; GitHub」は 2 項目。`_modeOfLabel`）で分類を切り替える（見出しの下の項目のあとの空行で元に戻る）。見出しのない項目は、`_known` の名前は各分類へ（クラウドのサービスは `cloud_platforms` にも足す）。知らない名前は使用言語の列 → `skills`、それ以外 → `tools`。「（補足）」は外す（サーバ OS・DB は残す）。空の分類は `利用なし`。
   - プロジェクト名に「プライベート」「個人開発」（`ExcelTexts.privateMarkers`）が入っていれば Private（印はタイトルから外し、workflow は書かない）。
 - テンプレートの中身（氏名・経験・プロジェクト 2 件）は、プロフィール / Work / Private のテンプレートのサンプルと同じ内容にしてある（`skill_sheet_test` で、作った Work / Private が `format_work.yaml` / `format_private.yaml` と details 以外一致するかを確認）。テンプレートを変えたらそろえる。
 - 作った YAML は `utils/yaml_writer.dart`（`toYaml`）で人が読める形に書く。
 
+### ［ダウンロード］：スキルシートを Excel / PDF で保存（2026-11-05〜、`sections/header/download_menu.dart`）
+
+- メニューで Excel / PDF を選ぶ → **先に**「名前を付けて保存」のダイアログ（`FileSaver.saveGeneratedBytesAs`。showSaveFilePicker はボタンを押した直後でないと開けないので、作る前に開く）→ 保存先が決まったら全画面ローディングで作って書き込む（`buildSkillSheetBytes`。名前は `skill_sheet_YYYYMMDD.xlsx|pdf`）→ 画面の下に SnackBar（保存した／ダウンロードした／やめた／失敗）。ダイアログが使えないブラウザ（Firefox / Safari）は作ってから通常のダウンロード。テスト用の `file_saver_stub.dart` は `make` を呼び、保存した中身を `FileSaver.lastSaved` に残す。
+- 書く中身（`currentSkillSheetData`）：今のプロフィール（`ProfileStore`）の氏名と、過去・直近の開発経験（`experienceTextOf`）、今の Work と Private（`loadYamlString` → `redistributeProjects`、開始の古い順。Work が先、No. は通し番号）。
+- Excel（`utils/skill_sheet_writer.dart` の `fillSkillSheet`）：テンプレートの zip の sheet XML だけを書き換え、ほかのファイル（スタイル・印刷設定など）はそのまま。
+  - プロジェクトの表は見出しの文字で探し、1 件目のブロック（11〜15 行）をひな形として件数分複製する。後ろの行は行数の差だけずらし、結合・入力規則（`dataValidation` の sqref）も付け直す。表の中のハイパーリンクは外す。
+  - 値はインライン文字列で書く。ブロックの最後の行は、文字が入りきらないときだけ高さを足す（`estimateTextHeight`）。日付の数式（YEAR / MONTH / DAY(TODAY())）は表示用の値を出力日にする。
+  - Private は案件名に【個人開発】を付け、作業工程の ● は書かない（読み込み `convertSkillSheet` で同じ中身に戻る。`skill_sheet_writer_test` で確認）。
+  - ふりがな・性別・年齢・生年月日・国籍・配偶者・最寄駅・学歴：プロフィールの `sheet`（読み込んだ Excel に書かれていたもの）をそのまま、見出しの結合の右隣に書く。ないものは空（テンプレートのサンプルは残さない）。生年月日が読めれば、生年月日と年齢はテンプレートと同じ数式（`"1990"&"年"&…`・`DATEDIF(DATE(…),TODAY(),"Y")`）にして、表示用の値は出力日で計算する（オーナーの指定、2026-11-05）。
+  - 業務概要（`skillSheetSummary`）：ふつうは「概要：説明」「内容：詳細」「URL：リンク」。詳細が Excel から読み込んだもの（「概要：」の行がある＝セル全体）なら詳細をそのまま書き、見出しを重ねない。リンクが詳細にすでにあれば「URL：」を足さない（2026-11-05、URL・概要が二重になる不具合を修正）。
+  - 役割・規模：枠の 2 行目の大きいセル（テンプレートの「PG」の場所）に「PL / SE」、次の行に「規模：20名」。1 行目のセルは空にする。
+- PDF（`utils/skill_sheet_pdf.dart` の `skillSheetPdf`、`pdf` パッケージ）：書き込んだ Excel の列幅・行の高さ・結合・罫線・塗り・フォント・配置・折り返し・縮小・余白・水平中央・フッター（&P/&N）を `utils/xlsx_layout.dart` で読み、A4 にそのまま描く（幅が入らなければ縮小）。改ページは行の境目。フォントは `assets/fonts/ipagp.ttf`（太字は塗り＋線で表す）。
+- 保存ダイアログが開けなかったとき（SecurityError など）も通常のダウンロードにする（`file_saver_web.dart`）。
+- PDF では空白（半角・全角スペース・タブ）は描かずに幅だけ空ける（`isSkillSheetBlank`。IPA P ゴシックの全角スペースが「、」の形で出て、タイトルが「、Skill Sheet、」になっていた）。
+- PDF の折り返しは `skillSheetWrap`：禁則処理あり（「、」「。」「）」・小さい仮名・長音は行の先頭に置かず前の行にぶら下げる。「（」「「」は行の最後に置かず次の行へ）。2026-11-05、行の先頭に「、」が来るとの指摘で追加。
+- PDF の配置（縮める倍率・ページの分け方）は `SkillSheetPdfGeometry`、フッターの文字は `skillSheetFooterText` に分けてあり、テストで確かめる。
+- 案件が 0 件なら、作業工程の選択肢（dataValidation）も外す（空の sqref は Excel が「修復」を出す）。
+
 ### プロフィール YAML（Home / About、2026-11-03〜）
 
 - ひな形：`assets/data/format_profile.yaml`（`home:` name★ / role★ / tagline★ / card、`about:` intro★ / domains / strengths / style / closing。★は必須、ほかは空なら表示しない）。
+- トップの `sheet:`（任意）：スキルシートだけの個人の項目（furigana / gender / age / birthday / nationality / spouse / station / education。`ExcelTexts.sheetLabels`）。画面には出さず、［ダウンロード］のスキルシートに書く。Excel から読むと入る。テンプレート（format_profile.*）にはサンプルを入れてある。
 - `about:` には、ほかに recent / past（直近 / 過去の開発経験。複数行）・recent_tech / past_tech（分類 → 技術の並び）も書ける（Excel から作ると入る。About に「直近の開発経験」「過去の開発経験」の行として表示）。テンプレート（format_profile.*）には入れていない。Markdown の `## recent_tech` の下は「- キー: 値」のキーが英数字だけなので、日本語の分類名は書けない（YAML なら書ける）。
 - 読み込み順（`utils/profile_store.dart` の `ProfileStore`）：
   1. `dart run tool/run.dart xxx.yaml` で起動 → スクリプトが `assets/profile/profile.yaml` にコピーし `--dart-define=PROFILE_FROM_ARG=true` を付けて `flutter run -d chrome` を実行 → アプリはこの印があるときだけそのファイルを読む。
@@ -171,6 +200,8 @@ sessionStorage['work'|'private'] ─┘   優先順位: sessionStorage > メモ�
 | キー | 型 | 備考 |
 |---|---|---|
 | title / description / details / link | String | `details` は複数行 `\|` |
+| role | List<String> | 役割（PM・PL・SE・PG など）。詳細に表示、フィルター「役割」（選んだものをすべて担当） |
+| scale | String | 規模（例：全体 20名（チーム 5名））。詳細に文章で表示。最初の「N名 / N人」で区分（`AppTexts.scaleBuckets`）し、フィルター「規模（人数）」（選んだ区分のどれか） |
 | server_os, db, tools, backend_frameworks, frontend_frameworks, ui_frameworks, testing_frameworks, cloud_platforms, aws_services, azure_services, gcp_services, container, container_orchestration, ai_services, skills | List<String> | 該当しない場合は `- 利用なし` |
 | period | `[YYYY-MM, YYYY-MM]` | 終わりに `現在` / `present` を書くと進行中扱い |
 | workflow（**Work のみ**） | Map<String,bool> | requirements, basic_design, detailed_design, implementation_unit_test, integration_test, system_test, maintenance_operation |
@@ -240,6 +271,8 @@ web/ ディレクトリがない環境では、先に `flutter create . --platfo
   - `Color.withOpacity` → `withValues(alpha: …)`。
   - 例外：`ProgressIndicatorThemeData.year2023` / `SliderThemeData.year2023`（`app_theme.dart`）は非推奨だが、既定値がまだ true（旧デザイン）で、M3 2024 版の見た目にする方法がこれしかないため `// ignore: deprecated_member_use` 付きで残す。既定値が false になったら消す。
 - Claude の作業環境には Flutter がない。静的解析・テスト・画面での確認はオーナーの手元で行う。
+- 2026-11-05 に追加した役割・規模（モデル・フィルター・詳細・入力フォーム・Excel の読み書き）とプロフィールの `sheet`（`project_role_scale_test`）も **analyze / test 未実行**。
+- 2026-11-05 に追加した［ダウンロード］（`download_menu.dart` / `skill_sheet_writer.dart` / `skill_sheet_pdf.dart` / `xlsx_layout.dart`・`skill_sheet_writer_test`）は **analyze / test 未実行**。
 - 2026-11-05 に追加したスキルシート（Excel）の入力（`skill_sheet.dart` / `xlsx_reader.dart` / `yaml_writer.dart`・入力方法の切り替え・About の開発経験の行・`skill_sheet_test` と `upload_dialogs_test` の追加分）は **analyze / test 未実行**。変換のルールは同じ規則の Python で実際のスキルシートとテンプレートに当てて確認済み。
 
 ### 課題：優先度 高（不具合・データの安全に関わる）

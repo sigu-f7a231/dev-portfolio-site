@@ -37,7 +37,11 @@ dependencies:
   file_picker: ^8.0.0
   web: ^1.1.1 # dart:html の後継（sessionStorage・ダウンロード・イベント送信）
   archive: ^4.0.0 # Excel（.xlsx は zip）を開く
+  # pdf が使う画像ライブラリ。image 4.11 は archive 4.4 の機能（ZLibDecoder.decodeLazy）を呼ぶが、
+  # pdf 3.12 は archive 4.1 未満までしか使えない（pdf 3.13 は Dart 3.12 以上が必要）ので、4.11 より前にしておく
+  image: ">=4.2.0 <4.11.0"
   xml: ^6.5.0 # Excel の中の XML を読む
+  pdf: ^3.11.1 # スキルシートを PDF で出力する
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
@@ -67,6 +71,8 @@ flutter:
     - assets/data/format_private.md
     - assets/data/format_profile.md
     - assets/data/format_skill_sheet.xlsx # スキルシート（Excel）のテンプレート
+    # PDF の日本語フォント（IPA P ゴシック。IPA フォントライセンス v1.0：assets/fonts/IPA_Font_License_Agreement_v1.0.txt）
+    - assets/fonts/ipagp.ttf
     # ［データ］→ 追加 → 複数件の「サンプルを入力欄に入れる」（2 件以上入ったサンプル）
     - assets/data/sample_work_multi.yaml
     - assets/data/sample_work_multi.md

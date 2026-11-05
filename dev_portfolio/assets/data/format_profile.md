@@ -4,7 +4,7 @@
   - 「- キー: 値」で 1 行の項目を書く。「## キー」の下には複数行の文章を書く
   - 「- キー: 値」は、その見出しの「## 」より前に書く
   - ★ は必須：home の name / role / tagline、about の intro
-  - card（右側のカード）は「## card」の下に「- キー: 値」で自由に書く（カンマ区切りは箇条書きになる）
+  - card（以前の右側のカード）は今は表示しない。書いてもエラーにはならない
   - domains（得意な領域）はカンマ区切り
   - この囲み（コメント）の中はメモ。読み込まれない
 -->
@@ -34,6 +34,23 @@ Flutter と Dart を中心に、Web とモバイルのフロントエンドを�
 現在は Flutter を使ったモバイル / Web アプリの開発に取り組んでいます。
 
 <!--
+  ---------- スキルシートだけの項目（任意） ----------
+  画面には出さず、ヘッダーの［ダウンロード］で作るスキルシート（Excel / PDF）にそのまま書きます。
+  スキルシート（Excel）から読み込むと、Excel に書かれていたものが入ります。書かなければスキルシートでも空欄
+  キー：furigana（ふりがな）/ gender（性別）/ birthday（生年月日）/ age（年齢。生年月日がないときだけ）/
+        nationality（国籍）/ spouse（配偶者）/ station（最寄駅）/ education（学歴）
+-->
+
+# sheet
+- furigana: やまだ たろう
+- gender: 男
+- birthday: 1990年04月01日
+- nationality: 日本
+- spouse: 無
+- station: ○○駅
+- education: ○○専門学校　○○学科
+
+<!--
   ---------- Work / Private（任意） ----------
   ここにも書くと、プロフィールと一緒に Skills と Projects も読み込みます（あとで個別にアップロードしなくてよい）。
   書き方は Work / Private のテンプレート（format_work.md / format_private.md）と同じで、見出しを 1 段深くします：
@@ -49,6 +66,8 @@ Flutter と Dart を中心に、Web とモバイルのフロントエンドを�
 - description: チーム開発における設計から実装、テストまでのアジャイル開発を担当
 - period: 2023-04 ~ 2023-09
 - link:
+- role: PG
+- scale:
 - server_os: Linux, Windows
 - db: PostgreSQL
 - tools: Git, GitLab, VSCode
@@ -76,6 +95,8 @@ Flutter と Dart を中心に、Web とモバイルのフロントエンドを�
 - description: 個人開発によるWebアプリケーション制作
 - period: 2024-01 ~ 2024-06
 - link: https://sigu-f7a231.github.io/my-portfolio/
+- role: PG
+- scale:
 - server_os: Windows
 - db: 利用なし
 - tools: GitHub, VSCode

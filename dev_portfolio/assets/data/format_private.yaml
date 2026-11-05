@@ -4,6 +4,9 @@ projects:
     details: |
       モダンな技術スタックを用いたフルスタック開発の検証。
       UI/UXの設計からレスポンシブ対応、コンテナ化までを一人で担当。
+    role:                         # 役割（PM・PL・SE・PG など。複数可）
+      - PG
+    scale: ""                     # 規模（例：全体 20名（チーム 5名）。人数で絞り込めます）
     server_os:
       - Windows
     db:

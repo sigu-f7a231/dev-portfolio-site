@@ -1,3 +1,4 @@
+import '../../../constants/app_texts.dart';
 import '../../../utils/skill_name.dart';
 import '../../../utils/tech_catalog.dart';
 
@@ -13,6 +14,15 @@ class Project {
   final String details;
   final String period;
   final String link;
+
+  // =========================
+  // 役割・規模（スキルシートの「役割 / 規模」の列）
+  // =========================
+  /// 役割（PM・PL・SE・PG など。カンマ区切り）
+  final String role;
+
+  /// 規模（「全体 20名（チーム 5名）」など。文章のまま）
+  final String scale;
 
   // =========================
   // INFRA
@@ -64,6 +74,8 @@ class Project {
     required this.details,
     required this.period,
     required this.link,
+    this.role = '',
+    this.scale = '',
 
     required this.serverOS,
     required this.db,
@@ -115,6 +127,8 @@ class Project {
       details: json['details'] ?? '',
       period: _toPeriod(json['period']),
       link: json['link'] ?? '',
+      role: _toCsv(json['role']),
+      scale: _toCsv(json['scale']).trim(),
 
       serverOS: _toCsv(json['server_os']),
       db: _toCsv(json['db']),
@@ -156,6 +170,24 @@ class Project {
   // FILTER GETTERS（UI/Filter用）
   // =========================
   List<String> get skillsList => _unique(skills);
+  List<String> get roleList => _unique(role);
+
+  /// 規模の人数（「全体 20名（チーム 5名）」なら最初に書かれた 20。書かれていなければ null）
+  int? get scalePeople {
+    final m = RegExp(r'(\d+)\s*(?:名|人|people|members?)', caseSensitive: false)
+        .firstMatch(toHalfWidth(scale));
+    return m == null ? null : int.parse(m.group(1)!);
+  }
+
+  /// 規模のフィルターの区分（AppTexts.scaleBuckets の名前。人数が読めなければ null）
+  String? get scaleBucket {
+    final n = scalePeople;
+    if (n == null) return null;
+    for (final (max, label) in AppTexts.scaleBuckets) {
+      if (max == null || n <= max) return label;
+    }
+    return null;
+  }
   List<String> get serverOSList => _unique(serverOS);
   List<String> get dbList => _unique(db);
 

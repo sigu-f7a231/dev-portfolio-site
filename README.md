@@ -10,6 +10,7 @@ Flutter Web で作った SPA で、GitHub Pages で公開しています。
 > A single-page developer portfolio built with Flutter Web and hosted on GitHub Pages, designed to complement a résumé.
 > It shows work and personal projects, and charts the technologies used across them.
 > All content is driven by YAML / Markdown files or an Excel skill sheet: the profile (Home / About) is loaded at startup (`dart run tool/run.dart my_profile.yaml`) or in the first-run dialog, and projects can be added or replaced from the header's **Data** button (on-screen form, pasted text, or files).
+> The header's **Download** button exports everything as a skill sheet in the template's Excel layout, or as a PDF that looks the same.
 
 ---
 
@@ -19,12 +20,13 @@ Flutter Web で作った SPA で、GitHub Pages で公開しています。
 
 | セクション | 内容 |
 |---|---|
-| **Home** | 名前・職種・紹介文（プロフィール YAML から）。ボタンで Skills / Projects へ移動できます。右側にはプロフィールのカードを YAML 風に表示します |
+| **Home** | 名前・職種・紹介文（プロフィール YAML から）を中央に。ボタンで Skills / Projects へ移動でき、その下に開発経験（年数）・プロジェクトの件数（業務・個人開発）・直近のプロジェクトのまとめを表示します（件数を押すと Projects、直近を押すとその詳細） |
 | **About** | 自己紹介と、得意な領域・直近 / 過去の開発経験と主な技術・強み・開発スタイル・締めの一言（プロフィールから。書いていない項目は表示しません） |
 | **Skills** | プロジェクトで使った技術の割合を、棒グラフ／円グラフで表示します。Work / Private の切り替えと、カテゴリの選択（ポップアップ）ができます。Skills・Tools はさらにグループ（プログラミング言語・ライブラリ・バージョン管理・開発ツール・環境など）に分けて表示します |
-| **Projects** | プロジェクトの一覧です。**List**（年表）と **Collection**（カバー付きカード）を切り替えられ、全分類の技術・工程・期間で絞り込み（ポップアップ）、開始・終了・期間の長さ・名前で並べ替えができます。カードを押すと詳細が開き、‹ › や ← → キーで前後の案件に移れます |
+| **Projects** | プロジェクトの一覧です。**List**（年表）と **Collection**（カバー付きカード）を切り替えられ、全分類の技術・役割・規模（人数）・工程・期間で絞り込み（ポップアップ）、開始・終了・期間の長さ・名前で並べ替えができます。カードを押すと詳細（役割・規模も）が開き、‹ › や ← → キーで前後の案件に移れます |
 
 - **ヘッダー**：Material 3 のトップアプリバー。ナビは表示中のセクションが強調され、スクロールに合わせて切り替わります
+- **ダウンロード**：ヘッダーの［ダウンロード］で、プロフィールと Work / Private をスキルシート（Excel のテンプレートの書式のまま）か、同じ見た目の PDF として「名前を付けて保存」できます。保存したかどうかは画面の下に表示します（詳しくは下の「スキルシートのダウンロード」）
 - **ダークモード**：ヘッダーのスイッチ（☀️ / 🌙）でライト／ダークを切り替えられます（スマホはアイコンボタン）
 - **レスポンシブ**：スマホではメニューがドロワーになり、フィルターは下から出るシートで開きます。Collection は画面幅に合わせて 1〜4 列、ページネーションは幅に応じて「1 … 4 5 6 … 10」「‹ 3 / 10 ›」と省略表示になります
 - **案件の詳細**：PC（幅 1024px 以上）はダイアログで開き、左右の ‹ › で前後の案件へ。タブレット・スマホは画面いっぱいで開き、文字を一回り大きく（1.15 倍）表示して、‹ › は下に置きます。前・次がないときはボタンを押せません。絞り込み・並び順のまま、ページをまたいで移れます
@@ -65,12 +67,25 @@ dart run tool/run.dart my_profile.yaml   # Markdown なら my_profile.md、ス�
 
 | 作るもの | Excel から読み取る項目 |
 |---|---|
+| スキルシートだけの項目 | ふりがな・性別・年齢・生年月日・国籍・配偶者・最寄駅・学歴 → `sheet:`（画面には出さず、［ダウンロード］のスキルシートにそのまま書きます） |
 | Home / About | 氏名 → `name`、過去 / 直近の開発経験（「領域：説明」の行）→ `past` / `recent`、それぞれの「主な使用技術・開発環境」（「言語：A、B」の行）→ `past_tech` / `recent_tech`。紹介文（`tagline`）は直近の言語から、自己紹介（`intro`）と得意な領域（`domains`）は経験の領域から作ります。職種（`role`）は「エンジニア」固定（YAML を保存して書き換えられます） |
-| Work / Private | プロジェクト名 → `title`、期間 → `period`、業務概要 → `description`（「概要：」の 1 行目）・`details`（全体）・`link`（URL）、サーバ OS → `server_os`、DB → `db`、FW・MW ツール等と使用言語 → 知っている名前は各分類（Django → `backend_frameworks`、Docker → `container`、「AI：」の行 → `ai_services` など）、それ以外は `tools` / `skills`、作業工程（● など）→ `workflow` |
+| Work / Private | プロジェクト名 → `title`、期間 → `period`、業務概要 → `description`（「概要：」の 1 行目）・`details`（全体）・`link`（URL）、役割 / 規模 → `role`（PG・SE など）・`scale`（「10名」など人数のある行。「役割：」「規模：」と書いてもよい）、サーバ OS → `server_os`、DB → `db`、FW・MW ツール等と使用言語 → 知っている名前は各分類（Django → `backend_frameworks`、Docker → `container`、「AI：」の行 → `ai_services` など）、それ以外は `tools` / `skills`、作業工程（● など）→ `workflow` |
 
 - プロジェクト名に「**プライベート**」か「**個人開発**」が入っているものだけ Private になります（印はタイトルから外し、作業工程は使いません）
 - セルの位置ではなく見出しの文字（「氏名」「プロジェクト名」「No.」など）で探すので、行や列が多少ずれても読めます。1 件は「No.」に番号がある行から次の番号の前の行まで
 - `.xls`（古い形式）は読めません。Excel で `.xlsx` として保存し直してください
+
+#### スキルシートのダウンロード：ヘッダーの［ダウンロード］
+
+今表示しているプロフィールと Work / Private を、スキルシート（`assets/data/format_skill_sheet.xlsx` の書式のまま）に書き込んで保存します。
+
+- **Excel**：テンプレートの書式（列幅・罫線・結合・印刷設定など）を変えずに書き込みます。案件の数だけ行が増えます
+- **PDF**：書き込んだ Excel と同じ見た目の PDF（A4）を直接保存します
+- どちらも「名前を付けて保存」のダイアログで保存先と名前を選びます（Chrome / Edge。Firefox / Safari は通常のダウンロード）
+- 保存したかどうかは画面の下に表示されます
+- ふりがな・性別・生年月日・国籍・配偶者・最寄駅・学歴は、読み込んだスキルシート（Excel）に書かれていたものをそのまま書きます（YAML / Markdown のプロフィールなら `sheet:` に書いたもの。ないものは空欄）。年齢は生年月日から、出力した日の年齢になります
+- 役割・規模は、各プロジェクトの `role` / `scale` を書きます
+- PDF の日本語フォントに [IPA P ゴシック](https://moji.or.jp/ipafont/)（IPA フォントライセンス v1.0。`assets/fonts/` に条文）を使っています
 
 #### 2. プロジェクト（Work / Private）：ヘッダーの［データ］
 
@@ -123,7 +138,7 @@ home:
   role: Web / モバイルエンジニア   # ★ 職種
   tagline: |                    # ★ 紹介文
     Flutter と Dart を中心に開発しています。
-  card:                         # 右側のカード（「キー: 値」か「キー: - 箇条書き」で自由に）
+  card:                         # （今は表示しません。書いてもエラーにはなりません）
     stack:
       - Flutter
       - Dart
@@ -223,6 +238,8 @@ projects:
       - 2024-04                      # 開始（YYYY-MM）
       - 現在                         # 終了（YYYY-MM）。進行中なら「現在」
     link: https://example.com        # なければ ""
+    role: [PL, SE]                   # 役割（詳細に表示・フィルターで絞り込める）
+    scale: 全体 20名（チーム 5名）     # 規模（文章。最初の人数でフィルターの「規模（人数）」に分ける）
     server_os: [Linux]
     db: [PostgreSQL]
     tools: [Git, VSCode]
@@ -323,6 +340,12 @@ flutter test
 | `project_detail_navigation_test.dart` | 案件の詳細：‹ › / ← → で前後に移る・端では押せない・PC はダイアログ／タブレット・スマホは全画面・画面共有向けの拡大（ボタン・キーボード・Mac / Windows の ⌘ / Ctrl ＋ 0） |
 | `min_width_scaler_test.dart` | 320px より狭い画面での縮小表示 |
 | `skill_sheet_test.dart` | スキルシート（Excel）から YAML を作る：テンプレートが Work / Private のサンプルと同じ中身になるか・Private の見分け・期間（全角の数字も）・作業工程・セル内の見出し（「AWS Service;」など）・技術の振り分け・読めないときのエラー・YAML の書き出し・Projects の期間の解釈 |
+| `project_role_scale_test.dart` | 役割・規模：Excel からの読み分け・人数の区分・フィルター、プロフィールの `sheet`（読み込み・テンプレート・Excel から） |
+| `skill_sheet_writer_test.dart` | ［ダウンロード］の Excel：セルごとの中身（期間・業務概要・役割 / 規模・技術・作業工程）・結合 / 入力規則 / 行・ふりがななどの個人の項目と年齢・開発経験の文章・0 件・読み直すと同じ中身・テンプレートの書式がそのまま |
+| `hero_section_test.dart` | Home：中央寄せ・ボタンの下のまとめ（開発経験・件数・直近のプロジェクト）の中身と並び・押したとき・作り直し |
+| `skill_sheet_pdf_test.dart` | PDF：幅に合わせて縮める・ページの分け方（行の切れ目・ページより高い行）・フッター（&P/&N）・出力 |
+| `xlsx_layout_test.dart` | Excel の見た目の読み取り：セル番地・列の幅・行の高さ・結合・書式（文字・寄せ方・折り返し・罫線）・余白・フッター |
+| `download_menu_test.dart` | ［ダウンロード］：メニュー・名前を付けて保存（Excel / PDF）・ローディング・画面の下の知らせ・失敗したとき・今のデータの集め方 |
 | `skill_name_test.dart` | 技術名の表記ゆれ（末尾の記号・大文字小文字・全角・キャメル / スネーク・AWS などの先頭）・Skills の集計・Projects のフィルター |
 | `tech_catalog_test.dart` | Skills・Tools に書かれた技術の振り分け（React → Frontend など）・Tools / Skills のグループ分け |
 | `project_data_test.dart` | ［データ］：テキストの読み取り・追加・複数件のサンプル・入力フォーム・タグ入力（候補・カンマ・Backspace）・年月の選択・画面の流れ（追加・更新・戻る） |
