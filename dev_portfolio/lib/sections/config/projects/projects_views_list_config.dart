@@ -91,6 +91,9 @@ class ProjectsListConfig {
   /// 全画面のときの文字の大きさ（端末の文字サイズ設定にさらに掛ける倍率）
   static const double fullscreenTextScale = 1.15;
 
+  /// 詳細の文字の大きさの段階（［A−］［A＋］・キーボードの − ＋ で切り替える。画面共有で見やすくするため）
+  static const List<double> modalZoomLevels = [1.0, 1.15, 1.3, 1.5, 1.75, 2.0, 2.5];
+
   /// 左右の ‹ › ボタン
   static const double modalNavIconSize = 28;
   static const double modalNavGap = AppSizes.space12;

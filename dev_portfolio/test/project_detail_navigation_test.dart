@@ -11,6 +11,7 @@ import 'package:dev_portfolio/sections/config/projects/projects_views_list_confi
 import 'package:dev_portfolio/sections/projects/models/projects_model.dart';
 import 'package:dev_portfolio/sections/projects/views/project_list/project_list_modal_function.dart';
 import 'package:dev_portfolio/theme/app_theme.dart';
+import 'package:dev_portfolio/utils/platform_keys.dart';
 
 final _projects = [
   for (final t in ['案件A', '案件B', '案件C'])
@@ -73,6 +74,9 @@ TextButton _textButton(WidgetTester tester, String label) => tester.widget<TextB
     );
 
 void main() {
+  // 表示の大きさは次に開いたときも引き継ぐので、テストごとに元に戻す
+  tearDown(ProjectDetailView.reset);
+
   group('PC 幅（ダイアログ、‹ › は左右）', () {
     testWidgets('ダイアログの幅は最大幅まで（画面いっぱいにはしない）、文字の倍率はそのまま', (tester) async {
       _setScreen(tester, const Size(1400, 900));
@@ -219,5 +223,103 @@ void main() {
     expect(find.byIcon(Icons.chevron_left), findsNothing);
     expect(find.byIcon(Icons.chevron_right), findsNothing);
     expect(find.text(AppTexts.projectPosition(1, 1)), findsNothing);
+  });
+
+  group('画面共有向けの表示の大きさ', () {
+    double scale(WidgetTester tester) =>
+        MediaQuery.textScalerOf(tester.element(find.text('案件A'))).scale(10) / 10;
+
+    testWidgets('PC：A＋ で文字とダイアログが大きくなり、100% を押すと戻る', (tester) async {
+      _setScreen(tester, const Size(1600, 1200));
+      await _open(tester, index: 0, onClosed: (_) {});
+      expect(find.text(AppTexts.zoomPercent(100)), findsOneWidget);
+      expect(_iconButton(tester, Icons.text_decrease).onPressed, isNull); // いちばん小さい
+
+      await tester.tap(find.byTooltip(AppTexts.zoomIn(shortcutModifierLabel)));
+      await _settle(tester);
+      final zoom = ProjectsListConfig.modalZoomLevels[1];
+      expect(scale(tester), closeTo(zoom, 0.001));
+      expect(find.text(AppTexts.zoomPercent((zoom * 100).round())), findsOneWidget);
+      final surface = find.ancestor(of: find.text('案件A'), matching: find.byType(Material)).first;
+      expect(tester.getSize(surface).width, closeTo(ProjectsListConfig.modalMaxWidth * zoom, 0.5));
+
+      await tester.tap(find.text(AppTexts.zoomPercent((zoom * 100).round())));
+      await _settle(tester);
+      expect(scale(tester), 1);
+    });
+
+    testWidgets('PC：キーボードの ＋ − でも変えられる', (tester) async {
+      _setScreen(tester, const Size(1600, 1200));
+      await _open(tester, index: 0, onClosed: (_) {});
+      await tester.sendKeyEvent(LogicalKeyboardKey.equal);
+      await _settle(tester);
+      expect(scale(tester), closeTo(ProjectsListConfig.modalZoomLevels[1], 0.001));
+      await tester.sendKeyEvent(LogicalKeyboardKey.minus);
+      await _settle(tester);
+      expect(scale(tester), 1);
+    });
+
+    testWidgets('PC：「大きく表示」で画面いっぱいになり、次に開いたときも引き継ぐ', (tester) async {
+      const size = Size(1400, 900);
+      _setScreen(tester, size);
+      await _open(tester, index: 0, onClosed: (_) {});
+      await tester.tap(find.byTooltip(AppTexts.largeView));
+      await _settle(tester);
+
+      final surface = find.ancestor(of: find.text('案件A'), matching: find.byType(Material)).first;
+      expect(tester.getSize(surface), size);
+      expect(scale(tester), closeTo(ProjectsListConfig.fullscreenTextScale, 0.001));
+      expect(find.byTooltip(AppTexts.normalView(shortcutModifierLabel)), findsOneWidget);
+
+      await tester.tap(find.byTooltip(AppTexts.close));
+      await _settle(tester);
+      await tester.tap(find.text('open'));
+      await _settle(tester);
+      expect(find.byTooltip(AppTexts.normalView(shortcutModifierLabel)), findsOneWidget, reason: '次に開いたときも大きく表示');
+    });
+
+    testWidgets('スマホ：「大きく表示」は出さない（いつも全画面）が、文字の大きさは変えられる', (tester) async {
+      _setScreen(tester, const Size(390, 844));
+      await _open(tester, index: 0, onClosed: (_) {});
+      expect(find.byTooltip(AppTexts.largeView), findsNothing);
+      await tester.tap(find.byTooltip(AppTexts.zoomIn(shortcutModifierLabel)));
+      await _settle(tester);
+      expect(scale(tester), closeTo(ProjectsListConfig.modalZoomLevels[2], 0.001)); // 1.15 の次
+    });
+  
+    // Mac は ⌘、Windows などは Ctrl
+    for (final (name, platform, key) in [
+      ('Mac', TargetPlatform.macOS, LogicalKeyboardKey.metaLeft),
+      ('Windows', TargetPlatform.windows, LogicalKeyboardKey.controlLeft),
+    ]) {
+      testWidgets('$name：${name == 'Mac' ? '⌘' : 'Ctrl'} ＋ 0 で文字の大きさも大きく表示も元に戻す', variant: TargetPlatformVariant.only(platform), (tester) async {
+        expect(shortcutModifierLabel, name == 'Mac' ? '⌘' : 'Ctrl');
+        _setScreen(tester, const Size(1400, 900));
+        await _open(tester, index: 0, onClosed: (_) {});
+
+        await tester.tap(find.byTooltip(AppTexts.largeView));
+        await _settle(tester);
+        await tester.tap(find.byTooltip(AppTexts.zoomIn(shortcutModifierLabel)));
+        await _settle(tester);
+        expect(ProjectDetailView.large, isTrue);
+        expect(ProjectDetailView.zoom, isNotNull);
+
+        // 修飾キー ＋ ＋（=）でも大きくなる
+        final before = ProjectDetailView.zoom!;
+        await tester.sendKeyDownEvent(key);
+        await tester.sendKeyEvent(LogicalKeyboardKey.equal);
+        await tester.sendKeyUpEvent(key);
+        await _settle(tester);
+        expect(ProjectDetailView.zoom, greaterThan(before));
+
+        await tester.sendKeyDownEvent(key);
+        await tester.sendKeyEvent(LogicalKeyboardKey.digit0);
+        await tester.sendKeyUpEvent(key);
+        await _settle(tester);
+        expect(ProjectDetailView.large, isFalse);
+        expect(ProjectDetailView.zoom, isNull);
+        expect(scale(tester), 1);
+      });
+    }
   });
 }

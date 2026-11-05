@@ -21,6 +21,14 @@ class Profile {
   final String style;
   final String closing;
 
+  /// 直近 / 過去の開発経験（複数行。スキルシートの Excel から読み込んだときに入る）
+  final String recent;
+  final String past;
+
+  /// 直近 / 過去の主な技術（分類 → 技術）
+  final Map<String, List<String>> recentTech;
+  final Map<String, List<String>> pastTech;
+
   const Profile({
     required this.name,
     required this.role,
@@ -31,6 +39,10 @@ class Profile {
     this.strengths = '',
     this.style = '',
     this.closing = '',
+    this.recent = '',
+    this.past = '',
+    this.recentTech = const {},
+    this.pastTech = const {},
   });
 
   /// まだ読み込んでいないとき（入力画面の後ろに出す空の表示）
@@ -39,7 +51,10 @@ class Profile {
   // YAML で使えるキー
   static const _topKeys = {'home', 'about'};
   static const _homeKeys = {'name', 'role', 'tagline', 'card'};
-  static const _aboutKeys = {'intro', 'domains', 'strengths', 'style', 'closing'};
+  static const _aboutKeys = {
+    'intro', 'domains', 'strengths', 'style', 'closing',
+    'recent', 'recent_tech', 'past', 'past_tech',
+  };
 
   /// YAML の文字列を読み取る。形式が違うときは errors に理由を入れて返す（profile は null）
   static ProfileParseResult parse(String text) {
@@ -98,6 +113,27 @@ class Profile {
       return v.where((e) => e != null).map((e) => '$e'.trim()).where((e) => e.isNotEmpty).toList();
     }
 
+    /// 「分類: のあとに - 箇条書き」（1 つだけなら「分類: 値」でもよい）
+    Map<String, List<String>> groups_(YamlMap m, String section, String key) {
+      final v = m[key];
+      if (v == null) return const {};
+      if (v is! YamlMap) {
+        errors.add(ProfileTexts.errorNotMapField('$section.$key'));
+        return const {};
+      }
+      final result = <String, List<String>>{};
+      v.forEach((k, items) {
+        if (items is YamlMap) {
+          errors.add(ProfileTexts.errorCardValue('$section.$key.$k'));
+        } else if (items is YamlList) {
+          result['$k'] = items.where((e) => e != null).map((e) => '$e'.trim()).where((e) => e.isNotEmpty).toList();
+        } else if (items != null && '$items'.trim().isNotEmpty) {
+          result['$k'] = ['$items'.trim()];
+        }
+      });
+      return result;
+    }
+
     final card = <String, Object>{};
     final rawCard = home['card'];
     if (rawCard != null) {
@@ -126,6 +162,10 @@ class Profile {
       strengths: text_(about, 'about', 'strengths'),
       style: text_(about, 'about', 'style'),
       closing: text_(about, 'about', 'closing'),
+      recent: text_(about, 'about', 'recent'),
+      past: text_(about, 'about', 'past'),
+      recentTech: groups_(about, 'about', 'recent_tech'),
+      pastTech: groups_(about, 'about', 'past_tech'),
     );
 
     return errors.isEmpty ? ProfileParseResult.ok(profile) : ProfileParseResult.error(errors);

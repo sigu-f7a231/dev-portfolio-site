@@ -36,6 +36,8 @@ dependencies:
   yaml: ^3.1.2
   file_picker: ^8.0.0
   web: ^1.1.1 # dart:html の後継（sessionStorage・ダウンロード・イベント送信）
+  archive: ^4.0.0 # Excel（.xlsx は zip）を開く
+  xml: ^6.5.0 # Excel の中の XML を読む
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
@@ -64,6 +66,12 @@ flutter:
     - assets/data/format_work.md
     - assets/data/format_private.md
     - assets/data/format_profile.md
+    - assets/data/format_skill_sheet.xlsx # スキルシート（Excel）のテンプレート
+    # ［データ］→ 追加 → 複数件の「サンプルを入力欄に入れる」（2 件以上入ったサンプル）
+    - assets/data/sample_work_multi.yaml
+    - assets/data/sample_work_multi.md
+    - assets/data/sample_private_multi.yaml
+    - assets/data/sample_private_multi.md
     # 起動時に指定したプロフィール（dart run tool/run.dart xxx.yaml がここにコピーする。Git には含めない）
     - assets/profile/
 

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../config/header_config.dart';
 import '../../theme/app_theme.dart';
 import '../../theme/app_styles.dart';
-import 'yaml_upload_dialog.dart';
+import 'project_data_dialog.dart';
 import 'header_parts.dart';
 import '../../constants/app_sizes.dart';
 import '../../constants/app_texts.dart';
@@ -29,12 +29,9 @@ class DesktopHeader extends StatelessWidget {
     required this.activeSection,
   });
 
-  // Work / Private のアップロード画面（中身は yaml_upload_dialog.dart で共通）
-  void _showWorkUploadDialog(BuildContext context) =>
-      showYamlUploadDialog(context, dataType: 'work', onSaved: onYamlStateChanged);
-
-  void _showPrivateUploadDialog(BuildContext context) =>
-      showYamlUploadDialog(context, dataType: 'private', onSaved: onYamlStateChanged);
+  // ［データ］：Work / Private のプロジェクトの追加・更新（中身は project_data_dialog.dart）
+  void _showDataDialog(BuildContext context) =>
+      showProjectDataDialog(context, onSaved: onYamlStateChanged);
 
   @override
   Widget build(BuildContext context) {
@@ -89,19 +86,11 @@ class DesktopHeader extends StatelessWidget {
 
                 // アクション
                 HeaderUploadButton(
-                  icon: Icons.work_outline,
-                  label: AppTexts.work,
-                  tooltip: AppTexts.workUploadTooltip,
+                  icon: Icons.dataset_outlined,
+                  label: DataTexts.button,
+                  tooltip: DataTexts.buttonTooltip,
                   showLabel: showUploadLabel,
-                  onPressed: () => _showWorkUploadDialog(context),
-                ),
-                const SizedBox(width: HeaderConfig.uploadGap),
-                HeaderUploadButton(
-                  icon: Icons.lock_outline,
-                  label: AppTexts.private,
-                  tooltip: AppTexts.privateUploadTooltip,
-                  showLabel: showUploadLabel,
-                  onPressed: () => _showPrivateUploadDialog(context),
+                  onPressed: () => _showDataDialog(context),
                 ),
                 VerticalDivider(
                   width: AppSizes.space24,

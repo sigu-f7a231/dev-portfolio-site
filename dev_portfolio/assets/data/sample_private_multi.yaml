@@ -1,0 +1,75 @@
+# ============================================================
+# Private（個人開発のプロジェクト）を複数件まとめて追加するときのサンプル（3 件）
+# - 書き方は format_private.yaml と同じ。「- title:」から 1 件ずつ書く
+# - 技術は [A, B] の形でも、「- A」を 1 行ずつ並べてもよい。該当しないものは 利用なし
+# - Private には workflow を書かない
+# ============================================================
+projects:
+  - title: サンプル・プライベートプロジェクト
+    description: 個人開発によるWebアプリケーション制作
+    details: |
+      モダンな技術スタックを用いたフルスタック開発の検証。
+      UI/UXの設計からレスポンシブ対応、コンテナ化までを一人で担当。
+    server_os: [Windows]
+    db: [利用なし]
+    tools: [GitHub, VSCode]
+    backend_frameworks: [Node.js]
+    frontend_frameworks: [React, Next.js]
+    ui_frameworks: [利用なし]
+    testing_frameworks: [利用なし]
+    cloud_platforms: [利用なし]
+    aws_services: [利用なし]
+    azure_services: [利用なし]
+    gcp_services: [利用なし]
+    container: [Docker]
+    container_orchestration: [利用なし]
+    ai_services: [利用なし]
+    skills: [JavaScript, TypeScript, HTML, CSS, YAML]
+    period: [2024-01, 2024-06]
+    link: https://sigu-f7a231.github.io/my-portfolio/
+
+  - title: サンプル・家計簿アプリ
+    description: 毎日の支出を記録してグラフで見られるスマートフォンアプリ
+    details: |
+      Flutter で iOS / Android の両方に対応。
+      データは Firebase に保存し、月ごとの集計をグラフで表示。
+    server_os: [macOS]
+    db: [Firestore]
+    tools: [GitHub, Android Studio, Xcode]
+    backend_frameworks: [利用なし]
+    frontend_frameworks: [Flutter]
+    ui_frameworks: [利用なし]
+    testing_frameworks: [利用なし]
+    cloud_platforms: [Firebase]
+    aws_services: [利用なし]
+    azure_services: [利用なし]
+    gcp_services: [利用なし]
+    container: [利用なし]
+    container_orchestration: [利用なし]
+    ai_services: [利用なし]
+    skills: [Dart]
+    period: [2023-05, 2023-08]
+    link: ""
+
+  - title: サンプル・技術ブログ
+    description: 学んだことをまとめる個人の技術ブログ
+    details: |
+      Markdown で記事を書き、静的サイトとして公開。
+      記事の下書きの見直しに生成 AI を活用。
+    server_os: [利用なし]
+    db: [利用なし]
+    tools: [GitHub, VSCode]
+    backend_frameworks: [利用なし]
+    frontend_frameworks: [Next.js]
+    ui_frameworks: [Tailwind CSS]
+    testing_frameworks: [利用なし]
+    cloud_platforms: [Vercel]
+    aws_services: [利用なし]
+    azure_services: [利用なし]
+    gcp_services: [利用なし]
+    container: [利用なし]
+    container_orchestration: [利用なし]
+    ai_services: [ChatGPT]
+    skills: [TypeScript, Markdown]
+    period: [2024-08, 現在]
+    link: ""

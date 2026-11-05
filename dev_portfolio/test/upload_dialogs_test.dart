@@ -547,4 +547,41 @@ private:
       expect(find.text(ProfileTexts.setupTitle), findsOneWidget); // 入力画面に戻る
     });
   });
+
+  group('最初の入力画面：入力方法（Excel / YAML・Markdown）', () {
+    testWidgets('はじめは YAML / Markdown。Excel に切り替えると Excel のボタンだけになる', (tester) async {
+      await _pumpOpener(tester, showProfileSetupDialog);
+      expect(find.text(ExcelTexts.methodExcel), findsOneWidget);
+      expect(find.text(AppTexts.pasteText), findsOneWidget);
+      expect(find.text(ExcelTexts.chooseExcel), findsNothing);
+
+      await tester.tap(find.text(ExcelTexts.methodExcel));
+      await tester.pumpAndSettle();
+      expect(find.text(ExcelTexts.saveTemplate), findsOneWidget);
+      expect(find.text(ExcelTexts.chooseExcel), findsOneWidget);
+      expect(find.text(AppTexts.pasteText), findsNothing);
+      expect(find.text(ExcelTexts.steps.first), findsOneWidget);
+      expect(_uploadButton(tester).onPressed, isNull);
+
+      // Excel テンプレートの保存（テストでは保存先がないので、エラーにならないことだけ確かめる）
+      await tester.tap(find.text(ExcelTexts.saveTemplate));
+      await tester.pumpAndSettle();
+      expect(find.textContaining(AppTexts.downloadFailed('').trim()), findsNothing);
+    });
+
+    testWidgets('YAML を読み込んだあとに切り替えると、選択は取り消される', (tester) async {
+      await _pumpOpener(tester, showProfileSetupDialog);
+      await _paste(tester, _profileYaml);
+      expect(_uploadButton(tester).onPressed, isNotNull);
+
+      await tester.tap(find.text(ExcelTexts.methodExcel));
+      await tester.pumpAndSettle();
+      expect(_uploadButton(tester).onPressed, isNull);
+      expect(find.text(AppTexts.noFileChosen), findsOneWidget);
+
+      await tester.tap(find.text(ExcelTexts.methodText));
+      await tester.pumpAndSettle();
+      expect(_uploadButton(tester).onPressed, isNull);
+    });
+  });
 }

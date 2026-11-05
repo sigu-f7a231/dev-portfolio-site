@@ -22,3 +22,6 @@ class SessionStore {
 
 /// Web 以外では送り先がないので何もしない
 void dispatchBrowserEvent(String name) {}
+
+/// Web 以外ではブラウザの拡大・縮小がないので何もしない
+void Function() blockBrowserZoomKeys() => () {};

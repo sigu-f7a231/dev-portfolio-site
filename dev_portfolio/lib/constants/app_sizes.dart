@@ -98,6 +98,16 @@ class AppSizes {
   // ----------------------------------------------------------
   static const double uploadDialogWidth = 450;
 
+  /// プロジェクトの入力フォームの期間（開始・終了）の欄の幅（狭い画面では縦に並ぶ）
+  static const double projectFormPeriodWidth = 180;
+
+  /// 年と月を選ぶ画面（lib/widgets/year_month_picker.dart）
+  static const double yearMonthPickerWidth = 360;
+  static const double yearMonthPickerGridHeight = 232;
+  static const double yearMonthPickerCellAspect = 2.2;
+  static const int yearMonthPickerFirstYear = 1980; // 選べるいちばん前の年
+  static const int yearMonthPickerYearsAhead = 5; // 今年から何年先まで選べるか
+
   /// プロフィール入力画面：見出し右の ⓘ ボタンの幅・手順の番号の丸
   static const double profileHelpButtonSize = 48;
   static const double profileStepRadius = 12;

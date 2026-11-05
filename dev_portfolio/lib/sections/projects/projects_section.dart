@@ -8,6 +8,7 @@ import 'projects_toolbar.dart';
 import 'filters/ui/project_filter_panel.dart';
 import 'filters/ui/project_active_filters.dart';
 import 'filters/state/project_filter_state.dart';
+import 'sort/project_sort.dart';
 import '../config/projects/projects_section_config.dart';
 import '../../theme/app_theme.dart';
 import '../../constants/app_sizes.dart';
@@ -15,7 +16,8 @@ import '../../widgets/app_loading_indicator.dart';
 import '../../widgets/app_filter_modal.dart';
 
 /// Projects セクション
-/// 状態（Work/Private・表示形式・フィルター）はここで持ち、ツールバー・パネル・一覧に渡す
+/// 状態（Work/Private・表示形式・フィルター・並び替え）はここで持ち、ツールバー・パネル・一覧に渡す
+/// 並び替えは Work / Private を切り替えてもそのまま
 class ProjectsSection extends StatefulWidget {
   const ProjectsSection({super.key});
 
@@ -31,6 +33,7 @@ class _ProjectsSectionState extends State<ProjectsSection> {
   bool _showCollection = false;
   bool _filterOpen = false;
   ProjectFilterState _filterState = ProjectFilterState.initial();
+  ProjectSort _sort = ProjectSort.initial;
 
   @override
   void initState() {
@@ -99,6 +102,8 @@ class _ProjectsSectionState extends State<ProjectsSection> {
                   onFilterPressed: () => _openFilter(current),
                   showCollection: _showCollection,
                   onViewChanged: (v) => setState(() => _showCollection = v),
+                  sort: _sort,
+                  onSortChanged: (s) => setState(() => _sort = s),
                 ),
 
                 // 適用中のフィルター
@@ -122,6 +127,7 @@ class _ProjectsSectionState extends State<ProjectsSection> {
                         projects: current,
                         filterState: _filterState,
                         showCollection: _showCollection,
+                        sort: _sort,
                       )
                     : const SizedBox(
                         height: ProjectsSectionConfig.loadingHeight,

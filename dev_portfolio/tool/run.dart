@@ -4,6 +4,7 @@
 //
 //   dart run tool/run.dart my_profile.yaml          … my_profile.yaml の内容で Home / About を表示
 //   dart run tool/run.dart my_profile.md            … Markdown で書いたプロフィールでもよい（format_profile.md の書き方）
+//   dart run tool/run.dart skill_sheet.xlsx         … スキルシート（Excel。format_skill_sheet.xlsx の形式）から作る
 //   dart run tool/run.dart                          … 起動後に「あなたのことを教えてください」を表示
 //   dart run tool/run.dart my_profile.yaml --release … 2 つ目以降の引数は flutter run にそのまま渡す
 //
@@ -18,6 +19,7 @@ import 'dart:io';
 
 import 'package:dev_portfolio/utils/data_format.dart';
 import 'package:dev_portfolio/utils/profile_bundle.dart';
+import 'package:dev_portfolio/utils/skill_sheet.dart';
 import 'package:dev_portfolio/constants/app_texts.dart';
 
 const _profileAsset = 'assets/profile/profile.yaml';
@@ -36,7 +38,9 @@ Future<void> main(List<String> args) async {
   final passThrough = <String>[];
   for (final a in args) {
     final lower = a.toLowerCase();
-    if (yamlPath == null && !a.startsWith('-') && hasAcceptedExtension(lower)) {
+    if (yamlPath == null &&
+        !a.startsWith('-') &&
+        (hasAcceptedExtension(lower) || isSkillSheetFile(lower))) {
       yamlPath = a;
     } else {
       passThrough.add(a);
@@ -53,7 +57,25 @@ Future<void> main(List<String> args) async {
     }
     // 起動前に、アプリと同じ確認をする（YAML / Markdown を見分け、Markdown は YAML として読める形に変える。
     // work / private も書かれていれば、それぞれ Work / Private として確かめる）
-    final bundle = readProfileBundle(src.readAsStringSync(), fileName: yamlPath);
+    // スキルシート（Excel）は、アプリと同じく中身から YAML を作ってから確かめる
+    final String input;
+    var fileName = yamlPath;
+    if (isSkillSheetFile(yamlPath)) {
+      final sheet = convertSkillSheet(src.readAsBytesSync(), fileName: yamlPath);
+      if (!sheet.isOk) {
+        stderr.writeln('スキルシートとして読み込めません: $yamlPath');
+        for (final e in sheet.errors) {
+          stderr.writeln('  ・$e');
+        }
+        stderr.writeln('ひな形：assets/data/format_skill_sheet.xlsx');
+        exit(65);
+      }
+      input = sheet.yamlText!;
+      fileName = skillSheetYamlName(yamlPath);
+    } else {
+      input = src.readAsStringSync();
+    }
+    final bundle = readProfileBundle(input, fileName: fileName);
     if (!bundle.isOk) {
       stderr.writeln('プロフィールとして読み込めません: $yamlPath');
       for (final e in bundle.errors) {

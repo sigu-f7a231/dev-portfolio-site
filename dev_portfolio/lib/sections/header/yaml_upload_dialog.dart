@@ -12,6 +12,8 @@
 // 3. 反映中は起動時と同じ全画面ローディング（最低 5 秒）を出してから画面に戻す
 // - テンプレートの保存はこの画面だけ（ⓘ の説明画面には置かない）
 // - こちらは任意なので、キャンセルで閉じられる
+// - [append] のとき（ヘッダーの［データ］→ 追加 → ファイル・貼り付けで追加）は、置き換えずに今の一覧の後ろに足す
+//   （確認画面は project_add_confirm.dart の追加用のもの）
 import 'dart:convert';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
@@ -28,24 +30,40 @@ import '../../utils/projects_yaml_validator.dart';
 import '../../utils/data_format.dart';
 import '../../utils/projects_diff.dart';
 import '../../utils/browser/browser.dart';
+import '../../utils/project_append.dart';
+import 'project_add_confirm.dart';
 
 /// アップロード画面を開く。保存できたら [onSaved]（Skills / Projects の読み直し）を呼ぶ
 Future<void> showYamlUploadDialog(
   BuildContext context, {
   required String dataType, // 'work' or 'private'
   VoidCallback? onSaved,
+  bool append = false, // true なら置き換えずに今の一覧の後ろに足す
+  VoidCallback? onBack, // ［データ］の画面から開いたとき：［戻る］でこの画面を閉じてから呼ぶ
 }) {
   return showDialog<void>(
     context: context,
-    builder: (_) => _YamlUploadDialog(dataType: dataType, onSaved: onSaved),
+    builder: (_) => _YamlUploadDialog(
+      dataType: dataType,
+      onSaved: onSaved,
+      append: append,
+      onBack: onBack,
+    ),
   );
 }
 
 class _YamlUploadDialog extends StatefulWidget {
   final String dataType;
   final VoidCallback? onSaved;
+  final bool append;
+  final VoidCallback? onBack;
 
-  const _YamlUploadDialog({required this.dataType, this.onSaved});
+  const _YamlUploadDialog({
+    required this.dataType,
+    this.onSaved,
+    this.append = false,
+    this.onBack,
+  });
 
   @override
   State<_YamlUploadDialog> createState() => _YamlUploadDialogState();
@@ -125,6 +143,17 @@ class _YamlUploadDialogState extends State<_YamlUploadDialog> {
     final text = _text;
     if (text == null) return;
 
+    // 追加：今の一覧の後ろに足す（確認画面・保存は追加用のもの）
+    if (widget.append) {
+      await confirmAndAppendProjects(
+        context,
+        dataType: widget.dataType,
+        adding: projectsOf(text),
+        onSaved: widget.onSaved,
+      );
+      return;
+    }
+
     final ok = await confirmUpload(
       context,
       fileName: _fileName!,
@@ -170,7 +199,9 @@ class _YamlUploadDialogState extends State<_YamlUploadDialog> {
           const SizedBox(width: AppSizes.profileHelpButtonSize),
           Expanded(
             child: Text(
-              _isWork ? AppTexts.workUploadTitle : AppTexts.privateUploadTitle,
+              widget.append
+                  ? DataTexts.appendTitle(_label)
+                  : (_isWork ? AppTexts.workUploadTitle : AppTexts.privateUploadTitle),
               textAlign: TextAlign.center,
               style: AppStyles.dialogTitle(context),
             ),
@@ -193,7 +224,9 @@ class _YamlUploadDialogState extends State<_YamlUploadDialog> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                _isWork ? AppTexts.workUploadDescription : AppTexts.privateUploadDescription,
+                widget.append
+                    ? DataTexts.appendDescription
+                    : (_isWork ? AppTexts.workUploadDescription : AppTexts.privateUploadDescription),
                 style: AppStyles.dialogBody(context),
               ),
               const SizedBox(height: AppSizes.space16),
@@ -234,6 +267,17 @@ class _YamlUploadDialogState extends State<_YamlUploadDialog> {
           onPressed: () => Navigator.of(context).pop(),
           child: const Text(AppTexts.cancel),
         ),
+        // ［データ］の画面から開いたときは、前の選択に戻れる
+        if (widget.onBack != null)
+          OutlinedButton(
+            onPressed: _picking
+                ? null
+                : () {
+                    Navigator.of(context).pop();
+                    widget.onBack!();
+                  },
+            child: const Text(DataTexts.back),
+          ),
         // 正しい YAML を読み込むまで押せない
         FilledButton.icon(
           onPressed: _text == null || _picking ? null : _upload,

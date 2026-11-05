@@ -1,3 +1,6 @@
+import '../../../utils/skill_name.dart';
+import '../../../utils/tech_catalog.dart';
+
 class Project {
   /// YAML で「該当なし」を表す値（集計・フィルター候補・詳細表示から除く）
   static const String notUsed = '利用なし';
@@ -102,7 +105,10 @@ class Project {
     return '';
   }
 
-  factory Project.fromMap(Map<String, dynamic> json) {
+  /// Skills・Tools に書かれたフロントエンド・バックエンドなどの技術は、本来の分類に移してから読む
+  /// （lib/utils/tech_catalog.dart の redistributeProject）
+  factory Project.fromMap(Map<String, dynamic> raw) {
+    final json = redistributeProject(raw);
     return Project(
       title: json['title'] ?? '',
       description: json['description'] ?? '',
@@ -142,28 +148,32 @@ class Project {
   List<String> _split(String v) =>
       v.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toList();
 
+  /// 分けたうえで、同じもの（表記ゆれ・AWS などの先頭の違いを含む）を 1 つにする（lib/utils/skill_name.dart）
+  List<String> _unique(String v, [String? category]) =>
+      uniqueSkillNames(_split(v), category: category);
+
   // =========================
   // FILTER GETTERS（UI/Filter用）
   // =========================
-  List<String> get skillsList => _split(skills);
-  List<String> get serverOSList => _split(serverOS);
-  List<String> get dbList => _split(db);
+  List<String> get skillsList => _unique(skills);
+  List<String> get serverOSList => _unique(serverOS);
+  List<String> get dbList => _unique(db);
 
-  List<String> get toolsList => _split(tools);
+  List<String> get toolsList => _unique(tools);
 
-  List<String> get backendList => _split(backendFrameworks);
-  List<String> get frontendList => _split(frontendFrameworks);
-  List<String> get uiList => _split(uiFrameworks);
-  List<String> get testingList => _split(testingFrameworks);
+  List<String> get backendList => _unique(backendFrameworks);
+  List<String> get frontendList => _unique(frontendFrameworks);
+  List<String> get uiList => _unique(uiFrameworks);
+  List<String> get testingList => _unique(testingFrameworks);
 
-  List<String> get cloudList => _split(cloudPlatforms);
-  List<String> get awsList => _split(awsServices);
-  List<String> get azureList => _split(azureServices);
-  List<String> get gcpList => _split(gcpServices);
+  List<String> get cloudList => _unique(cloudPlatforms);
+  List<String> get awsList => _unique(awsServices, 'aws_services');
+  List<String> get azureList => _unique(azureServices, 'azure_services');
+  List<String> get gcpList => _unique(gcpServices, 'gcp_services');
 
-  List<String> get containerList => _split(container);
-  List<String> get orchestrationList => _split(containerOrchestration);
-  List<String> get aiList => _split(aiServices);
+  List<String> get containerList => _unique(container);
+  List<String> get orchestrationList => _unique(containerOrchestration);
+  List<String> get aiList => _unique(aiServices);
 
   List<String> get workflowList =>
       workflow.entries.where((e) => e.value).map((e) => e.key).toList();
@@ -171,37 +181,30 @@ class Project {
   // =========================
   // PERIOD SORT FIX
   // =========================
+  /// 期間の文字から年月を順に読む（「2020-03 ~ 2020-10」「2020/03 から 2020/１０」「2020年3月〜」など）
+  static List<DateTime> _yearMonths(String s) => [
+        for (final m in RegExp(r'(\d{4})\s*[-/.年]\s*(\d{1,2})(?!\d)').allMatches(toHalfWidth(s)))
+          if (int.parse(m.group(2)!) case final month when month >= 1 && month <= 12)
+            DateTime(int.parse(m.group(1)!), month),
+      ];
+
   DateTime get periodStart {
-    try {
-      final start = period.split('~').first.trim();
-      final parts = start.split('-');
-      return DateTime(int.parse(parts[0]), int.parse(parts[1]));
-    } catch (_) {
-      return DateTime(1970, 1);
-    }
+    final ym = _yearMonths(period);
+    return ym.isEmpty ? DateTime(1970, 1) : ym.first;
   }
 
   DateTime get periodEnd {
-    try {
-      final end = period.split('~').last.trim();
-
-      if (end.contains('現在') || end.toLowerCase().contains('present')) {
-        return DateTime.now();
-      }
-
-      final parts = end.split('-');
-      return DateTime(int.parse(parts[0]), int.parse(parts[1]));
-    } catch (_) {
-      return DateTime.now();
-    }
+    if (isOngoing) return DateTime.now();
+    final ym = _yearMonths(period);
+    // 終わりが書かれていないときは、進行中ではなく開始と同じ月とみなす
+    if (ym.length >= 2) return ym[1];
+    return ym.isEmpty ? DateTime.now() : ym.first;
   }
 
-  /// 期間が「YYYY-MM ~ YYYY-MM」（終わりは「現在」/ present も可）の形で読み取れるか
+  /// 期間が「開始 ~ 終了」（終わりは「現在」/ present も可）の形で、年月として読み取れるか
   bool get hasValidPeriod {
-    final parts = period.split('~');
-    if (parts.length != 2) return false;
-    bool isYearMonth(String s) => RegExp(r'^\d{4}-\d{1,2}$').hasMatch(s.trim());
-    return isYearMonth(parts[0]) && (isOngoing || isYearMonth(parts[1]));
+    final ym = _yearMonths(period);
+    return ym.isNotEmpty && (isOngoing || ym.length >= 2);
   }
 
   /// 期間の長さ（月数）。開始月と終了月の両方を含めて数える（例：2023-04〜2023-09 は 6 か月）

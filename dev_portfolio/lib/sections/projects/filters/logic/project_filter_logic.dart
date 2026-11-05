@@ -1,5 +1,6 @@
 import '../../models/projects_model.dart';
 import '../state/project_filter_state.dart';
+import '../../../../utils/skill_name.dart';
 
 class WorkflowKeyMapper {
   /// 日本語 → workflowキー
@@ -35,11 +36,13 @@ class ProjectFilterLogic {
     /// ---------------------------
     /// 通常フィルター（部分一致）
     /// ---------------------------
-    bool match(List<String> selected, List<String> values) {
+    bool match(List<String> selected, List<String> values, [String? category]) {
       if (selected.isEmpty) return true;
 
+      // 表記ゆれ（大文字・小文字、全角・半角、前後の記号、空白、AWS などの先頭）を無視して部分一致で比べる
       return selected.every(
-        (s) => values.any((v) => v.contains(s)),
+        (s) => values.any((v) =>
+            skillKey(v, category: category).contains(skillKey(s, category: category))),
       );
     }
 
@@ -129,13 +132,13 @@ class ProjectFilterLogic {
           match(f['cloudPlatforms'] ?? [], getValues(p, 'cloudPlatforms'));
 
       final okAws =
-          match(f['awsServices'] ?? [], getValues(p, 'awsServices'));
+          match(f['awsServices'] ?? [], getValues(p, 'awsServices'), 'aws_services');
 
       final okAzure =
-          match(f['azureServices'] ?? [], getValues(p, 'azureServices'));
+          match(f['azureServices'] ?? [], getValues(p, 'azureServices'), 'azure_services');
 
       final okGcp =
-          match(f['gcpServices'] ?? [], getValues(p, 'gcpServices'));
+          match(f['gcpServices'] ?? [], getValues(p, 'gcpServices'), 'gcp_services');
 
       final okContainer =
           match(f['container'] ?? [], getValues(p, 'container'));

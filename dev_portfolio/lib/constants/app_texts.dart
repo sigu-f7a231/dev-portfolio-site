@@ -201,6 +201,32 @@ class AppTexts {
   static const String filterTools = 'Tools';
   static const String filterBackend = 'Backend';
   static const String filterFrontend = 'Frontend';
+  // 案件の詳細：画面共有向けの表示の大きさ
+  // [mod] は修飾キーの名前（Mac は ⌘、Windows などは Ctrl。lib/utils/platform_keys.dart）
+  static String zoomOut(String mod) => '文字を小さく（− / $mod＋−）';
+  static String zoomIn(String mod) => '文字を大きく（＋ / $mod＋＋）';
+  static String zoomPercent(int percent) => '$percent%';
+  static String zoomReset(String mod) => '元の大きさに戻す（$mod＋0。0 は文字の大きさだけ戻す）';
+  static const String largeView = '大きく表示（画面共有向け・F）';
+  static String normalView(String mod) => '元の大きさに戻す（F / $mod＋0）';
+  // Projects の並び替え（lib/sections/projects/sort/project_sort.dart）
+  static const String sort = '並び替え';
+  static String sortCurrent(String name) => '並び：$name';
+  static const String sortStartOldest = '開始が古い順';
+  static const String sortStartNewest = '開始が新しい順';
+  static const String sortEndNewest = '終了が新しい順';
+  static const String sortDurationLongest = '期間が長い順';
+  static const String sortDurationShortest = '期間が短い順';
+  static const String sortTitle = '名前順';
+  static const String filterUi = 'UI Frameworks';
+  static const String filterTesting = 'Testing Frameworks';
+  static const String filterCloud = 'Cloud Platforms';
+  static const String filterAws = 'AWS';
+  static const String filterAzure = 'Azure';
+  static const String filterGcp = 'GCP';
+  static const String filterContainer = 'Container';
+  static const String filterOrchestration = 'Container Orchestration';
+  static const String filterAi = 'AI Services';
   static const String filterSkills = 'Skills';
   static const String filterWorkflow = 'Workflow';
   static const String filterPeriod = '期間';
@@ -283,6 +309,8 @@ class AppTexts {
   static const String categoryGroupDev = '開発';
   static const String categoryGroupCloud = 'クラウド・AI';
   static const String categoryGroupProcess = '工程';
+  static const String categoryGroupTools = 'ツール';
+  static const String categoryGroupSkills = 'スキル';
   static const String privateHidden = 'Private のため表示できません';
 
   /// カテゴリキー → 表示名
@@ -290,6 +318,13 @@ class AppTexts {
     'server_os': 'OS',
     'db': 'DB',
     'tools': 'Tools',
+    'tools_vcs': 'Tools：バージョン管理',
+    'tools_dev': 'Tools：エディタ・開発ツール',
+    'tools_env': 'Tools：環境・ミドルウェア',
+    'tools_cicd': 'Tools：CI/CD・構成管理',
+    'tools_pm': 'Tools：プロジェクト管理・連絡',
+    'tools_design': 'Tools：デザイン',
+    'tools_other': 'Tools：その他',
     'backend_frameworks': 'Backend',
     'frontend_frameworks': 'Frontend',
     'ui_frameworks': 'UI Frameworks',
@@ -302,6 +337,12 @@ class AppTexts {
     'container_orchestration': 'Container Orchestration',
     'ai_services': 'AI Services',
     'skills': 'Skills',
+    'skills_lang': 'Skills：プログラミング言語',
+    'skills_markup': 'Skills：マークアップ・スタイルシート',
+    'skills_data': 'Skills：データ形式・クエリ',
+    'skills_arch': 'Skills：アーキテクチャ・設計',
+    'skills_lib': 'Skills：ライブラリ',
+    'skills_other': 'Skills：その他',
     'workflow': 'Workflow',
   };
 }
@@ -325,6 +366,8 @@ class AboutContent {
   static const String domainsLabel = '得意な領域';
   static const String strengthsLabel = '強み';
   static const String styleLabel = '開発スタイル';
+  static const String recentLabel = '直近の開発経験';
+  static const String pastLabel = '過去の開発経験';
 }
 
 /// プロフィール（Home / About）の入力画面・説明・エラー
@@ -333,8 +376,9 @@ class ProfileTexts {
 
   static const String setupTitle = 'あなたのことを教えてください';
   static const String setupLead =
-      'Home と About に表示するあなたのプロフィールを、YAML か Markdown で読み込みます。'
-      '同じファイルに Work / Private も書けば、Skills と Projects もまとめて読み込めます。'
+      'Home と About に表示するあなたのプロフィールを読み込みます。'
+      'スキルシート（Excel）か、YAML / Markdown のどちらで入力するかを選んでください。'
+      'Excel のプロジェクトや、同じファイルに書いた Work / Private も、Skills と Projects にまとめて読み込めます。'
       '読み込むまでこの画面は閉じられません。';
   static const List<String> setupSteps = [
     '「テンプレートを保存」か「テンプレートをコピー」で、ひな形を用意する',
@@ -342,7 +386,7 @@ class ProfileTexts {
     '「ファイルを選択」か「テキストを貼り付け」で読み込み、「アップロード」で内容を確認して反映する',
   ];
   static const String setupNextTime = '次回からは、YAML を指定して起動するとこの画面は出ません：';
-  static const String runCommand = 'dart run tool/run.dart あなたのファイル.yaml（.md も可）';
+  static const String runCommand = 'dart run tool/run.dart あなたのファイル.yaml（.md・.xlsx も可）';
 
   static const String saveTemplate = 'テンプレートを保存';
   static const String replaceTarget = 'プロフィール（Home / About）';
@@ -354,6 +398,8 @@ class ProfileTexts {
   static const String fieldCard = '右側のカード';
   static const String fieldIntro = '自己紹介';
   static const String fieldClosing = '締めの一言';
+  static const String fieldRecentTech = '直近の主な技術';
+  static const String fieldPastTech = '過去の主な技術';
   static const String upload = 'YAML をアップロード';
   static const String helpTooltip = '書き方の説明';
   static const String uploaded = 'プロフィールを読み込みました';
@@ -383,6 +429,8 @@ class ProfileTexts {
     ('about.strengths', false, '強み'),
     ('about.style', false, '開発スタイル・価値観'),
     ('about.closing', false, '締めの一言'),
+    ('about.recent / about.past', false, '直近 / 過去の開発経験（複数行。「領域：説明」の行は領域を太字で表示）'),
+    ('about.recent_tech / about.past_tech', false, '直近 / 過去の主な技術。「分類: のあとに - 箇条書き」で書きます（例：言語: - Python）'),
   ];
   static const String helpTemplate = 'ひな形（テンプレート）';
   static const String helpMarkdownTitle = 'Markdown で書く場合';
@@ -471,5 +519,186 @@ class OverwriteTexts {
   static const String question = 'それでもアップロードしますか？';
   static const String cancel = 'やめる';
   static const String overwrite = '上書きしてアップロード';
+}
+
+/// 入力方法の切り替えと、スキルシート（Excel）からの読み込み
+/// （lib/widgets/profile_setup_dialog.dart・lib/utils/skill_sheet.dart）
+class ExcelTexts {
+  ExcelTexts._();
+
+  // ---------- 入力方法 ----------
+  static const String methodLabel = '入力方法';
+  static const String methodExcel = 'Excel（スキルシート）';
+  static const String methodText = 'YAML / Markdown';
+
+  // ---------- 入力画面（Excel） ----------
+  static const List<String> steps = [
+    '「Excel テンプレートを保存」で、名前を付けてひな形を保存する（同じ形式のスキルシートがあれば不要）',
+    'Excel で氏名・過去 / 直近の開発経験・プロジェクトを書き換えて保存する',
+    '「Excel を選択」で読み込み、「アップロード」で内容を確認して反映する',
+  ];
+  static const String saveTemplate = 'Excel テンプレートを保存';
+  static const String chooseExcel = 'Excel を選択';
+  static const String chooseAnotherExcel = '別の Excel を選択';
+  static const String inputGroup = 'スキルシートを読み込む';
+  static const String excelFileDescription = 'Excel ブック';
+  static const String extensionOnly = '.xlsx / .xlsm のファイルだけ選べます（.xls は Excel で .xlsx として保存し直してください）';
+  static const String saveYaml = '作った YAML を保存';
+  static const String saveYamlNote =
+      'Excel から作った YAML を保存しておくと、次回はその YAML を指定して起動できます（下のコマンド）。';
+  static const String howItMaps = 'Excel から読み取る項目';
+  static const List<String> mapping = [
+    'Home / About：氏名、過去の開発経験・主な技術、直近の開発経験・主な技術',
+    'Work / Private：プロジェクト名、期間、業務概要、サーバ OS、DB、FW・MW ツール等、使用言語、作業工程',
+    'プロジェクト名に「プライベート」か「個人開発」が入っているものは Private（作業工程は使いません）',
+  ];
+
+  // ---------- Excel の見出し・値 ----------
+  static const String labelName = '氏名';
+  static const List<String> privateMarkers = ['プライベート', '個人開発'];
+  static const String notUsed = '利用なし';
+  static const String periodOngoing = '現在';
+
+  // ---------- 作る文言（Excel にない Home の項目） ----------
+  static const String defaultRole = 'エンジニア';
+  static String taglineLanguages(List<String> languages) =>
+      '${languages.join('・')} などを使って開発しています。';
+  static String taglineAreas(List<String> areas) => '${areas.join('、')} などに携わっています。';
+  static const String taglineFallback = 'これまでの開発経験と、関わったプロジェクトをまとめています。';
+  static String introPast(List<String> areas) => 'これまでに、${areas.join('、')} などを経験してきました。';
+  static String introRecent(List<String> areas) => '直近では、${areas.join('、')} などに取り組んでいます。';
+  static const String introFallback = 'これまでの開発経験をまとめています。';
+  static String yamlHeader(String? fileName) => [
+        if (fileName != null) '$fileName から作ったプロフィール',
+        'role（職種）などは自由に書き換えてください。書き方は format_profile.yaml を参照',
+      ].join('\n');
+
+  // ---------- エラー ----------
+  static const String notXlsx = 'Excel（.xlsx）として読み込めません。ファイルが壊れていないか確かめてください';
+  static const String nameMissing = '「氏名」の欄が見つからないか、空です';
+  static const String experienceMissing =
+      '「過去の開発経験」「直近の開発経験」が見つかりません（見出しの行のあとに、1 行ずつ「領域：説明」で書いてください）';
+}
+
+/// ヘッダーの［データ］：Work / Private のプロジェクトの追加・更新（lib/sections/header/project_data_dialog.dart）
+class DataTexts {
+  DataTexts._();
+
+  // ---------- ヘッダーのボタン ----------
+  static const String button = 'データ';
+  static const String buttonTooltip = 'Work / Private のプロジェクトを追加・更新';
+
+  // ---------- 画面 ----------
+  static const String title = 'プロジェクトの追加・更新';
+  static const String next = '次へ';
+  static const String back = '戻る';
+
+  // 各ステップの見出し
+  static const String stepAction = '何をしますか？';
+  static const String stepTarget = 'どちらのプロジェクトですか？';
+  static const String stepMethod = 'どの方法で追加しますか？';
+  static const String stepCount = '何件追加しますか？';
+  static const String stepSingleInput = 'どうやって入力しますか？';
+  static const String stepForm = '入力フォーム';
+  static const String stepText = 'テキストから追加';
+  static const String stepPick = '追加するプロジェクトを選ぶ';
+
+  // 選択肢（見出し・説明）
+  static const String add = '追加';
+  static const String addNote = '今の一覧はそのままで、新しいプロジェクトを後ろに足します';
+  static const String update = '更新';
+  static const String updateNote = 'ファイルや貼り付けた内容で、丸ごと置き換えます（これまでのアップロード画面）';
+  static const String workNote = '業務のプロジェクト';
+  static const String privateNote = '個人開発のプロジェクト';
+  static const String onScreen = '画面上で入力';
+  static const String onScreenNote = 'この画面の入力フォームや、テキストから追加します';
+  static const String existing = 'ファイル・貼り付けで追加';
+  static const String existingNote = 'これまでのアップロード画面で、ファイルやテキストを読み込んで追加します';
+  static const String single = '1 件';
+  static const String singleNote = '1 件だけ追加します';
+  static const String multiple = '複数件';
+  static const String multipleNote = 'YAML / Markdown のテキストやファイルから、まとめて追加します';
+  static const String form = '入力フォーム';
+  static const String formNote = '項目ごとに入力します';
+  static const String text = 'テキスト（YAML / Markdown）';
+  static const String textNote = 'YAML や Markdown で書いたものを貼り付けるか、ファイルを選びます';
+
+  // テキストから追加
+  static String textLead(bool single) => single
+      ? '1 件分の YAML か Markdown を貼り付けるか、ファイルを選んでください（書き方は Work / Private のテンプレートと同じ）。'
+      : '追加するプロジェクトを YAML か Markdown で貼り付けるか、ファイルを選んでください（書き方は Work / Private のテンプレートと同じ）。';
+  static const String textHint = '- title: プロジェクト名\n  description: 説明\n  period: [2024-04, 2024-09]\n  …';
+  static const String insertSample = 'サンプルを入力欄に入れる（上で選んだ形式）';
+  static String notSingle(int n) => '$n 件あります。1 件だけ書くか、前の画面で「複数件」を選んでください';
+
+  // 複数件：全部か、選んだものだけか
+  static String found(int n) => '$n 件のプロジェクトが見つかりました';
+  static const String addAll = '全部追加する';
+  static const String addSelected = '選んだものだけ追加する';
+  static String selectedCount(int n, int total) => '$total 件中 $n 件を選んでいます';
+  static const String selectAll = 'すべて選ぶ';
+  static const String selectNone = 'すべて外す';
+  static const String selectAtLeastOne = '1 件以上選んでください';
+
+  // 入力フォーム
+  static const String formTitle = 'プロジェクト名 ★';
+  static const String formDescription = '説明（1 行）';
+  static const String formDetails = '詳細（複数行）';
+  static const String formPeriodStart = '開始';
+  static const String formPeriodEnd = '終了';
+  static const String formOngoing = '進行中（終わりは「現在」）';
+  static const String formLink = 'リンク（URL）';
+  static const String formListHint = '打つと候補が出ます。カンマか Enter で区切り、空の欄で Backspace 2 回で直前を消す';
+  static const String formMainTech = '使った技術';
+  static const String formMoreTech = 'そのほかの技術（UI・テスト・クラウド・コンテナ・AI）';
+  static const String formOtherTech = 'フレームワーク・DB・OS・クラウド・コンテナ・AI';
+  static const String formTechNote = '項目を押すと、入力欄と、すでにある項目の一覧が開きます';
+  static const String tagPickerInput = '入力（打つと候補が出ます）';
+  static const String tagPickerExisting = 'すでにある項目（押すと追加、もう一度押すと外す）';
+  static const String tagPickerNoExisting = 'まだありません。上の欄に入力してください';
+  static const String tagPickerDone = '完了';
+  static String tagPickerTooltip(String label) => '$label を入力・選択';
+  static const String formWorkflow = '担当した工程';
+  static const String formTitleRequired = 'プロジェクト名を入れてください';
+  static const String formPeriodInvalid = '「2024-04」の形で入れてください';
+  static const String formPeriodEndMissing = '終了を入れるか、「進行中」にチェックしてください';
+  static const String formPeriodOrder = '終了は開始と同じか、より後にしてください';
+  static const String formPeriodStartMissing = '開始を入れてください';
+
+  // 年と月を選ぶ画面
+  static const String pickStart = '開始の年月を選ぶ';
+  static const String pickEnd = '終了の年月を選ぶ';
+  static String pickerYear(int y) => '$y年';
+  static String pickerMonth(int m) => '$m月';
+  static const String pickerPrevYear = '前の年';
+  static const String pickerNextYear = '次の年';
+  static const String pickerPrevYears = '前の 12 年';
+  static const String pickerNextYears = '次の 12 年';
+  static const String pickerOk = 'OK';
+  static const String pickerOpen = '押すと年月を選べます';
+  static const String pickerClear = '消す';
+
+  // 読み取りのエラー
+  static const String noProjectsFound =
+      'プロジェクトが見つかりません（「projects:」の下か、「- title:」から書いてください）';
+  static String itemNotMap(int i) => '$i 件目：「title: …」などの項目の形で書いてください';
+  static String itemNoTitle(int i) => '$i 件目：title（プロジェクト名）がありません';
+  static String itemNoWorkflow(int i) => '$i 件目：Work は workflow（担当した工程）が必要です';
+  static String itemHasWorkflow(int i) => '$i 件目：Private には workflow を書きません';
+
+  // 確認画面
+  static const String confirmTitle = 'この内容で追加しますか？';
+  static String confirmLead(String target, int current, int adding) =>
+      '$target の今の $current 件の後ろに、$adding 件を追加します。';
+  static const String dropSample = '今表示しているサンプルは外す（追加したものだけにする）';
+  static String duplicates(String titles) =>
+      '同じ名前のプロジェクトがすでにあります：$titles（両方とも残ります）';
+  static const String confirmOk = 'OK（追加）';
+  static String added(String target, int n) => '$target に $n 件追加しました';
+
+  // これまでのアップロード画面を「追加」で使うとき
+  static String appendTitle(String target) => '$target に追加（ファイル・貼り付け）';
+  static const String appendDescription =
+      '読み込んだプロジェクトを、今の一覧の後ろに足します（今の一覧は消えません）。';
 }
 

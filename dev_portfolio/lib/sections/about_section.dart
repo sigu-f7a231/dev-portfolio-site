@@ -8,7 +8,7 @@ import '../constants/app_texts.dart';
 import '../models/profile.dart';
 import '../utils/profile_store.dart';
 
-/// About：自己紹介 ＋ 得意な領域 / 強み / 開発スタイル ＋ 締めの一言
+/// About：自己紹介 ＋ 得意な領域 / 直近・過去の開発経験 / 強み / 開発スタイル ＋ 締めの一言
 class AboutSection extends StatelessWidget {
   const AboutSection({super.key});
 
@@ -51,7 +51,7 @@ class AboutSection extends StatelessWidget {
                 ),
                 AboutSectionConfig.introSpacing,
 
-                // 得意な領域 / 強み / 開発スタイル（YAML に書いたものだけ）
+                // 得意な領域 / 直近・過去の開発経験 / 強み / 開発スタイル（YAML に書いたものだけ）
                 ..._rows(context, profile, isWide),
                 if (profile.closing.isNotEmpty) ...[
                 AboutSectionConfig.closingSpacing,
@@ -104,6 +104,17 @@ List<Widget> _rows(BuildContext context, Profile profile, bool isWide) {
                   ))
               .toList(),
         ),
+      ),
+    // 直近 / 過去の開発経験（スキルシートの Excel から読み込んだときなど）
+    if (profile.recent.isNotEmpty || profile.recentTech.isNotEmpty)
+      (
+        AboutContent.recentLabel,
+        _ExperienceBody(text: profile.recent, tech: profile.recentTech),
+      ),
+    if (profile.past.isNotEmpty || profile.pastTech.isNotEmpty)
+      (
+        AboutContent.pastLabel,
+        _ExperienceBody(text: profile.past, tech: profile.pastTech),
       ),
     if (profile.strengths.isNotEmpty)
       (
@@ -164,6 +175,68 @@ class _AboutRow extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [term, const SizedBox(height: AppSizes.space8), child],
             ),
+    );
+  }
+}
+
+/// 開発経験の中身：「領域：説明」の行（領域を太字に）＋ 分類ごとの技術のタグ
+class _ExperienceBody extends StatelessWidget {
+  final String text;
+  final Map<String, List<String>> tech;
+
+  const _ExperienceBody({required this.text, required this.tech});
+
+  static final _labelValue = RegExp(r'^([^：:]{1,30}?)([：:])(.*)$');
+
+  @override
+  Widget build(BuildContext context) {
+    final body = AppStyles.aboutDescription(context);
+    final lines = text.split('\n').where((l) => l.trim().isNotEmpty).toList();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        for (final line in lines)
+          Padding(
+            padding: const EdgeInsets.only(bottom: AppSizes.space6),
+            child: Text.rich(
+              switch (_labelValue.firstMatch(line.trim())) {
+                final m? => TextSpan(children: [
+                    TextSpan(
+                      text: '${m.group(1)}${m.group(2)}',
+                      style: body.copyWith(fontWeight: FontWeight.w600),
+                    ),
+                    TextSpan(text: m.group(3)),
+                  ]),
+                null => TextSpan(text: line.trim()),
+              },
+              style: body,
+            ),
+          ),
+        if (lines.isNotEmpty && tech.isNotEmpty) const SizedBox(height: AppSizes.space8),
+        for (final e in tech.entries)
+          Padding(
+            padding: const EdgeInsets.only(bottom: AppSizes.space8),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(e.key, style: AppStyles.filterGroupLabel(context)),
+                const SizedBox(height: AppSizes.space4),
+                Wrap(
+                  spacing: AppStyles.skillTagSpacing,
+                  runSpacing: AppStyles.skillTagSpacing,
+                  children: e.value
+                      .map((t) => Container(
+                            padding: AppStyles.skillTagPadding,
+                            decoration: AppStyles.skillTag(context),
+                            child: Text(t, style: AppStyles.skillTagText(context)),
+                          ))
+                      .toList(),
+                ),
+              ],
+            ),
+          ),
+      ],
     );
   }
 }

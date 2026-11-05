@@ -1,13 +1,14 @@
 // lib/sections/projects/projects_toolbar.dart
 import 'package:flutter/material.dart';
 import 'projects_view_switch.dart';
+import 'sort/project_sort.dart';
 import '../../widgets/app_segment.dart';
 import '../config/projects/projects_section_config.dart';
 import '../../theme/app_styles.dart';
 import '../../constants/app_sizes.dart';
 import '../../constants/app_texts.dart';
 
-/// Work/Private ・ フィルター ・ List/Collection を 1 行にまとめたツールバー
+/// Work/Private ・ フィルター ・ 並び替え ・ List/Collection を 1 行にまとめたツールバー
 /// （狭い画面では折り返す）
 class ProjectsToolbar extends StatelessWidget {
   final bool isWork;
@@ -22,6 +23,9 @@ class ProjectsToolbar extends StatelessWidget {
   final bool showCollection;
   final ValueChanged<bool> onViewChanged;
 
+  final ProjectSort sort;
+  final ValueChanged<ProjectSort> onSortChanged;
+
   const ProjectsToolbar({
     super.key,
     required this.isWork,
@@ -33,6 +37,8 @@ class ProjectsToolbar extends StatelessWidget {
     required this.onFilterPressed,
     required this.showCollection,
     required this.onViewChanged,
+    required this.sort,
+    required this.onSortChanged,
   });
 
   @override
@@ -67,6 +73,23 @@ class ProjectsToolbar extends StatelessWidget {
                 child: const Icon(Icons.tune, size: ProjectsSectionConfig.filterIconSize),
               ),
               label: const Text(AppTexts.filter),
+            ),
+            // 並び替え（M3 のメニュー。今の並びにチェック）
+            MenuAnchor(
+              builder: (context, controller, _) => OutlinedButton.icon(
+                onPressed: () => controller.isOpen ? controller.close() : controller.open(),
+                style: AppStyles.toolbarButton(context, active: controller.isOpen),
+                icon: const Icon(Icons.sort, size: ProjectsSectionConfig.filterIconSize),
+                label: Text(AppTexts.sortCurrent(sort.label)),
+              ),
+              menuChildren: [
+                for (final s in ProjectSort.values)
+                  MenuItemButton(
+                    leadingIcon: Icon(s == sort ? Icons.check : null),
+                    onPressed: () => onSortChanged(s),
+                    child: Text(s.label),
+                  ),
+              ],
             ),
             ProjectsViewSwitch(
               showCollection: showCollection,

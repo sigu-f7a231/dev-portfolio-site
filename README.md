@@ -9,7 +9,7 @@ Flutter Web で作った SPA で、GitHub Pages で公開しています。
 > **English summary**
 > A single-page developer portfolio built with Flutter Web and hosted on GitHub Pages, designed to complement a résumé.
 > It shows work and personal projects, and charts the technologies used across them.
-> All content is driven by YAML files: the profile (Home / About) is loaded at startup (`dart run tool/run.dart my_profile.yaml`) or uploaded in the first-run dialog, and project data can be uploaded from the header.
+> All content is driven by YAML / Markdown files or an Excel skill sheet: the profile (Home / About) is loaded at startup (`dart run tool/run.dart my_profile.yaml`) or in the first-run dialog, and projects can be added or replaced from the header's **Data** button (on-screen form, pasted text, or files).
 
 ---
 
@@ -20,14 +20,20 @@ Flutter Web で作った SPA で、GitHub Pages で公開しています。
 | セクション | 内容 |
 |---|---|
 | **Home** | 名前・職種・紹介文（プロフィール YAML から）。ボタンで Skills / Projects へ移動できます。右側にはプロフィールのカードを YAML 風に表示します |
-| **About** | 自己紹介と、得意な領域・強み・開発スタイル・締めの一言（プロフィール YAML から。書いていない項目は表示しません） |
-| **Skills** | プロジェクトで使った技術の割合を、棒グラフ／円グラフで表示します。Work / Private の切り替えと、カテゴリ（OS・DB・Backend・AWS・工程など）の選択（ポップアップ）ができます |
-| **Projects** | プロジェクトの一覧です。**List**（年表：開始の年月・期間・長さ）と **Collection**（カバー付きカード）を切り替えられ、技術・工程・期間（年の範囲、進行中のみ）で絞り込めます（ポップアップ）。カードを押すと詳細が開き、‹ › や ← → キーで前後の案件に移れます |
+| **About** | 自己紹介と、得意な領域・直近 / 過去の開発経験と主な技術・強み・開発スタイル・締めの一言（プロフィールから。書いていない項目は表示しません） |
+| **Skills** | プロジェクトで使った技術の割合を、棒グラフ／円グラフで表示します。Work / Private の切り替えと、カテゴリの選択（ポップアップ）ができます。Skills・Tools はさらにグループ（プログラミング言語・ライブラリ・バージョン管理・開発ツール・環境など）に分けて表示します |
+| **Projects** | プロジェクトの一覧です。**List**（年表）と **Collection**（カバー付きカード）を切り替えられ、全分類の技術・工程・期間で絞り込み（ポップアップ）、開始・終了・期間の長さ・名前で並べ替えができます。カードを押すと詳細が開き、‹ › や ← → キーで前後の案件に移れます |
 
 - **ヘッダー**：Material 3 のトップアプリバー。ナビは表示中のセクションが強調され、スクロールに合わせて切り替わります
 - **ダークモード**：ヘッダーのスイッチ（☀️ / 🌙）でライト／ダークを切り替えられます（スマホはアイコンボタン）
 - **レスポンシブ**：スマホではメニューがドロワーになり、フィルターは下から出るシートで開きます。Collection は画面幅に合わせて 1〜4 列、ページネーションは幅に応じて「1 … 4 5 6 … 10」「‹ 3 / 10 ›」と省略表示になります
 - **案件の詳細**：PC（幅 1024px 以上）はダイアログで開き、左右の ‹ › で前後の案件へ。タブレット・スマホは画面いっぱいで開き、文字を一回り大きく（1.15 倍）表示して、‹ › は下に置きます。前・次がないときはボタンを押せません。絞り込み・並び順のまま、ページをまたいで移れます
+- **画面共有向けの表示**：詳細のヘッダーの［A−］［100%］［A＋］で文字を 100〜250% に、PC は［大きく表示］で画面いっぱいにできます（Google Meet・Teams・Slack ハドルなどで見やすく）。キーボードは − ＋ 0 F、⌘（Mac）/ Ctrl（Windows）＋ 0 で元の大きさ。開いている間はブラウザ自体の拡大・縮小は止めます
+- **技術名の整理**（表示のときだけ。保存したデータは変えません）
+  - 表記ゆれをまとめます：大文字・小文字・全角半角・末尾の `;` `:` `.` `/`・キャメルケース / スネークケースの違いは同じものとして扱い、正式な書き方（GitHub Actions、Node.js など）で表示します。数字の違い（Python と Python3）は別のものです。1 つのプロジェクトの中で重なっていても 1 回と数えます
+  - AWS / Azure / GCP のサービスは、先頭の「AWS」などを外して同じものにまとめます（AWS Lambda と Lambda）
+  - Skills や Tools に書かれたフロントエンド・バックエンドなどの技術は、本来の分類に移します（React → Frontend、Django → Backend、Docker → Container、k8s → Container Orchestration、Red Hat → Cloud など）
+  - Skills・Tools は名前から推測してグループに分けます（言語・マークアップ・データ形式・アーキテクチャ・ライブラリ ／ バージョン管理・開発ツール・環境・CI/CD・プロジェクト管理・デザイン）。グラフ・フィルター・詳細・入力フォームで共通です
 - **対応する最小の幅は 320px**（iPhone SE など）。それより狭い画面では、320px のレイアウトを画面幅に合わせて縮小して表示します
 
 ### 使い方（自分のデータで表示する）
@@ -41,7 +47,7 @@ Flutter Web で作った SPA で、GitHub Pages で公開しています。
 
 ```bash
 cd dev_portfolio
-dart run tool/run.dart my_profile.yaml   # Markdown なら my_profile.md
+dart run tool/run.dart my_profile.yaml   # Markdown なら my_profile.md、スキルシート（Excel）なら skill_sheet.xlsx
 ```
 
 - `flutter run -d chrome my_profile.yaml` のように flutter run へ直接 YAML は渡せない（引数は起動する Dart ファイルとして扱われる）ため、このスクリプトを使います。中で `flutter run -d chrome` を実行するので、`r`（ホットリロード）などもそのまま使えます。2 つ目以降の引数は flutter run に渡します（例：`dart run tool/run.dart my_profile.yaml --release`）
@@ -49,10 +55,46 @@ dart run tool/run.dart my_profile.yaml   # Markdown なら my_profile.md
 - 指定した YAML は `assets/profile/profile.yaml` にコピーされます。個人情報なので Git には含めません（`.gitignore` 済み）
 - **プロフィールのファイルに Work / Private も書ける**：同じファイルに書いておくと、起動時の指定でも入力画面のアップロードでも、1 回で Home / About と Skills / Projects がまとめて切り替わります（あとで個別にアップロードしなくてよい。書き方は下の「データの書き方」）
 
-#### 2. プロジェクト（Work / Private）
+#### 1'. スキルシート（Excel）から作る
 
-ヘッダーの 💼 Work ／ 🔒 Private ボタンから YAML ファイルを読み込むと、そのデータで Skills と Projects を表示し直します。
-何も読み込まない場合は、リポジトリにある `assets/data/format_*.yaml`（サンプル）を表示します。
+入力画面の「入力方法」で **Excel（スキルシート）** を選ぶと、Excel のスキルシートから Home / About と Work / Private をまとめて作れます。
+
+1. 「Excel テンプレートを保存」でひな形（`assets/data/format_skill_sheet.xlsx`）を名前を付けて保存（同じ形式のスキルシートがあれば不要）
+2. Excel で書き換えて保存
+3. 「Excel を選択」で読み込み → 確認画面 → OK で反映。中身から YAML を作り、YAML で読み込んだときと同じ確認をします。「作った YAML を保存」で保存しておくと、次回はその YAML（または Excel そのもの）を `tool/run.dart` に指定して起動できます
+
+| 作るもの | Excel から読み取る項目 |
+|---|---|
+| Home / About | 氏名 → `name`、過去 / 直近の開発経験（「領域：説明」の行）→ `past` / `recent`、それぞれの「主な使用技術・開発環境」（「言語：A、B」の行）→ `past_tech` / `recent_tech`。紹介文（`tagline`）は直近の言語から、自己紹介（`intro`）と得意な領域（`domains`）は経験の領域から作ります。職種（`role`）は「エンジニア」固定（YAML を保存して書き換えられます） |
+| Work / Private | プロジェクト名 → `title`、期間 → `period`、業務概要 → `description`（「概要：」の 1 行目）・`details`（全体）・`link`（URL）、サーバ OS → `server_os`、DB → `db`、FW・MW ツール等と使用言語 → 知っている名前は各分類（Django → `backend_frameworks`、Docker → `container`、「AI：」の行 → `ai_services` など）、それ以外は `tools` / `skills`、作業工程（● など）→ `workflow` |
+
+- プロジェクト名に「**プライベート**」か「**個人開発**」が入っているものだけ Private になります（印はタイトルから外し、作業工程は使いません）
+- セルの位置ではなく見出しの文字（「氏名」「プロジェクト名」「No.」など）で探すので、行や列が多少ずれても読めます。1 件は「No.」に番号がある行から次の番号の前の行まで
+- `.xls`（古い形式）は読めません。Excel で `.xlsx` として保存し直してください
+
+#### 2. プロジェクト（Work / Private）：ヘッダーの［データ］
+
+ヘッダーの［データ］ボタンから、プロジェクトを追加・更新できます。何も読み込まない場合は、リポジトリにある `assets/data/format_*.yaml`（サンプル）を表示します。
+1 つの画面の中で順に選び（上に「追加 › Work › …」、［戻る］で前へ）、どの道を通っても反映の前に確認画面を出します。
+
+| 選ぶもの | 動き |
+|---|---|
+| **更新** → Work / Private | これまでのアップロード画面で、ファイルや貼り付けた内容に丸ごと置き換えます |
+| **追加** → Work / Private → ファイル・貼り付けで追加 | 同じアップロード画面で読み込み、今の一覧の後ろに足します |
+| **追加** → … → 画面上で入力 → 1 件 → 入力フォーム | 項目ごとに入力します（下の表） |
+| **追加** → … → 画面上で入力 → 1 件 / 複数件 → テキスト | YAML / Markdown を貼り付けるかファイルを選びます。テンプレートの保存・コピー、ⓘ の説明、［サンプルを入力欄に入れる］（複数件は 3 件入ったサンプル）もあります。複数件は「全部追加する」か「選んだものだけ追加する」を選べます |
+
+- アップロード画面にも［戻る］があり、［データ］の 1 つ前の選択に戻れます
+- 追加の確認画面では、今の件数・追加するもの・同じ名前があるときの注意を出します。サンプルを表示中なら「サンプルを外す」を選べます
+
+**入力フォーム**
+
+| 項目 | 入れ方 |
+|---|---|
+| プロジェクト名 | 必須 |
+| 期間（開始・終了） | 欄を押すと、Material 3 の日付選択と同じ見た目で年と月を選ぶ画面が開きます（‹ › で年、年の部分で 12 年ずつの一覧）。終了は開始より前を選べません。進行中ならチェック |
+| 技術 | Skills・Tools はグループごと、ほかは項目ごとの小さなボタン（入れた数をバッジで表示）。押すと入力欄と「すでにある項目」の一覧が開き、一覧を押すと追加・もう一度で外します。入力欄は打つと候補が出て、カンマか Enter で区切り、空の欄で Backspace 1 回目で直前を強調・2 回目で消します |
+| 担当した工程 | Work のみ。チップで選びます |
 
 #### アップロード画面の流れ（プロフィール / Work / Private 共通）
 
@@ -238,7 +280,8 @@ YAML の注意：
 - **Flutter Web / Dart**（Dart SDK ^3.9.2）
 - [fl_chart](https://pub.dev/packages/fl_chart)：円グラフ
 - [yaml](https://pub.dev/packages/yaml)：データの読み込み
-- [file_picker](https://pub.dev/packages/file_picker)：YAML ファイルの選択
+- [file_picker](https://pub.dev/packages/file_picker)：ファイルの選択
+- [archive](https://pub.dev/packages/archive) / [xml](https://pub.dev/packages/xml)：Excel（.xlsx）の読み込み
 - [web](https://pub.dev/packages/web)：ブラウザの機能（sessionStorage・ファイルの保存）
 - [url_launcher](https://pub.dev/packages/url_launcher)：公開ページへのリンク
 - **GitHub Actions + GitHub Pages**：自動デプロイ
@@ -277,8 +320,13 @@ flutter test
 | `data_format_test.dart` | YAML / Markdown の見分け・Markdown の変換（テンプレートが YAML 版と同じ中身になるか・行番号付きのエラー。コメントがあっても元の行番号）・テンプレートが `pubspec.yaml` に登録されているか |
 | `upload_paste_test.dart` | テキストの貼り付け画面（クリアボタン）・テンプレートのコピー・形式の切り替え・読み込みボタン |
 | `upload_dialogs_test.dart` | Work / Private / 最初の入力画面：貼り付け（YAML / Markdown）→ 確認画面 → OK で反映、間違ったデータを弾く、入力画面が閉じられない、プロフィールと一緒に Work / Private も反映、上書きの確認（やめる / 上書き / 同じ内容なら出さない） |
-| `project_detail_navigation_test.dart` | 案件の詳細：‹ › / ← → で前後に移る・端では押せない・PC はダイアログ／タブレット・スマホは全画面 |
+| `project_detail_navigation_test.dart` | 案件の詳細：‹ › / ← → で前後に移る・端では押せない・PC はダイアログ／タブレット・スマホは全画面・画面共有向けの拡大（ボタン・キーボード・Mac / Windows の ⌘ / Ctrl ＋ 0） |
 | `min_width_scaler_test.dart` | 320px より狭い画面での縮小表示 |
+| `skill_sheet_test.dart` | スキルシート（Excel）から YAML を作る：テンプレートが Work / Private のサンプルと同じ中身になるか・Private の見分け・期間（全角の数字も）・作業工程・セル内の見出し（「AWS Service;」など）・技術の振り分け・読めないときのエラー・YAML の書き出し・Projects の期間の解釈 |
+| `skill_name_test.dart` | 技術名の表記ゆれ（末尾の記号・大文字小文字・全角・キャメル / スネーク・AWS などの先頭）・Skills の集計・Projects のフィルター |
+| `tech_catalog_test.dart` | Skills・Tools に書かれた技術の振り分け（React → Frontend など）・Tools / Skills のグループ分け |
+| `project_data_test.dart` | ［データ］：テキストの読み取り・追加・複数件のサンプル・入力フォーム・タグ入力（候補・カンマ・Backspace）・年月の選択・画面の流れ（追加・更新・戻る） |
+| `project_sort_test.dart` | Projects の並び替え |
 
 > ブラウザの機能（sessionStorage・ファイル保存）は、テストでは代わりの実装に自動で切り替わります（`lib/utils/browser/`・`lib/utils/file_saver.dart`）。ファイル選択の OS ダイアログはテストから操作できないので、同じ確認処理を通るテキストの貼り付けで確かめています。
 >
@@ -320,9 +368,9 @@ dev-portfolio-site/
 ├── CLAUDE.md                      # 開発メモ（構成・データの流れ・規約・既知の課題）
 └── dev_portfolio/                 # Flutter アプリ
     ├── assets/
-    │   ├── data/                  # ひな形・サンプル（format_profile / format_work / format_private）
+    │   ├── data/                  # ひな形・サンプル（format_profile / format_work / format_private / format_skill_sheet.xlsx / sample_*_multi）
     │   └── profile/               # 起動時に指定したプロフィール（Git 管理外）
-    ├── tool/run.dart              # プロフィール YAML を指定して起動するスクリプト
+    ├── tool/run.dart              # プロフィール YAML（.md・.xlsx も可）を指定して起動するスクリプト
     ├── web/index.html             # 起動時のローディング表示
     └── lib/
         ├── main.dart
@@ -333,14 +381,14 @@ dev-portfolio-site/
         ├── constants/             # 文言・数値
         ├── controllers/           # セクションへのスクロール・表示中セクション
         ├── widgets/               # 共通部品（セグメント・ポップアップ・入力画面・アップロード部品・ローディング）
-        └── utils/                 # YAML ローダー・プロフィールの保持・ファイル保存など
+        └── utils/                 # YAML ローダー・Excel の読み取り・技術名の整理と振り分け・追加の処理・ファイル保存など
 ```
 
 ---
 
 ## 現状と技術的な課題
 
-**現状**（2026-11-04）：非推奨の API（`dart:html`・`Color.withOpacity`）は置き換え済みです。2026-11-03 時点で `flutter analyze` は指摘なし、`flutter test` は全件成功。以降に追加した機能（詳細の前後移動・全画面表示・320px 未満の縮小・テキストの貼り付け・Markdown 対応・プロフィールと Work / Private のまとめての読み込み・上書きの確認）のテストは、テスト中のアセット読み込みが止まる問題を直した版の実行結果を確認中です。
+**現状**（2026-11-05）：スキルシート（Excel）からの入力、［データ］からの追加・更新（入力フォーム・タグ入力・年月の選択）、技術名の整理とグループ分け、並び替え、詳細の画面共有向け拡大を追加しました。追加した機能のテストは作者の手元で実行しながら直しています。ブラウザ・スマホでの見た目と操作（特にキーボード操作・日本語入力・ブラウザの拡大との兼ね合い）は、引き続き実機での確認が必要です。
 
 課題と今後の改善候補です（詳細は [CLAUDE.md](CLAUDE.md) の「現状と課題」）。
 
@@ -350,7 +398,7 @@ dev-portfolio-site/
 - **Work / Private の検証が浅い**：`projects` と `title`・`workflow` の有無しか確かめていないため、項目の型が違うと表示が崩れる可能性があります
 
 **優先度 中**
-- **自動テストがまだ足りない**：フィルター・ページネーション・スキル集計のテストはまだありません。ファイル選択（OS のダイアログ）はテストできないため、貼り付けで代わりに確かめています
+- **自動テストがまだ足りない**：ページネーションのテストはまだありません。ファイル選択（OS のダイアログ）はテストできないため、貼り付けで代わりに確かめています
 - **Android で Google Drive のファイルを選べないことがある**：ファイル選択画面がファイルの種類（MIME タイプ）で絞り込むため、Drive 側の種類の情報によっては選べません。テキストの貼り付けで回避できます
 - **文字列の分割処理が複数ある**：カンマ区切りの扱いがファイルによって違います
 - **Projects のページを切り替えても一覧の先頭に戻らない**
@@ -362,6 +410,7 @@ dev-portfolio-site/
 - **データはタブを閉じると消える**：アップロードした内容は sessionStorage にだけ保存しています
 - **Web 専用**：ブラウザの機能（`package:web` / `dart:js_interop`）を使うため、Web 以外ではビルドできません
 - **使っていないコード・定数が残っている**：古いタブ UI、旧形式のソート処理、作り直しで不要になった文言など
+- **技術名の振り分け・グループ分けは名前からの推測**：一覧にない名前は、名前に含まれる言葉で推測し、わからなければ「その他」になります。合わないものは `lib/utils/tech_catalog.dart` の一覧に足してください
 
 ---
 

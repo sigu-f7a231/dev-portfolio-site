@@ -7,6 +7,7 @@ import '../views/projects_collection_view.dart';
 import '../views/project_list/project_list_modal_function.dart';
 import '../filters/state/project_filter_state.dart';
 import '../filters/logic/project_filter_logic.dart';
+import '../sort/project_sort.dart';
 import '../../config/projects/projects_views_list_config.dart';
 import '../../config/projects/projects_views_collection_config.dart';
 import '../../config/projects/projects_section_config.dart';
@@ -25,11 +26,15 @@ class ProjectsTabView extends StatefulWidget {
   final ProjectFilterState filterState;
   final bool showCollection;
 
+  /// 並び替え（ツールバーで選ぶ）
+  final ProjectSort sort;
+
   const ProjectsTabView({
     super.key,
     required this.projects,
     required this.filterState,
     required this.showCollection,
+    this.sort = ProjectSort.initial,
   });
 
   @override
@@ -42,10 +47,11 @@ class _ProjectsTabViewState extends State<ProjectsTabView> {
   @override
   void didUpdateWidget(covariant ProjectsTabView oldWidget) {
     super.didUpdateWidget(oldWidget);
-    // タブ・フィルター・表示形式が変わったら 1 ページ目に戻す
+    // タブ・フィルター・表示形式・並び替えが変わったら 1 ページ目に戻す
     if (oldWidget.projects != widget.projects ||
         oldWidget.filterState != widget.filterState ||
-        oldWidget.showCollection != widget.showCollection) {
+        oldWidget.showCollection != widget.showCollection ||
+        oldWidget.sort != widget.sort) {
       currentPage = 1;
     }
   }
@@ -53,8 +59,7 @@ class _ProjectsTabViewState extends State<ProjectsTabView> {
   @override
   Widget build(BuildContext context) {
     final filteredProjects =
-        ProjectFilterLogic.apply(widget.projects, widget.filterState)
-          ..sort((a, b) => a.periodStart.compareTo(b.periodStart));
+        widget.sort.apply(ProjectFilterLogic.apply(widget.projects, widget.filterState));
 
     if (filteredProjects.isEmpty) {
       return SizedBox(

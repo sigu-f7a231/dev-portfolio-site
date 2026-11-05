@@ -34,7 +34,14 @@ class _SkillsSectionState extends State<SkillsSection> {
   final List<String> _baseCategories = const [
     'server_os',
     'db',
-    'tools',
+    // Tools はグループごと（バージョン管理・開発ツール・環境…。名前から推測）
+    'tools_vcs',
+    'tools_dev',
+    'tools_env',
+    'tools_cicd',
+    'tools_pm',
+    'tools_design',
+    'tools_other',
     'backend_frameworks',
     'frontend_frameworks',
     'ui_frameworks',
@@ -46,7 +53,13 @@ class _SkillsSectionState extends State<SkillsSection> {
     'container',
     'container_orchestration',
     'ai_services',
-    'skills',
+    // Skills はグループごと（プログラミング言語・マークアップ・データ形式・アーキテクチャ・ライブラリ…。名前から推測）
+    'skills_lang',
+    'skills_markup',
+    'skills_data',
+    'skills_arch',
+    'skills_lib',
+    'skills_other',
   ];
 
   /// workのみ追加
@@ -65,8 +78,23 @@ class _SkillsSectionState extends State<SkillsSection> {
       'frontend_frameworks',
       'ui_frameworks',
       'testing_frameworks',
-      'tools',
-      'skills',
+    ]),
+    SkillsCategoryGroup(AppTexts.categoryGroupSkills, [
+      'skills_lang',
+      'skills_markup',
+      'skills_data',
+      'skills_arch',
+      'skills_lib',
+      'skills_other',
+    ]),
+    SkillsCategoryGroup(AppTexts.categoryGroupTools, [
+      'tools_vcs',
+      'tools_dev',
+      'tools_env',
+      'tools_cicd',
+      'tools_pm',
+      'tools_design',
+      'tools_other',
     ]),
     SkillsCategoryGroup(AppTexts.categoryGroupCloud, [
       'cloud_platforms',

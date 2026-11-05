@@ -2,6 +2,10 @@
 //
 // 「あなたのことを教えてください」：プロフィール YAML の入力画面
 // - YAML を指定せずに起動したときだけ出す（HomePage から呼ぶ）
+// - 最初に入力方法を選ぶ：
+//   ・Excel（スキルシート）… Excel テンプレートを名前を付けて保存 → Excel で編集 → 選択すると、
+//     中身から YAML（プロフィール＋Work / Private）を作って確かめる（lib/utils/skill_sheet.dart）。作った YAML は保存もできる
+//   ・YAML / Markdown … これまでどおり（以下）
 // - できること：テンプレートを名前を付けて保存・コピー ／ ファイルを選択・テキストを貼り付け（その場で形式を確認）／
 //   アップロード（確認画面で中身を見て OK のときだけ。反映中は全画面ローディング）／ ⓘ で書き方の説明（説明だけ）
 // - 正しい YAML を読み込むまで閉じられない（外側のタップ・Esc・戻るでも閉じない）
@@ -21,7 +25,14 @@ import '../theme/app_theme.dart';
 import '../theme/app_styles.dart';
 import '../constants/app_sizes.dart';
 import '../constants/app_texts.dart';
+import '../utils/skill_sheet.dart';
+import '../utils/file_saver.dart';
+import '../utils/asset_text.dart';
+import 'app_segment.dart';
 import 'upload_parts.dart';
+
+/// 入力方法
+enum _InputMethod { excel, text }
 
 /// 入力画面を出す（読み込みが終わると閉じる）
 /// プロフィールのファイルに Work / Private も書かれていれば一緒に読み込み、[onProjectsChanged]
@@ -58,6 +69,111 @@ class _ProfileSetupDialogState extends State<_ProfileSetupDialog> {
 
   /// 保存・コピーするテンプレートの形式
   DataFormat _templateFormat = DataFormat.yaml;
+
+  /// 入力方法（Excel / YAML・Markdown）
+  _InputMethod _method = _InputMethod.text;
+
+  /// Excel から作った YAML（読み込めるときだけ。「作った YAML を保存」で使う）
+  String? _generatedYaml;
+
+  /// 入力方法を切り替える（選んでいたファイルは取り消す）
+  void _switchMethod(_InputMethod method) {
+    if (method == _method) return;
+    setState(() {
+      _method = method;
+      _fileName = null;
+      _bundle = null;
+      _errors = const [];
+      _generatedYaml = null;
+    });
+  }
+
+  /// Excel：テンプレートを名前を付けて保存する
+  Future<void> _saveExcelTemplate() async {
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      final bytes = await loadAssetBytes(skillSheetTemplateAsset);
+      final result = await FileSaver.saveBytesAs(
+        fileName: skillSheetTemplateFileName,
+        bytes: bytes,
+        description: ExcelTexts.excelFileDescription,
+        mimeType: skillSheetMimeType,
+        extensions: const ['.xlsx'],
+      );
+      if (result == FileSaveResult.saved) {
+        messenger.showSnackBar(
+            SnackBar(content: Text(AppTexts.formatSaved(skillSheetTemplateFileName))));
+      }
+    } catch (e) {
+      messenger.showSnackBar(SnackBar(content: Text(AppTexts.downloadFailed(e))));
+    }
+  }
+
+  /// Excel：ファイルを選ぶ → 中身から YAML を作り、YAML / Markdown と同じく確かめる
+  Future<void> _pickExcel() async {
+    setState(() => _picking = true);
+    try {
+      final picked = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: skillSheetExtensions,
+        withData: true,
+      );
+      final file = picked?.files.single;
+      if (file == null || file.bytes == null) return; // キャンセル（前の選択はそのまま）
+
+      if (!isSkillSheetFile(file.name)) {
+        setState(() {
+          _fileName = file.name;
+          _bundle = null;
+          _generatedYaml = null;
+          _errors = [ExcelTexts.extensionOnly];
+        });
+        return;
+      }
+
+      final result = convertSkillSheet(file.bytes!, fileName: file.name);
+      final bundle = result.isOk
+          ? readProfileBundle(result.yamlText!, fileName: skillSheetYamlName(file.name))
+          : null;
+      setState(() {
+        _fileName = file.name;
+        _bundle = bundle != null && bundle.isOk ? bundle : null;
+        _generatedYaml = _bundle != null ? result.yamlText : null;
+        _errors = bundle?.errors ?? result.errors;
+      });
+    } catch (e) {
+      setState(() {
+        _bundle = null;
+        _generatedYaml = null;
+        _errors = [AppTexts.fileReadFailed(e)];
+      });
+    } finally {
+      if (mounted) setState(() => _picking = false);
+    }
+  }
+
+  /// Excel から作った YAML を保存する（次回は tool/run.dart で指定して起動できる）
+  Future<void> _saveGeneratedYaml() async {
+    final yaml = _generatedYaml;
+    final source = _fileName;
+    if (yaml == null || source == null) return;
+    final messenger = ScaffoldMessenger.of(context);
+    final name = skillSheetYamlName(source);
+    try {
+      final result = await FileSaver.saveTextAs(
+        fileName: name,
+        text: yaml,
+        description: AppTexts.yamlFileDescription,
+        mimeType: 'text/yaml',
+        extensions: const ['.yaml', '.yml'],
+      );
+      if (result == FileSaveResult.saved) {
+        messenger.showSnackBar(SnackBar(content: Text(AppTexts.formatSaved(name))));
+      }
+    } catch (e) {
+      messenger.showSnackBar(SnackBar(content: Text(AppTexts.downloadFailed(e))));
+    }
+  }
 
   /// 1. ファイルを選ぶ → その場で形式を確かめる（間違っていればアップロードできない）
   Future<void> _pick() async {
@@ -165,6 +281,7 @@ class _ProfileSetupDialogState extends State<_ProfileSetupDialog> {
   Widget build(BuildContext context) {
     final colors = context.colors;
     final startupErrors = ProfileStore.instance.startupErrors;
+    final isExcel = _method == _InputMethod.excel;
 
     return AlertDialog(
       backgroundColor: colors.dialogBackground,
@@ -199,7 +316,25 @@ class _ProfileSetupDialogState extends State<_ProfileSetupDialog> {
             children: [
               Text(ProfileTexts.setupLead, style: AppStyles.dialogBody(context)),
               const SizedBox(height: AppSizes.space16),
-              const UploadSteps(steps: ProfileTexts.setupSteps),
+
+              // 入力方法（狭い画面では縮めて 1 行に収める）
+              Text(ExcelTexts.methodLabel, style: AppStyles.filterGroupLabel(context)),
+              const SizedBox(height: AppSizes.space6),
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.centerLeft,
+                child: AppSegment<_InputMethod>(
+                  value: _method,
+                  onChanged: _switchMethod,
+                  items: const [
+                    AppSegmentItem(value: _InputMethod.excel, label: ExcelTexts.methodExcel),
+                    AppSegmentItem(value: _InputMethod.text, label: ExcelTexts.methodText),
+                  ],
+                ),
+              ),
+              const SizedBox(height: AppSizes.space16),
+
+              UploadSteps(steps: isExcel ? ExcelTexts.steps : ProfileTexts.setupSteps),
               const SizedBox(height: AppSizes.space8),
 
               // 起動時に指定した YAML が読めなかった理由（ファイルを選ぶまで出す）
@@ -213,20 +348,27 @@ class _ProfileSetupDialogState extends State<_ProfileSetupDialog> {
                 const SizedBox(height: AppSizes.space8),
               ],
 
-              UploadSourcePanel(
-                templateFormat: _templateFormat,
-                onTemplateFormatChanged: (f) => setState(() => _templateFormat = f),
-                onSaveTemplate: () =>
-                    saveTemplateFile(context, kind: DataKind.profile, format: _templateFormat),
-                onCopyTemplate: () => copyTemplateText(
-                  context,
-                  assetPath: templateAssetPath(DataKind.profile, _templateFormat),
-                  fileName: templateFileName(DataKind.profile, _templateFormat),
+              if (isExcel)
+                _ExcelSourcePanel(
+                  onSaveTemplate: _saveExcelTemplate,
+                  onPickFile: _picking ? null : _pickExcel,
+                  hasSource: _fileName != null,
+                )
+              else
+                UploadSourcePanel(
+                  templateFormat: _templateFormat,
+                  onTemplateFormatChanged: (f) => setState(() => _templateFormat = f),
+                  onSaveTemplate: () =>
+                      saveTemplateFile(context, kind: DataKind.profile, format: _templateFormat),
+                  onCopyTemplate: () => copyTemplateText(
+                    context,
+                    assetPath: templateAssetPath(DataKind.profile, _templateFormat),
+                    fileName: templateFileName(DataKind.profile, _templateFormat),
+                  ),
+                  onPickFile: _picking ? null : _pick,
+                  onPasteText: _picking ? null : _paste,
+                  hasSource: _fileName != null,
                 ),
-                onPickFile: _picking ? null : _pick,
-                onPasteText: _picking ? null : _paste,
-                hasSource: _fileName != null,
-              ),
               const SizedBox(height: AppSizes.space12),
               SelectedFileStatus(fileName: _fileName, errors: _errors),
               // Work / Private も一緒に書かれていれば、それも読み込むことを知らせる
@@ -248,6 +390,16 @@ class _ProfileSetupDialogState extends State<_ProfileSetupDialog> {
                     ),
                   ],
                 ),
+              ],
+              // Excel から作った YAML を保存（次回はこの YAML を指定して起動できる）
+              if (isExcel && _generatedYaml != null) ...[
+                const SizedBox(height: AppSizes.space8),
+                TextButton.icon(
+                  onPressed: _saveGeneratedYaml,
+                  icon: const Icon(Icons.save_alt),
+                  label: const Text(ExcelTexts.saveYaml),
+                ),
+                Text(ExcelTexts.saveYamlNote, style: AppStyles.helpBody(context)),
               ],
               const SizedBox(height: AppSizes.space16),
 
@@ -297,6 +449,10 @@ class _ProfileSummary extends StatelessWidget {
     ];
   }
 
+  /// 「分類: A, B」の行
+  static String _tech(Map<String, List<String>> tech) =>
+      tech.entries.map((e) => '${e.key}: ${e.value.join(', ')}').join('\n');
+
   @override
   Widget build(BuildContext context) {
     final profile = bundle.profile!;
@@ -321,8 +477,70 @@ class _ProfileSummary extends StatelessWidget {
         ConfirmField(AboutContent.strengthsLabel, profile.strengths),
         ConfirmField(AboutContent.styleLabel, profile.style),
         ConfirmField(ProfileTexts.fieldClosing, profile.closing),
+        ConfirmField(AboutContent.recentLabel, profile.recent),
+        ConfirmField(ProfileTexts.fieldRecentTech, _tech(profile.recentTech)),
+        ConfirmField(AboutContent.pastLabel, profile.past),
+        ConfirmField(ProfileTexts.fieldPastTech, _tech(profile.pastTech)),
         ..._projects(context, AppTexts.work, bundle.workText),
         ..._projects(context, AppTexts.private, bundle.privateText),
+      ],
+    );
+  }
+}
+
+/// Excel（スキルシート）のときのボタン群と、読み取る項目の説明
+/// - テンプレート：［Excel テンプレートを保存］
+/// - スキルシートを読み込む：［Excel を選択］
+class _ExcelSourcePanel extends StatelessWidget {
+  final VoidCallback onSaveTemplate;
+  final VoidCallback? onPickFile; // null のときは押せない（読み込み中）
+  final bool hasSource;
+
+  const _ExcelSourcePanel({
+    required this.onSaveTemplate,
+    required this.onPickFile,
+    required this.hasSource,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    Widget group(String title, Widget button) => Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(title, style: AppStyles.filterGroupLabel(context)),
+            const SizedBox(height: AppSizes.space6),
+            button,
+          ],
+        );
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        group(
+          AppTexts.templateGroup,
+          TextButton.icon(
+            onPressed: onSaveTemplate,
+            icon: const Icon(Icons.save_alt),
+            label: const Text(ExcelTexts.saveTemplate),
+          ),
+        ),
+        const SizedBox(height: AppSizes.space12),
+        group(
+          ExcelTexts.inputGroup,
+          OutlinedButton.icon(
+            onPressed: onPickFile,
+            icon: const Icon(Icons.table_view_outlined),
+            label: Text(hasSource ? ExcelTexts.chooseAnotherExcel : ExcelTexts.chooseExcel),
+          ),
+        ),
+        const SizedBox(height: AppSizes.space12),
+        Text(ExcelTexts.howItMaps, style: AppStyles.filterGroupLabel(context)),
+        const SizedBox(height: AppSizes.space4),
+        for (final m in ExcelTexts.mapping)
+          Padding(
+            padding: const EdgeInsets.only(bottom: AppSizes.space4),
+            child: Text('${AppTexts.bullet}$m', style: AppStyles.helpBody(context)),
+          ),
       ],
     );
   }

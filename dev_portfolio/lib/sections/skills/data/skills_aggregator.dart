@@ -1,20 +1,29 @@
-import 'package:yaml/yaml.dart';
 import '../../../utils/string_utils.dart';
+import '../../../utils/skill_name.dart';
 
+/// カテゴリごとの出現割合（%）
+/// 表記ゆれ（大文字・小文字、全角・半角、末尾の「;」「:」「.」「/」など、キャメルケース・スネークケース、
+/// クラウドのサービスの先頭の「AWS」など）は 1 つにまとめて数える（lib/utils/skill_name.dart）
 Map<String, double> aggregateCategory(
-  YamlList projects,
+  List<dynamic> projects, // YamlList か、redistributeProjects の結果
   String key,
 ) {
-  final Map<String, int> countMap = {};
-
+  // 1 つのプロジェクトの中で同じもの（AWS Lambda と Lambda など）が重なっていても 1 回と数える
+  final names = <String>[];
   for (var project in projects) {
-    final raw = project[key];
-    final items = parseToList(raw);
-
-    for (var item in items) {
-      if (item.isEmpty || item == '利用なし') continue;
-      countMap[item] = (countMap[item] ?? 0) + 1;
+    final seen = <String>{};
+    for (final item in parseToList(project[key])) {
+      final name = cleanSkillName(item);
+      if (name.isEmpty || name == '利用なし') continue;
+      if (seen.add(skillKey(name, category: key))) names.add(name);
     }
+  }
+
+  final display = canonicalSkillNames(names, category: key); // キー → 表示する名前
+  final Map<String, int> countMap = {};
+  for (final name in names) {
+    final label = display[skillKey(name, category: key)]!;
+    countMap[label] = (countMap[label] ?? 0) + 1;
   }
 
   final total = countMap.values.fold<int>(0, (sum, v) => sum + v);
@@ -28,12 +37,12 @@ Map<String, double> aggregateCategory(
 }
 
 /// workflow（true率）
-Map<String, double> aggregateWorkflow(YamlList projects) {
+Map<String, double> aggregateWorkflow(List<dynamic> projects) {
   final Map<String, int> trueCount = {};
   final Map<String, int> totalCount = {};
 
   for (var project in projects) {
-    final raw = project['workflow'] as YamlMap?;
+    final raw = project['workflow'] as Map?;
     if (raw == null) continue;
 
     for (var entry in raw.entries) {

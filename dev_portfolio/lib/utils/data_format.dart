@@ -25,6 +25,11 @@ String templateFileName(DataKind kind, DataFormat format) =>
 String templateAssetPath(DataKind kind, DataFormat format) =>
     'assets/data/${templateFileName(kind, format)}';
 
+/// 複数件まとめて追加するときのサンプル（Work / Private。2 件以上入っている）の場所
+/// テンプレート（format_*）は 1 件のまま（ほかのテンプレートと中身をそろえるため）、こちらは別に持つ
+String multiSampleAssetPath(DataKind kind, DataFormat format) =>
+    'assets/data/sample_${kind.name}_multi.${format == DataFormat.markdown ? 'md' : 'yaml'}';
+
 /// 'work' / 'private' → DataKind
 DataKind projectKind(String dataType) =>
     dataType == 'work' ? DataKind.work : DataKind.private;

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import '../../models/projects_model.dart';
 import '../state/project_filter_state.dart';
 import '../../../../utils/language_utils.dart';
+import '../../../../utils/skill_name.dart';
+import '../../../../utils/tech_catalog.dart';
 import '../../../../widgets/filter_chips_section.dart';
 import '../../../config/projects/projects_section_config.dart';
 import '../../../../theme/app_styles.dart';
@@ -14,7 +16,10 @@ class _FilterGroup {
   final String title;
   final List<String> Function(Project p) values;
 
-  const _FilterGroup(this.key, this.title, this.values);
+  /// AWS などのサービスの分類名（候補をまとめるときに先頭の「AWS」などを外す）
+  final String? category;
+
+  const _FilterGroup(this.key, this.title, this.values, {this.category});
 }
 
 /// フィルターパネル（ツールバーの「フィルター」で開閉。開閉は親が管理）
@@ -66,13 +71,43 @@ class _ProjectsFilterState extends State<ProjectsFilter> {
   }
 
 
+  /// 並びは Skills のカテゴリと同じ。候補のない分類は出さない
   List<_FilterGroup> get _groups => [
         _FilterGroup('serverOS', AppTexts.filterServerOS, (p) => p.serverOSList),
         _FilterGroup('db', AppTexts.filterDb, (p) => p.dbList),
-        _FilterGroup('tools', AppTexts.filterTools, (p) => p.toolsList),
+        // Tools はグループ（バージョン管理・開発ツール・環境…。名前から推測）ごとに見出しを分ける
+        for (final g in ToolGroup.values)
+          _FilterGroup(
+            'tools',
+            AppTexts.skillCategoryLabels[g.key] ?? AppTexts.filterTools,
+            (p) => [for (final t in p.toolsList) if (toolGroupOf(t) == g) t],
+          ),
         _FilterGroup('backendFrameworks', AppTexts.filterBackend, (p) => p.backendList),
         _FilterGroup('frontendFrameworks', AppTexts.filterFrontend, (p) => p.frontendList),
-        _FilterGroup('skills', AppTexts.filterSkills, (p) => p.skillsList),
+        _FilterGroup('uiFrameworks', AppTexts.filterUi, (p) => p.uiList),
+        _FilterGroup('testingFrameworks', AppTexts.filterTesting, (p) => p.testingList),
+        _FilterGroup('cloudPlatforms', AppTexts.filterCloud, (p) => p.cloudList),
+        _FilterGroup('awsServices', AppTexts.filterAws, (p) => p.awsList,
+            category: 'aws_services'),
+        _FilterGroup('azureServices', AppTexts.filterAzure, (p) => p.azureList,
+            category: 'azure_services'),
+        _FilterGroup('gcpServices', AppTexts.filterGcp, (p) => p.gcpList,
+            category: 'gcp_services'),
+        _FilterGroup('container', AppTexts.filterContainer, (p) => p.containerList),
+        _FilterGroup('containerOrchestration', AppTexts.filterOrchestration,
+            (p) => p.orchestrationList),
+        _FilterGroup('aiServices', AppTexts.filterAi, (p) => p.aiList),
+        // Skills もグループ（プログラミング言語・マークアップ・データ形式・アーキテクチャ・ライブラリ…）ごとに見出しを分ける
+        for (final g in SkillGroup.values)
+          _FilterGroup(
+            'skills',
+            AppTexts.skillCategoryLabels[g.key] ?? AppTexts.filterSkills,
+            // 書いたままの名前で見分ける（url_launcher のような名前は表示用に整えるとライブラリと分からなくなるため）
+            (p) => [
+              for (final s in p.skills.split(','))
+                if (s.trim().isNotEmpty && skillGroupOf(s) == g) s.trim(),
+            ],
+          ),
         if (widget.isWork)
           _FilterGroup(
             'workflow',
@@ -83,11 +118,12 @@ class _ProjectsFilterState extends State<ProjectsFilter> {
           ),
       ];
 
-  List<String> _candidates(_FilterGroup g) => widget.projects
-      .expand(g.values)
-      .where((v) => v != Project.notUsed)
-      .toSet()
-      .toList();
+  /// 候補（表記ゆれ「MAC / mac / mac.」などは 1 つにまとめる。lib/utils/skill_name.dart）
+  /// AWS などのサービスは、先頭の「AWS」などを外してまとめる（AWS Lambda / Lambda → Lambda）
+  List<String> _candidates(_FilterGroup g) => uniqueSkillNames(
+        widget.projects.expand(g.values).where((v) => cleanSkillName(v) != Project.notUsed),
+        category: g.category,
+      );
 
   void _toggle(String key, String value) {
     setState(() {
