@@ -1,0 +1,41 @@
+# compose.yaml（frontend/ と backend/ がある場所で実行）
+#
+#   docker compose up --build      … ビルドして起動。http://localhost:8000 を開く
+#   docker compose up backend      … API だけ起動（http://localhost:8080/api/profile）
+#   docker compose down            … 止める
+#
+# backend/data の YAML を書き換えると、再起動しなくても API の応答が変わる（ファイルの更新日時を見て読み直す）
+name: dev-portfolio
+
+services:
+  backend:
+    build:
+      context: ./backend
+    environment:
+      PORT: "8080"
+      DATA_DIR: /data
+    volumes:
+      - ./backend/data:/data:ro
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: ["CMD", "/app/bin/server", "healthcheck"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        BASE_HREF: /
+    environment:
+      BACKEND_ORIGIN: http://backend:8080
+    ports:
+      - "8000:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped

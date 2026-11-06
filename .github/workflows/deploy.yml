@@ -33,23 +33,23 @@ jobs:
 
       - name: Install dependencies
         run: |
-          cd dev_portfolio
+          cd frontend
           flutter pub get
 
       - name: Configure Web Support
         run: |
-          cd dev_portfolio
+          cd frontend
           flutter create . --platforms web
 
       - name: Build web
         run: |
-          cd dev_portfolio
+          cd frontend
           flutter build web --release --base-href "/dev-portfolio-site/"
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./dev_portfolio/build/web
+          path: ./frontend/build/web
 
   deploy:
     environment:

@@ -1,0 +1,33 @@
+# frontend/nginx/default.conf.template
+# ${BACKEND_ORIGIN} は起動時に環境変数で置き換わる（nginx 公式イメージの機能。$uri などの nginx の変数はそのまま残る）
+server {
+    listen 80;
+    server_name _;
+    root /usr/share/nginx/html;
+
+    gzip on;
+    gzip_types text/css application/javascript application/json application/wasm image/svg+xml;
+
+    # API は backend へ
+    location /api/ {
+        proxy_pass ${BACKEND_ORIGIN};
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    location = /healthz {
+        proxy_pass ${BACKEND_ORIGIN};
+    }
+
+    # index.html と Service Worker は毎回確かめる（新しいビルドがすぐ反映されるように）
+    location ~ ^/(index\.html|flutter_service_worker\.js|flutter_bootstrap\.js|version\.json)$ {
+        add_header Cache-Control "no-cache";
+        try_files $uri =404;
+    }
+
+    # SPA：ファイルがなければ index.html を返す
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+}

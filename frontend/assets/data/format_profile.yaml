@@ -1,0 +1,172 @@
+# ============================================================
+# プロフィール（Home と About に表示する内容）
+# ------------------------------------------------------------
+# - インデントは半角スペース 2 つ
+# - ★ の付いた項目は必須。それ以外は書かなければ表示しない
+# - 複数行の文章は「|」のあとに改行して書く
+# - 起動時に読み込む：dart run tool/run.dart このファイル.yaml
+# ============================================================
+
+# ---------- Home（最初の画面） ----------
+home:
+  name: 山田 太郎                    # ★ 名前
+  role: Web / モバイルエンジニア       # ★ 職種（名前の上に小さく出る）
+  tagline: |                        # ★ 紹介文（名前の下に出る）
+    Flutter と Dart を中心に、Web とモバイルのフロントエンドを開発しています。
+    このサイトでは、業務と個人開発で使ってきた技術と、関わったプロジェクトをまとめています。
+
+  # card は今は表示しません（以前の右側のカード。書いてもエラーにはなりません）
+  card:
+    name: Taro Yamada
+    role: Web / Mobile Engineer
+    stack:
+      - Flutter
+      - Dart
+      - TypeScript
+    focus: ユーザー視点の UI
+
+# ---------- About（自己紹介） ----------
+about:
+  intro: |                          # ★ 自己紹介（名前・職種・簡単な経歴を 2〜3 文で）
+    受託開発の会社で Web アプリの設計から実装・テストまでを担当し、
+    現在は Flutter を使ったモバイル / Web アプリの開発に取り組んでいます。
+
+  domains:                          # 得意な領域（タグで表示）
+    - Web
+    - モバイル
+    - Flutter
+    - Dart
+
+  strengths: チーム開発、テストの設計と実施、UI の改善      # 強み
+
+  style: コード品質を重視し、スクラムでの開発経験があります。レスポンシブ対応を前提に設計します。  # 開発スタイル
+
+  closing: ユーザー視点での開発を常に心がけています。         # 締めの一言
+
+# ---------- スキルシートだけの項目（任意） ----------
+# 画面には出さず、ヘッダーの［ダウンロード］で作るスキルシート（Excel / PDF）にそのまま書きます。
+# スキルシート（Excel）から読み込むと、Excel に書かれていたものが入ります。書かなければスキルシートでも空欄
+# 年齢は生年月日から出します（生年月日がないときだけ age を使う）
+sheet:
+  furigana: やまだ たろう          # ふりがな
+  gender: 男                       # 性別
+  birthday: 1990年04月01日          # 生年月日（1990/4/1 などでもよい）
+  nationality: 日本                # 国籍
+  spouse: 無                       # 配偶者
+  station: ○○駅                   # 最寄駅
+  education: ○○専門学校　○○学科    # 学歴
+
+# ---------- Work / Private（任意） ----------
+# ここにも書くと、プロフィールと一緒に Skills と Projects も読み込みます（あとで個別にアップロードしなくてよい）。
+# 書き方は Work / Private のテンプレート（format_work.yaml / format_private.yaml）の「projects:」の中身と同じです。
+# - 1 件ごとに「- title:」から書き始める（複数件は続けて書く）
+# - 該当しない項目は「- 利用なし」
+# - Work は workflow（担当した工程）を必ず書く。Private には書かない
+# - 使わないときは「work:」「private:」ごと消してください（消すと、今表示している Work / Private はそのまま）
+
+# ---------- Work（業務のプロジェクト） ----------
+work:
+  - title: サンプル・ワークプロジェクト
+    description: チーム開発における設計から実装、テストまでのアジャイル開発を担当
+    details: |
+      要件定義を元にした詳細設計、バックエンドのAPI実装、フロントエンドのUI調整を実施。
+      単体テストの作成やコードレビューを通じて品質担保に貢献。
+    role:                         # 役割（PM・PL・SE・PG など。複数可）
+      - PG
+    scale: ""                     # 規模（例：全体 20名（チーム 5名）。人数で絞り込めます）
+    server_os:
+      - Linux
+      - Windows
+    db: 
+      - PostgreSQL
+    tools: 
+      - Git
+      - GitLab
+      - VSCode
+    backend_frameworks:
+      - Django
+    frontend_frameworks:
+      - 利用なし
+    ui_frameworks:
+      - Bootstrap
+    testing_frameworks:
+      - 利用なし
+    cloud_platforms:
+      - 利用なし
+    aws_services:
+      - 利用なし
+    azure_services:
+      - 利用なし
+    gcp_services:
+      - 利用なし
+    container:
+      - 利用なし
+    container_orchestration:
+      - 利用なし
+    ai_services:
+      - 利用なし
+    skills:
+      - Python
+    period:
+      - 2023-04
+      - 2023-09
+    link: ""
+    workflow:
+      requirements: false
+      basic_design: true
+      detailed_design: true
+      implementation_unit_test: true
+      integration_test: true
+      system_test: false
+      maintenance_operation: false
+
+# ---------- Private（個人開発のプロジェクト） ----------
+private:
+  - title: サンプル・プライベートプロジェクト
+    description: 個人開発によるWebアプリケーション制作
+    details: |
+      モダンな技術スタックを用いたフルスタック開発の検証。
+      UI/UXの設計からレスポンシブ対応、コンテナ化までを一人で担当。
+    role:                         # 役割（PM・PL・SE・PG など。複数可）
+      - PG
+    scale: ""                     # 規模（例：全体 20名（チーム 5名）。人数で絞り込めます）
+    server_os:
+      - Windows
+    db:
+      - 利用なし
+    tools:
+      - GitHub
+      - VSCode
+    backend_frameworks:
+      - Node.js
+    frontend_frameworks:
+      - React
+      - Next.js
+    ui_frameworks:
+      - 利用なし
+    testing_frameworks:
+      - 利用なし
+    cloud_platforms:
+      - 利用なし
+    aws_services:
+      - 利用なし
+    azure_services:
+      - 利用なし
+    gcp_services:
+      - 利用なし
+    container:
+      - Docker
+    container_orchestration:
+      - 利用なし
+    ai_services:
+      - 利用なし
+    skills:
+      - JavaScript
+      - TypeScript
+      - HTML
+      - CSS
+      - YAML
+    period:
+      - 2024-01
+      - 2024-06
+    link: https://sigu-f7a231.github.io/my-portfolio/

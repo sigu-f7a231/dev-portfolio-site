@@ -1,0 +1,22 @@
+# ビルド結果・キャッシュ
+build/
+.dart_tool/
+.flutter-plugins-dependencies
+.idea/
+*.iml
+.DS_Store
+
+# Web 以外のプラットフォーム（Web のビルドには使わない）
+android/
+ios/
+linux/
+macos/
+windows/
+
+# tool/run.dart がコピーした個人のプロフィール。assets/profile/ はフォルダーごとアセットに入るので、
+# イメージに入ると公開ページから取り出せてしまう。.gitkeep だけ残す
+assets/profile/*
+!assets/profile/.gitkeep
+
+Dockerfile
+.dockerignore

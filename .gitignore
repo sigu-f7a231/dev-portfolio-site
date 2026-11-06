@@ -1,0 +1,51 @@
+# リポジトリ全体の .gitignore
+# Flutter / Dart の細かい設定は frontend/.gitignore と backend/.gitignore にある
+
+# ---------- OS・エディタ ----------
+.DS_Store
+Thumbs.db
+*.swp
+.idea/
+*.iml
+# .vscode/ は起動設定を共有できるよう、frontend/.gitignore と同じく管理する
+
+# ---------- Dart / Flutter（どのフォルダーでも） ----------
+.dart_tool/
+build/
+.pub-cache/
+coverage/
+
+# ---------- 旧フォルダー（2026-11-06 に dev_portfolio/ → frontend/ に改名） ----------
+# 改名前に起動した flutter run の Chrome が .dart_tool/chrome-device を作り直すことがある
+/dev_portfolio/
+
+# ---------- 個人情報・秘密情報 ----------
+# 自分のスキルシート・YAML の置き場（中身は管理しない。フォルダーだけ .gitkeep で残す）
+/skill_sheet_yaml/*
+!/skill_sheet_yaml/.gitkeep
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+# GCP のサービスアカウントキー（Workload Identity Federation を使うので本来は作らない）
+*-sa-key.json
+service-account*.json
+
+# ---------- Terraform（infra/ を作るとき用） ----------
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfplan
+crash.log
+crash.*.log
+*.tfvars
+!*.tfvars.example
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+# .terraform.lock.hcl はプロバイダーの版をそろえるためコミットする
+
+# ---------- Docker ----------
+compose.override.yaml
