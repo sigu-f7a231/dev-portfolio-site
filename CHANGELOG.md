@@ -20,7 +20,7 @@
 
 ## 2026-11-06 — 構成の分割・テスト・CI・ドキュメント
 
-### Hono の API（段階 3。shelf の backend を置き換え）
+### Hono の API（段階 3。shelf の backend を置き換え）（`eed4845`）
 - **追加**：`services/api-hono/`（TypeScript・Hono・Node 22。型を外してそのまま動かすのでビルドなし）。プロフィール・スキル・表示設定（`/api/me/{profile,skills,display}`）、職務経歴（`/api/me/projects`。追加・置き換え・削除）、編集中のデータ全体（`/api/me/draft`。読んだときの `updatedAt` と違えば 409）、公開ページ（`/api/public/:slug`）、`/healthz`
 - **追加**：Firebase の ID トークンの確認（本物は Google の公開鍵で RS256、Emulator は中身だけ）。読み書きする文書は確かめた uid から作るので、本人のデータだけ。Firestore は REST（Emulator は `Bearer owner`）で、Admin SDK なし（Cloudflare Workers でも動く。`npm run dev:workers` は Emulator だけ）
 - **追加**：受け取ったデータの形の確認（データ設計の 2.）、まとまりごとの保存は読み直して 3 回までやり直す、1 行 1 件の JSON ログ（uid・中身は書かない）、SIGTERM で止まる、`healthcheck`
