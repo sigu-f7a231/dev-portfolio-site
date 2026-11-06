@@ -34,7 +34,7 @@ flowchart TD
   s7 --> s8["8. Google Cloud へのデプロイ・運用<br/>（ここで初めて請求先アカウント）"]
 ```
 
-- 進み具合：0 は済み（未決の項目は [決めること](decisions.md)）。1 は済み（Repository は構造のデータで受け渡し、画面はすべて Riverpod の Provider から読み、URL は `/`・`/login`・`/me`・`/me/edit`。ログイン・マイページは `--dart-define=ENABLE_ACCOUNT=true` のときだけ）。2 は済み（`compose.yaml` に Firebase Emulator とサンプルを入れる seed、`firebase/`・`services/` を用意。[ローカルのクラウド](../local-cloud.md)）。
+- 進み具合：0 は済み（未決の項目は [決めること](decisions.md)）。1 は済み（Repository は構造のデータで受け渡し、画面はすべて Riverpod の Provider から読み、URL は `/`・`/login`・`/me`・`/me/edit`。ログイン・マイページは `--dart-define=ENABLE_ACCOUNT=true` のときだけ）。2 は済み（`compose.yaml` に Firebase Emulator とサンプルを入れる seed、`firebase/`・`services/` を用意。[ローカルのクラウド](../local-cloud.md)）。3 は済み（`services/api-hono/`：プロフィール・スキル・職務経歴・表示設定・編集中のデータの読み書き、ID トークンで本人だけ、Emulator の上のテスト。`backend/` は削除。版と公開の API は段階 5 で）。
 - 0〜7 は**ローカルだけ**で進められる（クラウドの契約・カードの登録はいらない）。
 - `develop` に push すると今の GitHub Pages に公開されるので、1 以外は別のブランチで進めるか、新しい画面をビルドの設定（`--dart-define`）で隠す。
 
@@ -46,7 +46,7 @@ flowchart TD
 | 入力 | YAML / Markdown / Excel のファイル、貼り付け、入力フォーム | 同じ（読み込んだものを Firestore に保存する） |
 | 公開ページ | 開いた人が自分でデータを読み込む | 本人が「公開」した版を、誰でも URL で見られる |
 | ログイン | なし | あり（Phoenix） |
-| API | shelf（YAML を返すだけ。画面からは使っていない） | Hono（マイページの読み書き）・FastAPI（Excel のうち必要な処理だけ） |
+| API | （前は shelf。YAML を返すだけ）→ 2026-11-06 に Hono に置き換えた | Hono（マイページの読み書き）・FastAPI（Excel のうち必要な処理だけ） |
 | 画面 | 1 ページ＋ダイアログ | 公開ページ＋ログイン・マイページ・編集・表示設定（URL を分ける） |
 | 配信 | GitHub Pages | Cloudflare（[決めること](decisions.md#d-04-フロントエンドの配信先)） |
 

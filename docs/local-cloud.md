@@ -1,7 +1,7 @@
 # ローカルのクラウド（Firebase Emulator と compose）
 
 > 次の構成（[計画](plan/README.md)）の段階 2。本物のクラウドの代わりに、手元の Docker だけで Firebase（Auth・Firestore）を動かす。構成・ポート・起動から止めるまでの流れ・データの残り方・サンプル・つなぎ先・よくある失敗。
-> 2026-11-06 時点。起動の仕方の要約は [開発ガイド](development.md#dockerfrontend--backend--firebase-emulator)、Emulator のファイルの説明は [firebase/README.md](../firebase/README.md)。
+> 2026-11-06 時点。起動の仕方の要約は [開発ガイド](development.md#dockerfrontend--api--firebase-emulator)、Emulator のファイルの説明は [firebase/README.md](../firebase/README.md)。
 
 ---
 
@@ -23,8 +23,7 @@ flowchart LR
   subgraph host["このパソコン（docker compose）"]
     direction LR
     fe["frontend<br/>nginx ＋ Flutter Web<br/>:8000"]
-    be["backend（shelf）<br/>:8081 → 中は 8080<br/>段階 3 で消す"]
-    data[("backend/data/*.yaml")]
+    be["api（services/api-hono）<br/>Hono・Node 22<br/>:8787"]
     subgraph fb["firebase（Firebase Emulator）"]
       direction TB
       ui["確認用の画面<br/>:4001"]
@@ -34,18 +33,20 @@ flowchart LR
     end
     vol[("firebase/emulator-data<br/>Git 管理外")]
     seed["seed<br/>docker compose run --rm seed<br/>のときだけ"]
-    fe -- "/api/・/healthz" --> be --> data
+    fe -- "/api/・/healthz" --> be
+    be -- "本人のデータ（Bearer owner）" --> fs
+    be -. "ID トークンを確かめる（Emulator は中身だけ）" .-> auth
     seed -- "利用者を作る" --> auth
     seed -- "文書を書く（管理者として）" --> fs
     fb -- "止めたときに書き出す /<br/>起動したときに読み込む" --- vol
   end
   browser -- ":8000" --> fe
   browser -- ":4001" --> ui
-  next["これから足す（点線）<br/>auth-phoenix :4100<br/>api-hono :8787<br/>excel-fastapi :8001"]
+  next["これから足す（点線）<br/>auth-phoenix :4100<br/>excel-fastapi :8001"]
   next -. "FIREBASE_AUTH_EMULATOR_HOST<br/>FIRESTORE_EMULATOR_HOST" .-> fb
 ```
 
-- Flutter の画面（frontend）は、**まだ Emulator を使っていない**。データは今までどおり、同梱のサンプルとブラウザの sessionStorage。画面から Emulator（の上の API）を使うのは段階 5。
+- api（`services/api-hono/`）は Emulator につなぐ（`FIRESTORE_EMULATOR_HOST=firebase:8080`・`FIREBASE_AUTH_EMULATOR_HOST=firebase:9099`）。Flutter の画面（frontend）は、**まだ api を呼んでいない**。データは今までどおり、同梱のサンプルとブラウザの sessionStorage。画面から Emulator（の上の API）を使うのは段階 5。
 - compose の `seed` は `profiles: ["seed"]` なので、`docker compose up` では動かず、`docker compose run --rm seed` のときだけ動く。
 
 ## 3. ポート
@@ -53,7 +54,7 @@ flowchart LR
 | このパソコン側 | コンテナの中 | サービス | 中身 | 決めた理由 |
 |---|---|---|---|---|
 | 8000 | 80 | frontend | Flutter Web（nginx） | 前から |
-| 8081 | 8080 | backend | shelf の API | Firestore Emulator の既定の 8080 と重なるので、このパソコン側だけ 8081 にした。frontend からは `http://backend:8080` のまま（コンテナどうしは中のポート） |
+| 8787 | 8787 | api | マイページの API（Hono） | `wrangler dev` の既定と同じ。前の backend（8080 → このパソコン側 8081）は 2026-11-06 に消した |
 | 4001 | 4001 | firebase | 確認用の画面（Emulator UI） | 既定の 4000 は Phoenix の既定と重なるので 4001 |
 | 9099 | 9099 | firebase | Auth | 既定のまま |
 | 8080 | 8080 | firebase | Firestore | 既定のまま（各 SDK・ツールが既定で探す番号） |
@@ -61,18 +62,17 @@ flowchart LR
 | 4400 | 4400 | firebase | ハブ（動いているエミュレーターの一覧） | 既定のまま。compose の healthcheck が使う |
 | ― | 4500 | firebase | ログ | 外には出さない |
 | （これから）4100 | | auth-phoenix | Phoenix | 既定の 4000 を避ける |
-| （これから）8787 | | api-hono | Hono | `wrangler dev` の既定 |
 | （これから）8001 | | excel-fastapi | FastAPI | 既定の 8000 は frontend と重なる |
 
 `flutter run -d chrome` で画面を開くときのポートは、起動のたびに変わる。決めたいときは `--web-port 5000` のように、上の表にない番号を付ける。
 
-`dart run bin/server.dart`（backend を Docker なしで起動）の既定は 8080 なので、Emulator と一緒に動かすときは `PORT=8081 dart run bin/server.dart` にする。
+`services/api-hono` を Docker なしで動かすときは、`FIRESTORE_EMULATOR_HOST=localhost:8080 FIREBASE_AUTH_EMULATOR_HOST=localhost:9099 npm run dev`（[services/api-hono/README.md](../services/api-hono/README.md)）。
 
 ## 4. ファイル
 
 ```
 dev-portfolio-site/
-├── compose.yaml              # frontend・backend・firebase・seed
+├── compose.yaml              # frontend・api・firebase・seed
 ├── firebase/
 │   ├── Dockerfile            # Node 22 ＋ Java 21 ＋ firebase-tools 15.34.0（版は固定）
 │   ├── firebase.json         # エミュレーターのポート。0.0.0.0 で待つ（コンテナの外から見るため）
@@ -197,13 +197,14 @@ docker compose build --no-cache firebase  # firebase-tools の版を変えたあ
 
 | 起きること | 原因 | 対処 |
 |---|---|---|
-| `Bind for 0.0.0.0:8080 failed: port is already allocated` | 8080（または 4001・9099 など）を、ほかのアプリ・前の backend が使っている | `docker compose down` で前のものを止める。`lsof -i :8080` で使っているものを探す。手元の `dart run bin/server.dart` は `PORT=8081` で |
+| `Bind for 0.0.0.0:8080 failed: port is already allocated` | 8080（または 4001・9099 など）を、ほかのアプリが使っている | `docker compose down` で前のものを止める。`lsof -i :8080` で使っているものを探す。 |
 | `Cannot connect to the Docker daemon` | Docker（Rancher Desktop）が起動していない・接続先が違う | Rancher Desktop を起動する。`docker context ls` で接続先を確かめる |
 | イメージのビルドで `npm install` や `setup:emulators` が失敗する | ネットワークにつながらない（プロキシ・社内のネットワーク） | つながる場所でビルドする。一度ビルドすれば、起動にはネットワークはいらない |
 | `firebase` がいつまでも `healthy` にならない | Firestore の本体（Java）の起動が遅い・失敗している | `docker compose logs firebase` を見る。Java の版のエラーなら `Dockerfile` の Java が 21 か確かめる。メモリが少ないときは Docker に割り当てを増やす |
 | 確認用の画面は開くが、Firestore の画面が読み込み中のまま | ブラウザが 9150（WebSocket）につなげない | 9150 が compose の `ports` にあるか、ほかのアプリが使っていないか確かめる |
 | 止めて起動し直したら、データが消えている | `docker compose kill`・強制終了で書き出さなかった、または書き出しが 30 秒に間に合わなかった | `docker compose stop` で止める。ログに書き出しのエラーがないか見る。`emulator-data/` に `firebase-export-metadata.json` があるか確かめる |
 | 起動に失敗し、ログに読み込み（import）のエラー | 書き出しの途中で止まり、`emulator-data/` が壊れた | 止めてから `rm -rf firebase/emulator-data` して、`seed` で入れ直す |
+| `api` が `unhealthy`、ログに `EACCES: permission denied, open '/app/src/server.ts'` | 手元のファイルが自分だけ読める権限（600）のまま写され、コンテナの `node` ユーザーが読めない | `services/api-hono/Dockerfile` で `COPY --chown=node:node` にした（2026-11-06）。`docker compose build api` で作り直す |
 | `seed` が「FIREBASE_AUTH_EMULATOR_HOST と FIRESTORE_EMULATOR_HOST を指定してください」で止まる | compose を通さずに `node seed.mjs` を実行した | `docker compose run --rm seed` で実行する。手元で動かすなら 2 つを `localhost:9099`・`localhost:8080` で指定する |
 | `seed` が `EMAIL_EXISTS` 以外の Auth のエラーで止まる | Emulator がまだ起動しきっていない | `docker compose ps` で `healthy` を待ってからもう一度 |
 
@@ -227,7 +228,7 @@ docker compose build --no-cache firebase  # firebase-tools の版を変えたあ
 
 | 段階 | ここに足すもの |
 |---|---|
-| 3 | `services/api-hono/`（Firestore Emulator につなぐ API）を compose に足し、`backend/` を消す（8081 も使わなくなる） |
+| 3（済み） | `services/api-hono/`（Firestore Emulator につなぐ API）を compose に足し、`backend/` を消した |
 | 4 | `services/auth-phoenix/`（Auth Emulator につなぐ認証） |
 | 5 | Flutter の画面から API を呼ぶ（ローカルでは Emulator のデータが画面に出る） |
 | 6 | `services/excel-fastapi/`（必要なら） |

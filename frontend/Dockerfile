@@ -1,6 +1,6 @@
 # frontend/Dockerfile
 # 1. Flutter で Web をビルド
-# 2. nginx で配信し、/api/ と /healthz は backend へ転送する（本番の Cloudflare Worker と同じ役割）
+# 2. nginx で配信し、/api/ と /healthz は API（services/api-hono）へ転送する（本番の Cloudflare Worker と同じ役割）
 ARG FLUTTER_VERSION=3.41.6
 
 FROM ghcr.io/cirruslabs/flutter:${FLUTTER_VERSION} AS build
@@ -19,5 +19,5 @@ FROM nginx:1.27-alpine
 # templates/*.template は起動時に環境変数（BACKEND_ORIGIN）を埋め込んで conf.d に置かれる
 COPY nginx/default.conf.template /etc/nginx/templates/default.conf.template
 COPY --from=build /app/build/web /usr/share/nginx/html
-ENV BACKEND_ORIGIN=http://backend:8080
+ENV BACKEND_ORIGIN=http://api:8787
 EXPOSE 80

@@ -1,7 +1,7 @@
 # データの流れ
 
 > 読み込み・検証・保存・集計・Excel / PDF の入出力・YAML のスキーマ。データの形や流れを変えるときは必ずここを読み、変えたら直す。
-> backend（`backend/`）の API は、まだ frontend から呼んでいない（表示は assets と sessionStorage から）。API の仕様は `docs/design.md` の「backend（API）」。
+> API（`services/api-hono/`）は、まだ frontend から呼んでいない（表示は assets と sessionStorage から）。API の仕様は `docs/design.md` の「API（services/api-hono）」。
 
 ## 全体
 

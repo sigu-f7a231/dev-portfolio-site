@@ -20,7 +20,17 @@
 
 ## 2026-11-06 — 構成の分割・テスト・CI・ドキュメント
 
-### ローカルのクラウド（段階 2）
+### Hono の API（段階 3。shelf の backend を置き換え）
+- **追加**：`services/api-hono/`（TypeScript・Hono・Node 22。型を外してそのまま動かすのでビルドなし）。プロフィール・スキル・表示設定（`/api/me/{profile,skills,display}`）、職務経歴（`/api/me/projects`。追加・置き換え・削除）、編集中のデータ全体（`/api/me/draft`。読んだときの `updatedAt` と違えば 409）、公開ページ（`/api/public/:slug`）、`/healthz`
+- **追加**：Firebase の ID トークンの確認（本物は Google の公開鍵で RS256、Emulator は中身だけ）。読み書きする文書は確かめた uid から作るので、本人のデータだけ。Firestore は REST（Emulator は `Bearer owner`）で、Admin SDK なし（Cloudflare Workers でも動く。`npm run dev:workers` は Emulator だけ）
+- **追加**：受け取ったデータの形の確認（データ設計の 2.）、まとまりごとの保存は読み直して 3 回までやり直す、1 行 1 件の JSON ログ（uid・中身は書かない）、SIGTERM で止まる、`healthcheck`
+- **テスト・CI**：51 件（値・設定・ID トークン・Firestore・形・読み書き・ルート、Emulator の上で本人だけとセキュリティルール）。CI の backend のジョブを `api-hono`（型の確認・テスト）に置き換え
+- **変更**：`compose.yaml` の backend を `api`（8787。Emulator につなぐ）に、frontend の転送先（`BACKEND_ORIGIN`）を `http://api:8787` に。ルートの `.gitignore` に `node_modules/`
+- **修正**：api のコンテナが起動しない（手元のファイルの権限 600 のまま写され、`node` ユーザーが読めない）→ `COPY --chown=node:node`。テストのヘッダーの型の誤り（`tsc`）
+- **削除**：`backend/`（Dart の shelf）。このパソコン側のポート 8081 も使わなくなった
+- **ドキュメント**：設計（API の節）・開発ガイド・ファイル構成・ライブラリ・ローカルのクラウド・テスト計画書と一覧・CI の設計と状況・計画・今後の動き・CLAUDE.md・docs/claude/・README
+
+### ローカルのクラウド（段階 2）（`7eb1b1d`）
 - **追加**：Firebase Emulator（`firebase/`）。Node 22 ＋ Java 21 ＋ `firebase-tools@15.34.0` のイメージ、Auth（9099）・Firestore（8080）・確認用の画面（4001）。プロジェクトは `demo-dev-portfolio`（本物の Firebase にはつながらない）。止めたとき（SIGINT）にデータを `firebase/emulator-data/`（Git 管理外）に書き出し、次の起動で読み込む
 - **追加**：Firestore のセキュリティルール（画面からの読み書きは全部断る。D-05 の案）
 - **追加**：サンプルを入れる `docker compose run --rm seed`（`firebase/seed/`。架空の利用者と、データ設計の 5 つの文書。公開ページには `sheet` を入れない。何度実行してもよい）とそのテスト（6 件）、CI の `firebase-seed` ジョブ

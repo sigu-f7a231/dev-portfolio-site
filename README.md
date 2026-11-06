@@ -2,7 +2,7 @@
 
 履歴書を補うための、開発者ポートフォリオサイトです。
 業務（Work）と個人開発（Private）のプロジェクト、そこで使った技術の割合を 1 ページで見られます。
-Flutter Web で作った SPA で、GitHub Pages で公開しています。API サーバー（Dart / shelf）と Docker Compose での起動、テスト（網羅率 90% 以上）と CI もそろえています。
+Flutter Web で作った SPA で、GitHub Pages で公開しています。API（Hono・TypeScript）と Firebase Emulator を Docker Compose で起動する構成、テスト（網羅率 90% 以上）と CI もそろえています。
 
 公開ページ: https://sigu-f7a231.github.io/dev-portfolio-site/
 
@@ -11,7 +11,7 @@ Flutter Web で作った SPA で、GitHub Pages で公開しています。API �
 > It shows work and personal projects, and charts the technologies used across them.
 > All content is driven by YAML / Markdown files or an Excel skill sheet: the profile (Home / About) is loaded at startup (`dart run tool/run.dart my_profile.yaml`) or in the first-run dialog, and projects can be added or replaced from the header's **Data** button (on-screen form, pasted text, or files).
 > The header's **Download** button exports everything as a skill sheet in the template's Excel layout, or as a PDF that looks the same.
-> The repository is split into `frontend/` (Flutter) and `backend/` (a small Dart API built with shelf + shelf_router), and `docker compose up --build` starts both (nginx serves the app and proxies `/api/`).
+> The repository is split into `frontend/` (Flutter) and `services/api-hono/` (a TypeScript API built with Hono that reads and writes each user's own data in Firestore after verifying their Firebase ID token), and `docker compose up --build` starts the app, the API and the Firebase Emulator (nginx serves the app and proxies `/api/`).
 > Tests cover both normal and error cases with ≥ 90% line and branch coverage, enforced by GitHub Actions.
 
 ## ドキュメント
@@ -19,21 +19,21 @@ Flutter Web で作った SPA で、GitHub Pages で公開しています。API �
 | ドキュメント | 内容 |
 |---|---|
 | [操作説明書](docs/manual.md) | 使い方（プロフィール・Excel・［データ］・［ダウンロード］・アップロードの流れ）、データの書き方（YAML / Markdown）、カスタマイズ |
-| [設計](docs/design.md) | 構成、データの流れ、backend の API、技術スタック、現状と課題、今後の計画 |
+| [設計](docs/design.md) | 構成、データの流れ、API、技術スタック、現状と課題、今後の計画 |
 | [ファイル構成](docs/structure.md) | ディレクトリ構成、コンポーネントごとのファイルと中身 |
 | [ライブラリとスタイリング](docs/libraries-and-styling.md) | CSS・CSS フレームワークを使っていない理由、ライブラリの一覧（版・用途・ファイル）、画面ごとにどの部品・ライブラリをどう使っているか |
 | [デザインシステム](docs/design-system.md) | 色・文字・角丸・余白・動きのトークン、部品の選び方、スタイル（CSS に当たるもの）を書く場所、ダークモード |
 | [画面仕様書](docs/screens/README.md) | 画面の一覧（ID）と遷移図、画面ごとの項目・操作・条件・メッセージ（メイン画面・ダイアログ） |
 | [UI / UX](docs/ui-ux.md) | 画面の組み立てとブレークポイント、操作の流れ、UX の決まり、状態ごとの表示、アクセシビリティ、課題 |
 | [パフォーマンス](docs/performance.md) | 起動の流れ、待ち時間の設計、重い処理、配信の設定、測り方と目標（案） |
-| [開発ガイド](docs/development.md) | 起動（Docker / Flutter / backend）、テスト・CI のコマンドと案内 |
+| [開発ガイド](docs/development.md) | 起動（Docker / Flutter / API）、テスト・CI のコマンドと案内 |
 | [テスト計画書](docs/testing/test-plan.md) ／ [テスト一覧](docs/testing/test-catalog.md) | テストの目的・範囲・観点・合格の基準／各テストが確かめていること |
 | [CI の設計](docs/ci/ci-design.md) ／ [CI の状況](docs/ci/ci-status.md) | GitHub Actions の流れと失敗の条件／今の状態と注意点 |
 | [今後の動き](docs/roadmap.md) | テスト・CI・アプリ・インフラのこれからの段階 |
 | [ローカルのクラウド](docs/local-cloud.md) | Firebase Emulator（Auth・Firestore）と compose：構成・ポート・起動から止めるまで・データの残り方・サンプル・つなぎ先・よくある失敗 |
 | [次の構成の計画](docs/plan/README.md) | ログイン・マイページ・クラウド（Phoenix・Hono・FastAPI・Firebase、費用ゼロ）の要件定義・画面設計・データ設計・決めること |
 | [更新履歴](CHANGELOG.md) | いつ・何を追加 / 変更 / 修正したか（コミットごと） |
-| [backend/README.md](backend/README.md) | API サーバーの詳細 |
+| [services/api-hono/README.md](services/api-hono/README.md) | API（Hono）の詳細：エンドポイント・環境変数・テスト |
 | [CLAUDE.md](CLAUDE.md) | AI（Claude）向けの開発メモの入口（詳細は `docs/claude/`） |
 
 ---
@@ -67,7 +67,7 @@ Flutter Web で作った SPA で、GitHub Pages で公開しています。API �
 ## すぐ試す
 
 ```bash
-# Docker（frontend + backend）：http://localhost:8000
+# Docker（frontend + API + Firebase Emulator）：http://localhost:8000
 docker compose up --build
 
 # Flutter で直接：自分のプロフィールを指定して起動
@@ -82,7 +82,7 @@ dart run tool/run.dart my_profile.yaml
 
 ## 現状
 
-2026-11-06 時点で、リポジトリを `frontend/`（Flutter）と `backend/`（API）に分け、Docker Compose で両方を起動できるようにしました。テストは正常系・異常系の両方を書き、網羅率は行 96.2%・分岐 90.4%（基準 90%。GitHub Actions で確認）です。課題と今後の計画は [設計](docs/design.md#現状と課題) にまとめています。
+2026-11-06 時点で、リポジトリを `frontend/`（Flutter）と API（`services/api-hono/`、Hono）に分け、Firebase Emulator と一緒に Docker Compose で起動できるようにしました。テストは正常系・異常系の両方を書き、網羅率は行 96.2%・分岐 90.4%（基準 90%。GitHub Actions で確認）です。課題と今後の計画は [設計](docs/design.md#現状と課題) にまとめています。
 
 ---
 

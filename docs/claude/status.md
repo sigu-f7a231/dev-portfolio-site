@@ -6,8 +6,8 @@
 
 - `flutter test`：全件成功（オーナーの手元で確認）。網羅率は行 96.3%・分岐 90.7%（基準 90%。`testing.md`）。
   - 2026-11-06 にページ送りのはみ出しを直し、`coverage_extra_test` にスマホで確かめるテストを足した。この 2 つはオーナーの手元で**未実行**。
-- `docker compose up --build` で frontend と backend が起動する（オーナーの手元で確認）。
-- 2026-11-06 にフォルダーを `frontend/` / `backend/` に分け、Docker・backend（shelf）・テスト・CI（`test.yml`）を足した。Git へのコミットはオーナーが行う。
+- `docker compose up --build` で frontend・api（Hono）・Firebase Emulator が起動する（オーナーの手元で確認。api は healthy、Emulator の上のテスト 4 件も成功）。
+- 2026-11-06 にフォルダーを `frontend/` と API に分け、Docker・テスト・CI（`test.yml`）を足した。同じ日に API を shelf（`backend/`、削除）から Hono（`services/api-hono/`）に置き換えた。Git へのコミットはオーナーが行う。
 - 非推奨 API は置き換え済み（Flutter stable 2026-10 のソースで `@Deprecated` を照合）:
   - `dart:html` → `package:web`（`web: ^1.1.1`）。sessionStorage とイベント送信は `utils/browser/browser.dart` 経由（Web は `browser_web.dart`、flutter test は `browser_stub.dart` のメモリ実装を条件付き export で自動選択）。ファイル保存も同じく `utils/file_saver.dart`（Web は `file_saver_web.dart`、テストは `file_saver_stub.dart`）。**`dart:html` / `package:web` を直接 import しない**（`*_web.dart` だけが使う）。
   - `Color.withOpacity` → `withValues(alpha: …)`。
@@ -37,7 +37,7 @@
 9. **全画面ローディングは時間で待っている**：アップロード後は最低 5 秒（`AppSizes.reloadMinDuration`）、最大 8 秒。描画完了を厳密に検知しているわけではない。
 10. **Android で Google Drive のファイルを選べないことがある**：Android のファイル選択画面は MIME タイプで絞り込み、Drive 側の種類（`application/octet-stream` など）が `.yaml` と合わないと選べない。テキストの貼り付けで回避できる。根本的に直すなら、Android では `FileType.any` にして選んだ後に拡張子を確かめる（`utils/file_pick.dart` の 1 か所で直せる）。
 11. **アップロード画面（Work / Private）は拡張子を確かめていない**：ファイル選択のダイアログで絞っているだけで、コードでは見ていない（入力画面は確かめる）。上の 10 を直すなら、ここでも確かめる。
-12. **frontend がまだ API を呼ばない**：backend はあるが、表示は assets と sessionStorage から。API から読むようにするのは次の段階（状態管理を Riverpod にし、Repository 層で読み先を切り替える案）。
+12. **frontend がまだ API を呼ばない**：api（`services/api-hono/`）はあるが、表示は assets と sessionStorage から（Repository の Local の実装）。API の Repository を足すのは段階 5（ログインと一緒に）。
 13. **deploy.yml がテストを待たない**：test.yml とつないでいないので、テストが落ちていても develop に push すれば公開される。
 
 ## 課題：優先度 低（仕様として受け入れているもの・整理）

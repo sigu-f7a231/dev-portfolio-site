@@ -1,0 +1,25 @@
+{
+  "name": "api-hono",
+  "private": true,
+  "type": "module",
+  "description": "マイページの API（Hono）。Firestore（ローカルでは Emulator）に読み書きする",
+  "engines": {
+    "node": ">=22.18"
+  },
+  "scripts": {
+    "start": "node src/server.ts",
+    "dev": "node --watch src/server.ts",
+    "dev:workers": "npx wrangler@4 dev",
+    "typecheck": "tsc",
+    "test": "node --test \"test/**/*.test.ts\"",
+    "test:emulator": "node --test test/emulator.test.ts"
+  },
+  "dependencies": {
+    "@hono/node-server": "^1.14.0",
+    "hono": "^4.7.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^6.0.2"
+  }
+}

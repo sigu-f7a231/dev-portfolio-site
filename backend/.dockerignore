@@ -1,6 +1,0 @@
-.dart_tool/
-build/
-bin/server
-*.md
-Dockerfile
-.dockerignore

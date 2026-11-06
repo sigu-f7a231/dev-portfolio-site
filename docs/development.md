@@ -1,18 +1,18 @@
 # 開発ガイド
 
-> 起動（Docker / Flutter / backend）、テストと網羅率の基準、CI / デプロイ。
+> 起動（Docker / Flutter / API）、テストと網羅率の基準、CI / デプロイ。
 > プロジェクトの紹介は [README](../README.md)。
 
 ## 起動
 
-### Docker（frontend + backend + Firebase Emulator）
+### Docker（frontend + API + Firebase Emulator）
 
-リポジトリの直下（`frontend/`・`backend/`・`firebase/` がある場所）で：
+リポジトリの直下（`frontend/`・`services/`・`firebase/` がある場所）で：
 
 ```bash
-docker compose up --build        # http://localhost:8000（API は http://localhost:8081、Emulator の確認用の画面は http://localhost:4001）
+docker compose up --build        # http://localhost:8000（API は http://localhost:8787、Emulator の確認用の画面は http://localhost:4001）
 docker compose run --rm seed     # Emulator にサンプル（架空のデータ）を入れる。何度実行してもよい
-docker compose up backend        # API だけ
+docker compose up api            # API（と Emulator）だけ
 docker compose up firebase       # Firebase Emulator だけ
 docker compose stop              # 止める（Emulator はデータを firebase/emulator-data/ に書き出し、次の起動で読み込む）
 docker compose down              # 止めてコンテナを消す（書き出したデータは残る）
@@ -20,19 +20,18 @@ docker compose down              # 止めてコンテナを消す（書き出し
 
 | サービス | ビルド | 中身 | ポート |
 |---|---|---|---|
-| `frontend` | `ghcr.io/cirruslabs/flutter:3.41.6` で `flutter build web` → `nginx:1.27-alpine` | Flutter Web を nginx で配信。`/api/` と `/healthz` は backend へ転送（転送先は環境変数 `BACKEND_ORIGIN`）。index.html と Service Worker はキャッシュしない | 8000 |
-| `backend` | `dart:3.11` で `dart compile exe` → `scratch`（10MB 前後） | shelf + shelf_router の API。`backend/data/` を読み取り専用でマウント。ヘルスチェックが通ってから frontend を起動。Hono（`services/api-hono/`）ができたら消す | 8081（コンテナの中は 8080） |
+| `frontend` | `ghcr.io/cirruslabs/flutter:3.41.6` で `flutter build web` → `nginx:1.27-alpine` | Flutter Web を nginx で配信。`/api/` と `/healthz` は api へ転送（転送先は環境変数 `BACKEND_ORIGIN`）。index.html と Service Worker はキャッシュしない | 8000 |
+| `api` | `node:22-bookworm-slim`（本番の依存だけ・`node` ユーザー） | マイページの API（`services/api-hono/`。Hono）。Firebase Emulator につなぐ。ヘルスチェック（`node src/server.ts healthcheck`）が通ってから frontend を起動 | 8787 |
 | `firebase` | `node:22-bookworm-slim` ＋ Java 21（`eclipse-temurin:21-jre` から）＋ `firebase-tools@15.34.0` | Firebase Emulator（Auth・Firestore・確認用の画面）。プロジェクトは `demo-dev-portfolio`（本物にはつながらない）。止めるときに SIGINT を送ってデータを `firebase/emulator-data/`（Git 管理外）に書き出し、次の起動で読み込む。詳しくは [firebase/README.md](../firebase/README.md) | 4001（確認用の画面）・9099（Auth）・8080（Firestore）・9150・4400 |
 | `seed` | `node:22-bookworm-slim` | `docker compose run --rm seed` のときだけ。Emulator にサンプル（`firebase/seed/sample.json` の架空のデータ）を入れる | ― |
 
 - 詳しい構成・データの残り方・サンプル・つなぎ先・よくある失敗は [ローカルのクラウド](local-cloud.md)
-- ポートの重なり：Firestore Emulator の既定は 8080 で、backend と同じなので、backend をこのパソコン側では 8081 にした。Emulator の確認用の画面の既定の 4000 は Phoenix（段階 4）と重なるので 4001 にした。これから足すサービスのポートは [サービスの構成](plan/architecture.md#2-ローカルの構成)（auth-phoenix 4100・api-hono 8787・excel-fastapi 8001）
+- ポートの重なり：Firestore Emulator の既定は 8080（前の backend と同じだったが、backend は消した）。Emulator の確認用の画面の既定の 4000 は Phoenix（段階 4）と重なるので 4001 にした。これから足すサービスのポートは [サービスの構成](plan/architecture.md#2-ローカルの構成)（auth-phoenix 4100・excel-fastapi 8001）
 - Emulator で確かめるデータは **サンプルだけ** にする（個人の情報は入れない）。自分のデータで試したら、終わったら `firebase/emulator-data/` を消す
 
 - 初回は Flutter のイメージの取得とビルドに数分かかります。Flutter のビルドはメモリを使うので、Docker に 6〜8GB 程度割り当ててください
-- `backend/data/` の YAML を書き換えると、再起動しなくても API の応答が変わります
 - `frontend/assets/profile/` の個人のプロフィールは、イメージに入らないようにしています（`frontend/.dockerignore`）
-- ビルドの引数：`FLUTTER_VERSION`（frontend の Flutter の版）、`BASE_HREF`（配信するパス。既定 `/`）、`DART_VERSION`（backend）
+- ビルドの引数：`FLUTTER_VERSION`（frontend の Flutter の版）、`BASE_HREF`（配信するパス。既定 `/`）
 - `Cannot connect to the Docker daemon` と出たら、Docker Desktop / Rancher Desktop が起動しているか、`docker context ls` で接続先を確かめてください
 
 ### ローカル（Flutter）
@@ -59,13 +58,16 @@ flutter run -d chrome --dart-define=ENABLE_ACCOUNT=true
 flutter build web --release --base-href "/dev-portfolio-site/"
 ```
 
-### backend だけ（Dart）
+### API だけ（Node）
 
 ```bash
-cd backend
-dart pub get
-dart run bin/server.dart     # http://localhost:8080（Firebase Emulator を動かしているときは PORT=8081 dart run bin/server.dart。8080 が重なる）
+cd services/api-hono
+npm install                  # はじめて（package-lock.json ができたらコミットする）
+docker compose up -d firebase   # リポジトリの直下で、Emulator を起動
+FIRESTORE_EMULATOR_HOST=localhost:8080 FIREBASE_AUTH_EMULATOR_HOST=localhost:9099 npm run dev   # http://localhost:8787
 ```
+
+詳しくは [services/api-hono/README.md](../services/api-hono/README.md)。
 
 ---
 
@@ -80,7 +82,7 @@ flutter test --coverage --branch-coverage      # 網羅率も記録（coverage/l
 dart run tool/coverage_check.dart              # 網羅率の集計と基準（行・分岐とも 90% 以上）の確認
 dart run tool/coverage_check.dart --update-imports   # lib/ にファイルを足したら
 
-cd ../backend && dart test                     # backend
+cd ../services/api-hono && npm run typecheck && npm test   # API（Emulator の上のテストは npm run test:emulator）
 ```
 
 | ドキュメント | 中身 |

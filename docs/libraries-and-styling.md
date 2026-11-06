@@ -1,7 +1,7 @@
 # ライブラリとスタイリング（CSS）
 
 > CSS・CSS フレームワークを使っているか、見た目を何で作っているか、どのライブラリを・どの画面の・どこで・どう使っているか。色や文字の決まりは [デザインシステム](design-system.md)、画面の項目は [画面仕様書](screens/README.md)（画面 ID はそちらと同じ）。
-> 2026-11-06 時点。版は `pubspec.lock`（frontend）・`backend/pubspec.lock` のとおり。
+> 2026-11-06 時点。版は `pubspec.lock`（frontend）・`services/api-hono/package.json` のとおり。
 
 ---
 
@@ -80,24 +80,26 @@ flowchart LR
 | flutter_test | SDK | テスト | ウィジェット・単体のテスト | `test/` | ― |
 | flutter_lints | 5.0.0 | 静的解析 | 解析のルール | `analysis_options.yaml` | ― |
 
-### backend（`backend/pubspec.yaml`）
+### api（`services/api-hono/package.json`）
 
 | ライブラリ | 版 | 何に使うか |
 |---|---|---|
-| shelf | 1.4.3 | HTTP サーバー、ミドルウェア（ログ・CORS）、応答 |
-| shelf_router | 1.1.5 | ルーティング（`/healthz`・`/api/profile`・`/api/projects/<type>`） |
-| yaml | 3.1.4 | `data/*.yaml` の読み込み |
-| test | 1.33.0 | テスト |
-| lints | 5.1.1 | 静的解析のルール |
+| hono | 4.x（`^4.7.0`） | ルーティング・ミドルウェア（CORS）・応答。Node・Cloudflare Workers の両方で動く |
+| @hono/node-server | 1.x（`^1.14.0`） | Node で Hono を動かす（`src/server.ts`） |
+| typescript | 6.x（開発だけ） | 型の確認（`npm run typecheck`）。動かすときは使わない（Node 22 が型を外す） |
+| @types/node | 22.x（開発だけ） | Node の型 |
+
+Firestore・Firebase Auth は SDK を使わず、REST と Web Crypto で読み書き・確認している（Workers でも動かすため。[decisions.md](plan/decisions.md#d-02-hono-を動かす場所) の D-02）。テストは Node の標準（`node --test`）。
 
 ### 実行環境・ツール
 
 | もの | 版 | 何に使うか |
 |---|---|---|
-| nginx | 1.27-alpine | Docker で Flutter Web を配信し、`/api/` を backend へ転送（gzip・キャッシュの設定） |
-| Dart（backend のイメージ） | 3.11 → scratch | `dart compile exe` の実行ファイルを最小のイメージで動かす |
+| nginx | 1.27-alpine | Docker で Flutter Web を配信し、`/api/` を api へ転送（gzip・キャッシュの設定） |
+| Node（api・seed のイメージ） | node:22-bookworm-slim | API と、Emulator にサンプルを入れるスクリプトを動かす |
+| Firebase Emulator | firebase-tools 15.34.0 ＋ Java 21 | ローカルの Auth・Firestore（[ローカルのクラウド](local-cloud.md)） |
 | Flutter（frontend のイメージ） | ghcr.io/cirruslabs/flutter:3.41.6 | Docker の中で `flutter build web` |
-| GitHub Actions | actions/checkout@v4・subosito/flutter-action@v2・dart-lang/setup-dart@v1・actions/upload-artifact@v4・actions/upload-pages-artifact@v3・actions/deploy-pages@v4 | CI とデプロイ |
+| GitHub Actions | actions/checkout@v4・subosito/flutter-action@v2・actions/setup-node@v4・actions/upload-artifact@v4・actions/upload-pages-artifact@v3・actions/deploy-pages@v4 | CI とデプロイ |
 | Mermaid | GitHub の表示 | ドキュメントの図 |
 
 ## 4. 画面ごとの使い方

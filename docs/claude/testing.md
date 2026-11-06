@@ -14,7 +14,7 @@ dart run tool/coverage_check.dart             # 行（C0）・分岐（C1）の�
 dart run tool/coverage_check.dart --update-imports   # lib/ にファイルを足したら（下の「集計の漏れを防ぐ」）
 ```
 
-backend は `backend/` で `dart test`。
+API は `services/api-hono/` で `npm test`（Emulator の上は `npm run test:emulator`）。
 
 - Claude の作業環境には Flutter がない。静的解析・テスト・画面での確認はオーナーの手元で行い、結果（失敗の出力・網羅率の表示）を貼ってもらう。`coverage/lcov.info` と `coverage/uncovered.txt` は手元のフォルダーにできるので、Claude はそれを直接読める。
 
@@ -102,4 +102,4 @@ backend は `backend/` で `dart test`。
 | スキルシート | `skill_sheet_writer_test` / `skill_sheet_pdf_test` / `download_menu_test` | ［ダウンロード］の Excel・PDF・メニュー・保存・失敗 |
 | 文言・小さな処理 | `app_texts_test` / `small_utils_test` | 期間の長さの表示・差し込む文言、区切り・工程の日本語化・番号付け |
 
-backend：`backend/test/app_test.dart`（各 API の正常系、404・500 のエラー、壊れた YAML、必須項目、ログの形、CORS）。
+API：`services/api-hono/test/`（値の変換・設定・ID トークン・Firestore の REST・形の確認・本人のデータの読み書き・ルート・Emulator の上での本人だけとセキュリティルール）。一覧は `docs/testing/test-catalog.md`。

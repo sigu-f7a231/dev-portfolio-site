@@ -13,7 +13,7 @@ flowchart TB
   subgraph test["Test（test.yml）"]
     direction LR
     fe["frontend<br/>analyze → test（網羅率）→ 網羅率の基準"]
-    be["backend<br/>analyze → test"]
+    be["api-hono<br/>typecheck → test"]
     fb["firebase-seed<br/>node --test"]
   end
   subgraph deploy["Deploy（deploy.yml）"]
@@ -61,15 +61,15 @@ flowchart LR
 | 6 | 網羅率の確認 | `dart run tool/coverage_check.dart --min-line 90 --min-branch 90`。結果を Actions の実行のサマリーにも出す（`tee -a "$GITHUB_STEP_SUMMARY"`。`shell: bash` で pipefail を付け、tee を挟んでも失敗が伝わる） | 行・分岐のどちらかが 90% 未満、分岐の情報がない、集計に入っていないファイルがある |
 | 7 | 網羅率のファイルを保存 | `coverage/`（`lcov.info`・`uncovered.txt`）を成果物 `frontend-coverage` として保存。**失敗しても保存する**（`if: always()`）。通っていない行を手元で見るため | |
 
-### ジョブ：backend（`backend/` で実行）
+### ジョブ：api-hono（`services/api-hono/` で実行）
 
 | 順 | ステップ | 内容 | 失敗する条件 |
 |---|---|---|---|
 | 1 | checkout | | |
-| 2 | Dart の用意 | `dart-lang/setup-dart@v1`、Dart **3.11** | |
-| 3 | `dart pub get` | | |
-| 4 | `dart analyze` | | 指摘がある |
-| 5 | `dart test` | | テストが失敗 |
+| 2 | Node の用意 | `actions/setup-node@v4`、Node **22** | |
+| 3 | 依存関係 | `package-lock.json` があれば `npm ci`（版をそろえる）、なければ `npm install` | 解決できない |
+| 4 | `npm run typecheck` | `tsc`（型の確認だけ。出力しない） | 型の誤りがある |
+| 5 | `npm test` | `node --test`（単体・ルート。Emulator の上のテストは環境変数がないので飛ばす。段階 7 で Emulator を起動して動かす） | テストが失敗 |
 
 ### ジョブ：firebase-seed（リポジトリの直下で実行）
 
@@ -79,7 +79,7 @@ flowchart LR
 | 2 | Node の用意 | `actions/setup-node@v4`、Node **22** | |
 | 3 | `node --test firebase/seed/seed.test.mjs` | Firebase Emulator にサンプルを入れるスクリプトのテスト（偽物の Emulator に送った中身を確かめる。パッケージはいらない） | テストが失敗 |
 
-3 つのジョブは並んで動く（どれかが失敗しても、ほかは最後まで動く）。Firebase Emulator そのものは CI では起動しない（段階 7 で、Emulator を使った各サービスのテストと一緒に足す）。
+3 つのジョブ（frontend・api-hono・firebase-seed）は並んで動く（どれかが失敗しても、ほかは最後まで動く）。Firebase Emulator そのものは CI では起動しない（段階 7 で、Emulator を使った各サービスのテストと一緒に足す）。
 
 ## 3. Deploy（deploy.yml）
 
@@ -105,8 +105,9 @@ flutter pub get && flutter analyze
 flutter test --coverage --branch-coverage
 dart run tool/coverage_check.dart --min-line 90 --min-branch 90
 
-cd ../backend
-dart pub get && dart analyze && dart test
+cd ../services/api-hono
+npm install && npm run typecheck && npm test
+node --test ../../firebase/seed/seed.test.mjs
 ```
 
 ## 5. 失敗したときの見方

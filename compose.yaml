@@ -1,38 +1,39 @@
-# compose.yaml（frontend/・backend/・firebase/・services/ がある場所で実行）
+# compose.yaml（frontend/・services/・firebase/ がある場所で実行）
 #
 #   docker compose up --build      … ビルドして起動。http://localhost:8000 を開く
 #   docker compose run --rm seed   … Firebase Emulator にサンプル（架空のデータ）を入れる。何度実行してもよい
 #   docker compose up firebase     … Firebase Emulator だけ起動（確認用の画面 http://localhost:4001）
-#   docker compose up backend      … API だけ起動（http://localhost:8081/api/profile）
+#   docker compose up api          … API（Hono）と Emulator だけ起動（http://localhost:8787/healthz）
 #   docker compose stop / down     … 止める。Firebase Emulator はこのときデータを ./firebase/emulator-data に書き出し、次の起動で読み込む
 #                                     （消すときは ./firebase/emulator-data を消す。docker compose kill だと書き出さない）
 #
 # ポート（このパソコン側）
-#   8000 frontend（nginx）  8081 backend（shelf。コンテナの中は 8080）
+#   8000 frontend（nginx。/api/ と /healthz は api へ）  8787 api（services/api-hono）
 #   4001 Emulator の確認用の画面  9099 Auth  8080 Firestore  9150 確認用の画面 → Firestore  4400 ハブ
-#   Firestore Emulator の既定が 8080 なので、backend をこのパソコン側では 8081 にした（backend は Hono に置き換えたら消す）
-#   これから足すもの（docs/plan/architecture.md）：auth-phoenix 4100・api-hono 8787・excel-fastapi 8001
-#
-# backend/data の YAML を書き換えると、再起動しなくても API の応答が変わる（ファイルの更新日時を見て読み直す）
+#   これから足すもの（docs/plan/architecture.md）：auth-phoenix 4100・excel-fastapi 8001
 name: dev-portfolio
 
 services:
-  backend:
+  # マイページの API（services/api-hono。Hono・Node 22）。Firebase Emulator につなぐ
+  api:
     build:
-      context: ./backend
+      context: ./services/api-hono
     environment:
-      PORT: "8080"
-      DATA_DIR: /data
-    volumes:
-      - ./backend/data:/data:ro
+      PORT: "8787"
+      FIREBASE_PROJECT: demo-dev-portfolio
+      FIRESTORE_EMULATOR_HOST: firebase:8080
+      FIREBASE_AUTH_EMULATOR_HOST: firebase:9099
     ports:
-      - "8081:8080"
+      - "8787:8787"
+    depends_on:
+      firebase:
+        condition: service_healthy
     healthcheck:
-      test: ["CMD", "/app/bin/server", "healthcheck"]
+      test: ["CMD", "node", "src/server.ts", "healthcheck"]
       interval: 10s
       timeout: 5s
       retries: 3
-      start_period: 5s
+      start_period: 10s
     restart: unless-stopped
 
   frontend:
@@ -41,11 +42,11 @@ services:
       args:
         BASE_HREF: /
     environment:
-      BACKEND_ORIGIN: http://backend:8080
+      BACKEND_ORIGIN: http://api:8787
     ports:
       - "8000:80"
     depends_on:
-      backend:
+      api:
         condition: service_healthy
     restart: unless-stopped
 

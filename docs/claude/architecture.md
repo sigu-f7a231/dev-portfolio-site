@@ -8,24 +8,16 @@
 ```
 dev-portfolio-site/
 ├── .github/workflows/
-│   ├── test.yml                   # push・PR ごとに analyze・テスト・網羅率（行・分岐 90% 以上）。backend のテストも
+│   ├── test.yml                   # push・PR ごとに analyze・テスト・網羅率（行・分岐 90% 以上）。api（Hono）の型とテスト、seed のテストも
 │   └── deploy.yml                 # develop への push で GitHub Pages にデプロイ
 ├── README.md                      # プロジェクトの紹介（人向けの詳しい説明は docs/ の manual / design / structure / development へ案内）
 ├── CLAUDE.md                      # Claude 向けの入口（ここから docs/claude/ を読む）
 ├── docs/claude/                   # 開発メモ（構成・データの流れ・規約・テスト・運用・課題）
 ├── firebase/                      # Firebase Emulator（Auth :9099・Firestore :8080・確認用の画面 :4001）。seed/ にサンプルを入れるスクリプト
-├── services/                      # 次の構成のサービス（auth-phoenix・api-hono・excel-fastapi。まだ README だけ）
-├── compose.yaml                   # frontend（nginx :8000）・backend（:8081）・firebase を起動。docker compose up --build
-├── backend/                       # API サーバー（shelf + shelf_router。Flutter に依存しない Dart）
-│   ├── bin/server.dart            # 起動（PORT / DATA_DIR / ALLOWED_ORIGIN）・SIGTERM で停止・`server healthcheck`
-│   ├── lib/src/app.dart           # ルーティング（/healthz・/api/profile・/api/projects/<work|private>）・エラーの JSON・CORS
-│   ├── lib/src/data_store.dart    # data/*.yaml を読んで確かめる（アップロード時と同じ必須項目）。更新日時が変わったら読み直す
-│   ├── lib/src/logging.dart       # 1 リクエスト 1 行の JSON ログ（severity・httpRequest。Cloud Logging 向け）
-│   ├── data/                      # 返す YAML（profile / work / private。最初は frontend のひな形のコピー）
-│   ├── test/app_test.dart         # dart test
-│   └── Dockerfile                 # dart compile exe → scratch
+├── services/                      # サービス：api-hono（マイページの API。Hono・TypeScript）、auth-phoenix・excel-fastapi（まだ README だけ）
+├── compose.yaml                   # frontend（nginx :8000）・api（:8787）・firebase を起動。docker compose up --build
 └── frontend/                      # Flutter アプリ本体（コマンドはここで実行。パッケージ名は dev_portfolio のまま）
-    ├── Dockerfile                 # flutter build web → nginx（nginx/default.conf.template。/api/ と /healthz を backend へ転送）
+    ├── Dockerfile                 # flutter build web → nginx（nginx/default.conf.template。/api/ と /healthz を api へ転送）
     ├── .dockerignore              # assets/profile/ の個人のプロフィールをイメージに入れない
     ├── pubspec.yaml
     ├── assets/data/

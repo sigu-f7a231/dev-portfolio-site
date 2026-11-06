@@ -29,7 +29,7 @@ node --test firebase/seed/seed.test.mjs   # スクリプトのテスト（Node 2
 |---|---|
 | 4001 | 確認用の画面（Emulator UI。既定の 4000 は Phoenix と重なるので変えた） |
 | 9099 | Auth |
-| 8080 | Firestore（既定のまま。backend はこのパソコン側では 8081 にした） |
+| 8080 | Firestore（既定のまま） |
 | 9150 | 確認用の画面が Firestore を見るための WebSocket |
 | 4400 | ハブ（起動しているエミュレーターの一覧。compose の healthcheck が使う） |
 

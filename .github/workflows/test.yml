@@ -46,19 +46,21 @@ jobs:
           name: frontend-coverage
           path: frontend/coverage/
 
-  backend:
+  # マイページの API（services/api-hono）。型の確認と、単体・ルートのテスト（Emulator のテストは段階 7 で足す）
+  api-hono:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: backend
+        working-directory: services/api-hono
     steps:
       - uses: actions/checkout@v4
-      - uses: dart-lang/setup-dart@v1
+      - uses: actions/setup-node@v4
         with:
-          sdk: '3.11'
-      - run: dart pub get
-      - run: dart analyze
-      - run: dart test
+          node-version: '22'
+      # package-lock.json があれば版をそろえる（npm ci）。まだなければ npm install
+      - run: if [ -f package-lock.json ]; then npm ci; else npm install; fi
+      - run: npm run typecheck
+      - run: npm test
 
   # Firebase Emulator にサンプルを入れるスクリプト（firebase/seed/）のテスト。Node の標準のテストだけ（パッケージはいらない）
   firebase-seed:

@@ -56,7 +56,7 @@ flowchart LR
 | ポート | Firebase Emulator の既定（確認用の画面 4000）と Phoenix の既定（4000）が重なるので、Phoenix を 4100、確認用の画面を 4001 にする |
 | つなぎ先 | 環境変数 `FIREBASE_AUTH_EMULATOR_HOST`・`FIRESTORE_EMULATOR_HOST` があれば Emulator、なければ本物 |
 | データ | Emulator のデータ（`firebase/emulator-data/`）は Git 管理外。止めたとき（SIGINT）に書き出し、次の起動で読み込む。動作確認はサンプルのデータだけ（`docker compose run --rm seed`。個人の情報は入れない） |
-| 今の backend | Hono が動いたら `backend/`（shelf）を消す。それまでは、このパソコン側のポートを 8081 にして Firestore（8080）と重ならないようにした |
+| 前の backend | Hono（`services/api-hono/`）に置き換えて `backend/`（shelf）を消した（2026-11-06）。ポートの 8081 も使わなくなった |
 
 ## 3. 本番の構成（案）
 

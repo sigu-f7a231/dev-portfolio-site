@@ -9,6 +9,11 @@ Thumbs.db
 *.iml
 # .vscode/ は起動設定を共有できるよう、frontend/.gitignore と同じく管理する
 
+# ---------- Node（services/api-hono など） ----------
+node_modules/
+.wrangler/
+.dev.vars
+
 # ---------- Dart / Flutter（どのフォルダーでも） ----------
 .dart_tool/
 build/

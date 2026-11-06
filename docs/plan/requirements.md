@@ -89,6 +89,6 @@
 | 入力の画面（アップロード・［データ］・入力フォーム・確認画面） | マイページの編集に移す。確認画面を挟む流れは変えない |
 | データの形（YAML / Markdown のテンプレート、`Profile`・`Project`） | Firestore の項目の元にする（[データ設計](data-model.md)） |
 | Excel の読み込み・書き出し・PDF（`skill_sheet*.dart`） | まずはそのまま使い、FastAPI に移すかは比べて決める |
-| shelf の backend | Hono に置き換えて消す |
+| shelf の backend | Hono（`services/api-hono/`）に置き換えて消した（2026-11-06） |
 | テスト・網羅率 90%・CI | 続ける。サービスごとのテストと、Emulator を使ったテストを足す |
 | GitHub Pages へのデプロイ | 新しい配信先が動くまで残す |

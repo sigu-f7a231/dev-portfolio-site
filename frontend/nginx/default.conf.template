@@ -8,7 +8,7 @@ server {
     gzip on;
     gzip_types text/css application/javascript application/json application/wasm image/svg+xml;
 
-    # API は backend へ
+    # API は services/api-hono（Hono）へ
     location /api/ {
         proxy_pass ${BACKEND_ORIGIN};
         proxy_set_header Host $host;

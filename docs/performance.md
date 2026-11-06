@@ -77,7 +77,7 @@ sequenceDiagram
 | 配信 | 設定 |
 |---|---|
 | Docker（nginx） | gzip（CSS・JS・JSON・wasm・SVG）。`index.html`・`flutter_service_worker.js`・`flutter_bootstrap.js`・`version.json` はキャッシュしない（新しいビルドがすぐ反映される）。それ以外は nginx の既定 |
-| backend の API | `/api/` は `Cache-Control: public, max-age=60`（CDN で短くキャッシュできる）、`/healthz` はキャッシュしない |
+| API（api-hono） | 公開ページ（`/api/public/:slug`）は `Cache-Control: public, max-age=60`（CDN で短くキャッシュできる）、本人のデータ（`/api/me/*`）と `/healthz` はキャッシュしない |
 | GitHub Pages（今の公開ページ） | GitHub Pages の既定（圧縮・キャッシュは GitHub 側） |
 | 今後（Cloudflare） | 静的アセットをエッジから配信、`/api/` をエッジでキャッシュ（[設計](design.md#今後)） |
 

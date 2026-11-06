@@ -26,8 +26,11 @@ GitHub 上の実行の履歴（Actions のタブ）は、Claude の作業環境�
 | `dart run tool/coverage_check.dart` | 行 96.3%（5900 / 6125）・分岐 90.7%（2173 / 2397）、99 ファイル、基準を満たす。新しいファイル（`lib/data/`・`lib/state/`・`lib/router/`）は行・分岐とも 100% | 2026-11-06 |
 | `node --test firebase/seed/seed.test.mjs` | 6 件すべて成功（Node 22、Claude のクラウドの作業場所で実行） | 2026-11-06 |
 | `docker compose up --build`（Firebase Emulator を足したあと） | オーナーの手元で起動。「おそらく問題ない」との報告。seed・止めたときの書き出し・次の起動での読み込みを通しての記録はまだ（確かめ方は [ローカルのクラウド](../local-cloud.md#11-確かめたこと確かめ方)） | 2026-11-06 |
-| `dart test`（backend） | エディタでの依存関係の解決は確認。テストの実行結果は未確認 | ― |
-| `flutter analyze` / `dart analyze` | 未確認（CI で初めて確かめることになる） | ― |
+| `node --test`（api-hono のうち hono に依存しないもの：値・設定・ID トークン・Firestore・形の確認・読み書き） | 35 件すべて成功、`tsc` の型の確認も通る（Claude のクラウドの作業場所。npm のパッケージを取れないため、ルートと Emulator の上のテストは動かせない） | 2026-11-06 |
+| `npm run test:emulator`（api-hono。Emulator の上で本人だけ・セキュリティルール） | 4 件すべて成功（オーナーの手元） | 2026-11-06 |
+| `npm run typecheck`・`npm test`（api-hono 全体） | 型の誤りが 1 件（テストのヘッダーの型）→ 直して、`tsc` は通り、テストは 47 件すべて成功（Emulator の上の 4 件は環境変数がないので飛ばす） | 2026-11-06 |
+| `docker compose up --build`（backend を api に置き換えたあと） | firebase・api・frontend がすべて起動し、api は healthy、`curl http://localhost:8787/healthz` → `{"status":"ok"}`（オーナーの手元。最初はファイルの権限で api が起動せず、`COPY --chown` で直した） | 2026-11-06 |
+| `flutter analyze` | 未確認（CI で初めて確かめることになる） | ― |
 
 ## 3. 初めて動かすときの注意点
 
@@ -38,7 +41,7 @@ GitHub 上の実行の履歴（Actions のタブ）は、Claude の作業環境�
 | `flutter analyze` を CI で初めて動かす | 新しく足したテスト・コードの指摘（使っていない import など）で止まる | 指摘を直してコミット |
 | Flutter 3.41.6 の取得 | `subosito/flutter-action` が版を見つけられない | 版の書き方を直すか、`channel: stable` だけにする |
 | `--branch-coverage` | 分岐の情報が出ない（版による） | `coverage_check.dart` が「分岐の情報なし」で知らせる |
-| backend の `dart analyze` | 未確認なので、指摘が出る可能性 | 指摘を直す |
+| api-hono の `npm ci` | `package-lock.json` がまだないと、毎回 `npm install` で版がそろわない | オーナーの手元で `npm install` し、lock をコミットする |
 | Deploy のパス | `frontend/` への改名後、初めてのビルド | ビルドのログでパスの誤りを確かめる |
 | Deploy がテストを待たない | テストが失敗していても、develop に push すれば公開される | 今は push の前にローカルで確かめる。今後つなぐ（[今後の動き](../roadmap.md)） |
 
@@ -57,7 +60,8 @@ GitHub 上の実行の履歴（Actions のタブ）は、Claude の作業環境�
 | Deploy が Test を待たない | テストが落ちたままでも公開される | Deploy を Test の成功のあとに動かす |
 | ブランチの保護がない | develop に直接 push できる・失敗しても入る | プルリクエストと、Test の成功を必須にする |
 | Docker イメージのビルドを CI で確かめていない | Dockerfile が壊れても気づかない | `docker compose build` のジョブを足す |
-| backend の網羅率を測っていない | backend のテストの抜けに気づけない | 網羅率を測り、frontend と同じ基準にする |
+| api の網羅率を測っていない | api のテストの抜けに気づけない | `node --test --experimental-test-coverage` で測り、frontend と同じ基準にする |
+| Emulator の上のテストを CI で動かしていない | 本人だけ・セキュリティルールの崩れに気づけない | 段階 7 で、CI で Emulator を起動して `npm run test:emulator` |
 | 画面の見た目の変化（ゴールデン）・実ブラウザでの動き（E2E）を確かめていない | 色や配置の変化・ブラウザだけで起きる不具合に気づけない | ゴールデンテスト、Playwright での E2E |
 
 いつ・どの順で進めるかは [今後の動き](../roadmap.md)。

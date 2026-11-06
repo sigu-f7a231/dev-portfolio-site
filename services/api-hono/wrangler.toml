@@ -1,0 +1,10 @@
+# Cloudflare Workers で確かめるとき（npm run dev:workers）。本番の置き場所はまだ決めていない（docs/plan/decisions.md の D-02）
+# 今は Firebase Emulator（docker compose up firebase）につなぐときだけ動く
+name = "api-hono"
+main = "src/worker.ts"
+compatibility_date = "2026-10-01"
+
+[vars]
+FIREBASE_PROJECT = "demo-dev-portfolio"
+FIRESTORE_EMULATOR_HOST = "localhost:8080"
+FIREBASE_AUTH_EMULATOR_HOST = "localhost:9099"

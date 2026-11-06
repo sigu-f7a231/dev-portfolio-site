@@ -14,7 +14,7 @@ flutter test --plain-name '0 件でも落ちない'   # 名前で絞る
 flutter test --coverage --branch-coverage && dart run tool/coverage_check.dart   # 網羅率
 ```
 
-backend は `backend/` で `dart test`。
+API は `services/api-hono/` で `npm test`（Emulator の上のテストは `npm run test:emulator`）。
 
 ---
 
@@ -103,17 +103,20 @@ backend は `backend/` で `dart test`。
 
 ---
 
-## backend（`backend/test/app_test.dart`、12 件）
+## API（`services/api-hono/test/`）
 
-| 確かめていること | 観点 |
-|---|---|
-| `/healthz` は 200 でキャッシュしない | 正 |
-| `/api/profile`・`/api/projects/work`・`/api/projects/private` が JSON を返す | 正 |
-| 知らない type・知らないパス → 404 | 異 |
-| ファイルがない → 404（`data_not_found`） | 異 |
-| Work に workflow がない・Private に workflow がある・プロフィールの必須がない・YAML の誤り → 500（`invalid_data`） | 異 |
-| ログは 1 リクエスト 1 行の JSON（severity・httpRequest） | 正 |
-| `ALLOWED_ORIGIN` を渡すと CORS のヘッダーが付く | 正 |
+`npm test`（Node の標準のテスト）。`emulator.test.ts` は `FIRESTORE_EMULATOR_HOST`・`FIREBASE_AUTH_EMULATOR_HOST` があるときだけ動く。
+
+| ファイル | 件数 | 観点 | 確かめていること |
+|---|---|---|---|
+| `values.test.ts` | 4 | 正・異 | Firestore の値への変換と戻し（整数・日時・空の並び・入れ子）、書けない値 |
+| `config.test.ts` | 4 | 正・異 | 既定・指定、本物のプロジェクト、ポートの誤り・demo- なのに Emulator なし・Auth だけ Emulator |
+| `auth.test.ts` | 5 | 正・異 | RS256 の署名（正しい・別の鍵・鍵がない・署名なし）、公開鍵の使い回し、Emulator のトークン、宛先・発行元・期限・発行時刻・利用者の異常系、時計のずれ、ヘッダーの形 |
+| `firestore.test.ts` | 5 | 正・異 | REST に送る中身（読む・書く・項目だけ・消す・前提）、前提が崩れた → ConflictError、500、本物のアクセストークン、メタデータサーバー |
+| `validate.test.ts` | 7 | 正・異 | プロフィール・スキル・職務経歴（必須・期間・リンク・工程・同じ id・件数）・表示設定・全体（知らない項目・大きすぎる） |
+| `portfolio.test.ts` | 10 | 正・異 | はじめては空、本人の文書だけに書く、409（古い updatedAt・書くまでの間に変わった）、形の誤りは何も書かない、まとまりごとのやり直しとほかのまとまりを消さない、職務経歴の追加・変更・削除・ほかの人の案件、公開ページ |
+| `app.test.ts` | 12 | 正・異 | ルート：401（なし・壊れた・ほかのプロジェクト）、本人だけ、各まとまり、409、400 と誤りの一覧・JSON でない、201 / 204 / 404、公開ページ、500、ログに uid・中身を書かない、CORS |
+| `emulator.test.ts` | 4 | 正・異 | Emulator の上で：Auth Emulator のトークンで本人だけ・Firestore には本人の文書だけ、トークンなしは 401、セキュリティルールがログインしていても・していなくても直接の読み書きを断る |
 
 ---
 

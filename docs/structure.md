@@ -26,21 +26,17 @@ dev-portfolio-site/
 │   ├── testing/                   # test-plan.md（テスト計画書）・test-catalog.md（テスト一覧）
 │   ├── ci/                        # ci-design.md（CI の設計）・ci-status.md（CI の状況）
 │   └── claude/                    # AI 向けの開発メモ：architecture / data-flow / conventions / testing / operations / status
-├── compose.yaml                   # frontend・backend・Firebase Emulator をまとめて起動（docker compose up --build）。seed でサンプルを入れる
+├── compose.yaml                   # frontend・api・Firebase Emulator をまとめて起動（docker compose up --build）。seed でサンプルを入れる
 ├── firebase/                      # Firebase Emulator（Dockerfile・firebase.json・firestore.rules・entrypoint.sh・seed/。書き出したデータ emulator-data/ は Git 管理外）
-├── services/                      # 次の構成のサービス（auth-phoenix・api-hono・excel-fastapi。まだ README だけ）
+├── services/                      # サービス（次の構成）
+│   ├── api-hono/                  # マイページの API（Hono・TypeScript）。src/・test/・Dockerfile・README
+│   ├── auth-phoenix/              # 認証（Phoenix。まだ README だけ）
+│   └── excel-fastapi/             # Excel の処理（FastAPI。まだ README だけ）
 ├── .gitignore                     # リポジトリ全体（OS・エディタ・ビルド結果・秘密情報・Terraform など）
 ├── .github/workflows/
-│   ├── test.yml                   # テストと網羅率（行・分岐 90% 以上）、backend のテスト、Emulator のサンプルのスクリプトのテスト
+│   ├── test.yml                   # テストと網羅率（行・分岐 90% 以上）、api（Hono）の型とテスト、Emulator のサンプルのスクリプトのテスト
 │   └── deploy.yml                 # GitHub Pages への自動デプロイ
 ├── skill_sheet_yaml/              # 自分のスキルシート・YAML の置き場（中身は Git 管理外）
-├── backend/                       # API サーバー（shelf + shelf_router）
-│   ├── bin/server.dart            # 起動・停止・ヘルスチェック
-│   ├── lib/src/                   # app（ルーティング）・data_store（YAML の読み込みと確認）・logging（JSON ログ）
-│   ├── data/                      # 返す YAML（profile / work / private）
-│   ├── test/app_test.dart
-│   ├── Dockerfile                 # dart compile exe → scratch
-│   └── README.md
 └── frontend/                      # Flutter アプリ（Dart のパッケージ名は dev_portfolio）
     ├── Dockerfile                 # flutter build web → nginx
     ├── nginx/default.conf.template # 配信と /api/ の転送
@@ -144,12 +140,15 @@ flowchart TB
 | `theme/app_styles.dart` | 共通の見た目（文字・角丸・カード・タグ・ボタン・グラフ・ダイアログ） |
 | `constants/app_texts.dart` / `app_sizes.dart` | 画面の文言すべて／余白・時間・大きさ |
 
-### backend（`backend/`）
+### api（`services/api-hono/`）
 
 | ファイル | 中身 |
 |---|---|
-| `bin/server.dart` | 起動（`PORT`・`DATA_DIR`・`ALLOWED_ORIGIN`）、SIGTERM で処理中のリクエストを終えてから停止、`server healthcheck`（コンテナのヘルスチェック用） |
-| `lib/src/app.dart` | ルーティング（shelf_router）、JSON の応答とエラー、CORS、キャッシュの指定 |
-| `lib/src/data_store.dart` | `data/*.yaml` を読み、アップロード時と同じ必須項目を確かめる。更新日時が変わったときだけ読み直す |
-| `lib/src/logging.dart` | 1 リクエスト 1 行の JSON ログ（`severity`・`httpRequest`。Cloud Logging がそのまま読める形） |
-| `data/` | 返す YAML（`profile.yaml`・`work.yaml`・`private.yaml`）。最初は frontend のひな形のコピー |
+| `src/app.ts` | ルート（Hono）、ログ、CORS、エラーの JSON |
+| `src/portfolio.ts` | 本人のデータの読み書き（編集中のデータ・プロフィール・スキル・表示設定・職務経歴・公開ページ） |
+| `src/validate.ts` | 受け取ったデータの形の確認 |
+| `src/auth.ts` | Firebase の ID トークンの確認（RS256 の署名。Emulator は中身だけ） |
+| `src/firestore.ts`・`src/values.ts` | Firestore の REST（Emulator は `Bearer owner`、本物はメタデータサーバーのアクセストークン）、値の変換 |
+| `src/config.ts`・`src/log.ts`・`src/setup.ts` | 環境変数と安全の確認、1 行 1 件の JSON ログ、組み立て |
+| `src/server.ts`・`src/worker.ts` | Node の入口（SIGTERM で止まる・`healthcheck`）、Workers の入口（wrangler dev） |
+| `test/` | 単体・ルート・Emulator の上でのテスト（`npm test`・`npm run test:emulator`） |
