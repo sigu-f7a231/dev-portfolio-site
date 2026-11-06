@@ -20,7 +20,8 @@ flutter build web --release --base-href "/dev-portfolio-site/"
 ## Docker Compose（リポジトリの直下で）
 
 ```bash
-docker compose up --build    # frontend http://localhost:8000（/api/ と /healthz は backend へ）・backend http://localhost:8080
+docker compose up --build    # frontend http://localhost:8000（/api/ と /healthz は backend へ）・backend http://localhost:8081・Emulator の画面 http://localhost:4001
+docker compose run --rm seed # Firebase Emulator にサンプル（架空のデータ）を入れる
 docker compose up backend    # API だけ
 docker compose down
 ```

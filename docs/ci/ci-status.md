@@ -24,6 +24,8 @@ GitHub 上の実行の履歴（Actions のタブ）は、Claude の作業環境�
 | `flutter test --coverage --branch-coverage`（全体） | 成功（Repository・Riverpod・go_router を入れたあと。ページ送りの修正のテストも含む） | 2026-11-06 |
 | `flutter test` / `flutter analyze`（URL・構造のデータの Repository・画面が Provider から読む形にしたあと） | **未確認**（このあとオーナーの手元で実行） | ― |
 | `dart run tool/coverage_check.dart` | 行 96.3%（5900 / 6125）・分岐 90.7%（2173 / 2397）、99 ファイル、基準を満たす。新しいファイル（`lib/data/`・`lib/state/`・`lib/router/`）は行・分岐とも 100% | 2026-11-06 |
+| `node --test firebase/seed/seed.test.mjs` | 6 件すべて成功（Node 22、Claude のクラウドの作業場所で実行） | 2026-11-06 |
+| `docker compose up --build`（Firebase Emulator を足したあと） | オーナーの手元で起動。「おそらく問題ない」との報告。seed・止めたときの書き出し・次の起動での読み込みを通しての記録はまだ（確かめ方は [ローカルのクラウド](../local-cloud.md#11-確かめたこと確かめ方)） | 2026-11-06 |
 | `dart test`（backend） | エディタでの依存関係の解決は確認。テストの実行結果は未確認 | ― |
 | `flutter analyze` / `dart analyze` | 未確認（CI で初めて確かめることになる） | ― |
 

@@ -21,14 +21,17 @@ dev-portfolio-site/
 │   ├── ui-ux.md                   # UI / UX（レイアウト・ブレークポイント・操作の流れ・UX の決まり・アクセシビリティ）
 │   ├── performance.md             # パフォーマンス（起動・待ち時間・重い処理・配信・測り方）
 │   ├── roadmap.md                 # 今後の動き（テスト・CI・アプリ・インフラの段階）
+│   ├── local-cloud.md             # ローカルのクラウド（Firebase Emulator と compose：構成・ポート・データの残り方・サンプル・よくある失敗）
 │   ├── plan/                      # 次の構成の計画（要件定義・画面設計・データ設計・サービスの構成・決めること）
 │   ├── testing/                   # test-plan.md（テスト計画書）・test-catalog.md（テスト一覧）
 │   ├── ci/                        # ci-design.md（CI の設計）・ci-status.md（CI の状況）
 │   └── claude/                    # AI 向けの開発メモ：architecture / data-flow / conventions / testing / operations / status
-├── compose.yaml                   # frontend と backend をまとめて起動（docker compose up --build）
+├── compose.yaml                   # frontend・backend・Firebase Emulator をまとめて起動（docker compose up --build）。seed でサンプルを入れる
+├── firebase/                      # Firebase Emulator（Dockerfile・firebase.json・firestore.rules・entrypoint.sh・seed/。書き出したデータ emulator-data/ は Git 管理外）
+├── services/                      # 次の構成のサービス（auth-phoenix・api-hono・excel-fastapi。まだ README だけ）
 ├── .gitignore                     # リポジトリ全体（OS・エディタ・ビルド結果・秘密情報・Terraform など）
 ├── .github/workflows/
-│   ├── test.yml                   # テストと網羅率（行・分岐 90% 以上）、backend のテスト
+│   ├── test.yml                   # テストと網羅率（行・分岐 90% 以上）、backend のテスト、Emulator のサンプルのスクリプトのテスト
 │   └── deploy.yml                 # GitHub Pages への自動デプロイ
 ├── skill_sheet_yaml/              # 自分のスキルシート・YAML の置き場（中身は Git 管理外）
 ├── backend/                       # API サーバー（shelf + shelf_router）

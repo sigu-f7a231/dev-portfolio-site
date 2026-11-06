@@ -49,3 +49,10 @@ override.tf.json
 
 # ---------- Docker ----------
 compose.override.yaml
+
+# ---------- Firebase Emulator ----------
+# 書き出したデータ（docker compose stop のたびに作り直される。サンプルでも Git には入れない）
+/firebase/emulator-data/
+firebase-debug.log*
+firestore-debug.log*
+ui-debug.log*

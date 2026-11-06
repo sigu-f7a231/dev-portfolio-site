@@ -1,0 +1,90 @@
+{
+  "_comment": "動作確認用のサンプル（架空の人・架空の案件。個人の情報は入れない）。形は docs/plan/data-model.md の 2. と 3.",
+  "user": {
+    "email": "sample@example.com",
+    "password": "sample-password",
+    "displayName": "サンプル 太郎",
+    "slug": "sample"
+  },
+  "data": {
+    "profile": {
+      "home": {
+        "name": "サンプル 太郎",
+        "role": "Web / モバイルエンジニア",
+        "tagline": "Flutter と Dart を中心に、Web とモバイルのフロントエンドを開発しています。"
+      },
+      "about": {
+        "intro": "受託開発の会社で Web アプリの設計から実装・テストまでを担当しています。",
+        "domains": ["Web", "モバイル", "Flutter"],
+        "strengths": "チーム開発、テストの設計と実施",
+        "style": "コード品質を重視し、レスポンシブ対応を前提に設計します。",
+        "closing": "ユーザー視点での開発を心がけています。"
+      },
+      "sheet": {
+        "furigana": "さんぷる たろう",
+        "station": "○○駅"
+      }
+    },
+    "skills": {
+      "recentTech": { "skills": ["Dart", "TypeScript"], "frontend_frameworks": ["Flutter"] },
+      "pastTech": { "skills": ["Python"], "backend_frameworks": ["Django"] }
+    },
+    "projects": [
+      {
+        "id": "p_sample_work_1",
+        "kind": "work",
+        "order": 0,
+        "title": "サンプル・ワークプロジェクト",
+        "description": "チーム開発における設計から実装、テストまでを担当",
+        "details": "詳細設計、バックエンドの API の実装、フロントエンドの UI の調整。",
+        "role": ["PG"],
+        "scale": "",
+        "period": { "start": "2023-04", "end": "2023-09" },
+        "link": "",
+        "tech": {
+          "server_os": ["Linux"],
+          "db": ["PostgreSQL"],
+          "tools": ["Git", "VSCode"],
+          "backend_frameworks": ["Django"],
+          "skills": ["Python"]
+        },
+        "workflow": {
+          "requirements": false,
+          "basic_design": true,
+          "detailed_design": true,
+          "implementation_unit_test": true,
+          "integration_test": true,
+          "system_test": false,
+          "maintenance_operation": false
+        }
+      },
+      {
+        "id": "p_sample_private_1",
+        "kind": "private",
+        "order": 0,
+        "title": "サンプル・プライベートプロジェクト",
+        "description": "個人開発による Web アプリケーション",
+        "details": "UI の設計からレスポンシブ対応、コンテナ化までを一人で担当。",
+        "role": ["PG"],
+        "scale": "",
+        "period": { "start": "2024-01", "end": null },
+        "link": "",
+        "tech": {
+          "frontend_frameworks": ["React"],
+          "container": ["Docker"],
+          "skills": ["TypeScript"]
+        }
+      }
+    ],
+    "display": {
+      "sections": [
+        { "id": "about", "visible": true },
+        { "id": "skills", "visible": true },
+        { "id": "projects", "visible": true }
+      ],
+      "projects": { "tabs": { "work": true, "private": true }, "hidden": [], "view": "list" },
+      "allowSheetDownload": false,
+      "theme": "system"
+    }
+  }
+}

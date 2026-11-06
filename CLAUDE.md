@@ -9,7 +9,9 @@
 - **構成**:
   - `frontend/` … Flutter Web / Dart（SDK `^3.9.2`）、Material 3。Dart のパッケージ名は `dev_portfolio`（2026-11-06 に `dev_portfolio/` から改名したため。import は `package:dev_portfolio/...`）
   - `backend/` … API サーバー（shelf + shelf_router。Dart 3.11）。まだ frontend からは呼んでいない
-  - `compose.yaml` … Docker Compose で両方を起動（frontend :8000 / backend :8080）
+  - `compose.yaml` … Docker Compose で起動（frontend :8000 / backend :8081 / Firebase Emulator：確認用の画面 :4001・Auth :9099・Firestore :8080）。`docker compose run --rm seed` でサンプルを入れる
+  - `firebase/` … Firebase Emulator（ローカルのクラウド）。Emulator に入れるのはサンプルだけ（個人の情報は入れない）
+  - `services/` … 次の構成のサービス（auth-phoenix・api-hono・excel-fastapi。まだ README だけ。docs/plan/）
 - **公開先**: GitHub Pages（`/dev-portfolio-site/` 配下）
 - **リポジトリ**: `git@github.com:sigu-f7a231/dev-portfolio-site.git`
 - **ブランチ**: `develop`（作業・デプロイ対象）、`main`
@@ -26,7 +28,7 @@
 | 起動・Docker・backend・CI / デプロイ | [operations.md](docs/claude/operations.md) |
 | 大きな変更の前、不具合・課題の確認 | [status.md](docs/claude/status.md) |
 
-人向けの説明は README とそこから案内する `docs/`：[README.md](README.md)（プロジェクトの紹介）・[docs/manual.md](docs/manual.md)（操作説明書・データの書き方）・[docs/design.md](docs/design.md)（設計・API）・[docs/structure.md](docs/structure.md)（ファイル構成・コンポーネント）・[docs/development.md](docs/development.md)（起動・テスト・CI の案内）・[docs/testing/](docs/testing/test-plan.md)（テスト計画書・テスト一覧）・[docs/ci/](docs/ci/ci-design.md)（CI の設計・状況）・[docs/roadmap.md](docs/roadmap.md)（今後の動き）・[docs/plan/](docs/plan/README.md)（次の構成の計画：要件・画面・データ・決めること）・[docs/libraries-and-styling.md](docs/libraries-and-styling.md)（CSS の有無・ライブラリと画面ごとの使い方）・[docs/design-system.md](docs/design-system.md)（色・文字・部品・スタイル）・[docs/screens/](docs/screens/README.md)（画面仕様書）・[docs/ui-ux.md](docs/ui-ux.md)（レイアウト・UX の決まり・アクセシビリティ）・[docs/performance.md](docs/performance.md)（体感の速さ）・[CHANGELOG.md](CHANGELOG.md)（更新履歴）、backend の詳細は [backend/README.md](backend/README.md)。画面・データの形・起動方法・テストを変えたら、該当する人向けの説明も直す（テストを足したら test-catalog.md、CI を動かした・変えたら ci-status.md / ci-design.md、段階を進めたら roadmap.md、次の構成のことが決まったら docs/plan/decisions.md の状態と関係するファイル、画面の項目・文言・動きを変えたら docs/screens/、色・文字・部品・ブレークポイントを変えたら design-system.md / ui-ux.md、待ち時間・重い処理・配信を変えたら performance.md、ライブラリを足す・外す・部品を変えたら libraries-and-styling.md）。変更したら CHANGELOG.md の「未コミット」に足し、コミットしたらその日の見出しへハッシュ付きで移す。
+人向けの説明は README とそこから案内する `docs/`：[README.md](README.md)（プロジェクトの紹介）・[docs/manual.md](docs/manual.md)（操作説明書・データの書き方）・[docs/design.md](docs/design.md)（設計・API）・[docs/structure.md](docs/structure.md)（ファイル構成・コンポーネント）・[docs/development.md](docs/development.md)（起動・テスト・CI の案内）・[docs/testing/](docs/testing/test-plan.md)（テスト計画書・テスト一覧）・[docs/ci/](docs/ci/ci-design.md)（CI の設計・状況）・[docs/roadmap.md](docs/roadmap.md)（今後の動き）・[docs/plan/](docs/plan/README.md)（次の構成の計画：要件・画面・データ・決めること）・[docs/local-cloud.md](docs/local-cloud.md)（Firebase Emulator と compose）・[docs/libraries-and-styling.md](docs/libraries-and-styling.md)（CSS の有無・ライブラリと画面ごとの使い方）・[docs/design-system.md](docs/design-system.md)（色・文字・部品・スタイル）・[docs/screens/](docs/screens/README.md)（画面仕様書）・[docs/ui-ux.md](docs/ui-ux.md)（レイアウト・UX の決まり・アクセシビリティ）・[docs/performance.md](docs/performance.md)（体感の速さ）・[CHANGELOG.md](CHANGELOG.md)（更新履歴）、backend の詳細は [backend/README.md](backend/README.md)。画面・データの形・起動方法・テストを変えたら、該当する人向けの説明も直す（テストを足したら test-catalog.md、CI を動かした・変えたら ci-status.md / ci-design.md、段階を進めたら roadmap.md、次の構成のことが決まったら docs/plan/decisions.md の状態と関係するファイル、compose・Emulator・ポートを変えたら docs/local-cloud.md と firebase/README.md、画面の項目・文言・動きを変えたら docs/screens/、色・文字・部品・ブレークポイントを変えたら design-system.md / ui-ux.md、待ち時間・重い処理・配信を変えたら performance.md、ライブラリを足す・外す・部品を変えたら libraries-and-styling.md）。変更したら CHANGELOG.md の「未コミット」に足し、コミットしたらその日の見出しへハッシュ付きで移す。
 
 ## 必ず守ること（詳細は各ファイル）
 

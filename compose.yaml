@@ -1,8 +1,17 @@
-# compose.yaml（frontend/ と backend/ がある場所で実行）
+# compose.yaml（frontend/・backend/・firebase/・services/ がある場所で実行）
 #
 #   docker compose up --build      … ビルドして起動。http://localhost:8000 を開く
-#   docker compose up backend      … API だけ起動（http://localhost:8080/api/profile）
-#   docker compose down            … 止める
+#   docker compose run --rm seed   … Firebase Emulator にサンプル（架空のデータ）を入れる。何度実行してもよい
+#   docker compose up firebase     … Firebase Emulator だけ起動（確認用の画面 http://localhost:4001）
+#   docker compose up backend      … API だけ起動（http://localhost:8081/api/profile）
+#   docker compose stop / down     … 止める。Firebase Emulator はこのときデータを ./firebase/emulator-data に書き出し、次の起動で読み込む
+#                                     （消すときは ./firebase/emulator-data を消す。docker compose kill だと書き出さない）
+#
+# ポート（このパソコン側）
+#   8000 frontend（nginx）  8081 backend（shelf。コンテナの中は 8080）
+#   4001 Emulator の確認用の画面  9099 Auth  8080 Firestore  9150 確認用の画面 → Firestore  4400 ハブ
+#   Firestore Emulator の既定が 8080 なので、backend をこのパソコン側では 8081 にした（backend は Hono に置き換えたら消す）
+#   これから足すもの（docs/plan/architecture.md）：auth-phoenix 4100・api-hono 8787・excel-fastapi 8001
 #
 # backend/data の YAML を書き換えると、再起動しなくても API の応答が変わる（ファイルの更新日時を見て読み直す）
 name: dev-portfolio
@@ -17,7 +26,7 @@ services:
     volumes:
       - ./backend/data:/data:ro
     ports:
-      - "8080:8080"
+      - "8081:8080"
     healthcheck:
       test: ["CMD", "/app/bin/server", "healthcheck"]
       interval: 10s
@@ -39,3 +48,46 @@ services:
       backend:
         condition: service_healthy
     restart: unless-stopped
+
+  # Firebase Emulator（Auth・Firestore・確認用の画面）。本物の Firebase にはつながらない（プロジェクトは demo- で始まる名前）
+  firebase:
+    build:
+      context: ./firebase
+    environment:
+      FIREBASE_PROJECT: demo-dev-portfolio
+    volumes:
+      # 書き出したデータ（Git 管理外）。サンプル以外（個人の情報）は入れない
+      - ./firebase/emulator-data:/data
+    ports:
+      - "4001:4001" # 確認用の画面
+      - "9099:9099" # Auth
+      - "8080:8080" # Firestore
+      - "9150:9150" # 確認用の画面が Firestore を見るための WebSocket
+      - "4400:4400" # ハブ（起動しているエミュレーターの一覧）
+    # 止めるときに SIGINT を送り、データを書き出す時間を待つ（init で Node に合図を届ける）
+    init: true
+    stop_signal: SIGINT
+    stop_grace_period: 30s
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:4400/emulators').then((r) => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 30s
+    restart: unless-stopped
+
+  # Emulator にサンプルを入れる（docker compose run --rm seed のときだけ動く）
+  seed:
+    image: node:22-bookworm-slim
+    profiles: ["seed"]
+    working_dir: /seed
+    command: ["node", "seed.mjs"]
+    environment:
+      FIREBASE_PROJECT: demo-dev-portfolio
+      FIREBASE_AUTH_EMULATOR_HOST: firebase:9099
+      FIRESTORE_EMULATOR_HOST: firebase:8080
+    volumes:
+      - ./firebase/seed:/seed:ro
+    depends_on:
+      firebase:
+        condition: service_healthy

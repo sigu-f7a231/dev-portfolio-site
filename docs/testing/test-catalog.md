@@ -117,6 +117,14 @@ backend は `backend/` で `dart test`。
 
 ---
 
+## Firebase Emulator のサンプル（`firebase/seed/seed.test.mjs`、6 件）
+
+`node --test firebase/seed/seed.test.mjs`（Node 22。パッケージはいらない）。CI の `firebase-seed` ジョブでも動く。
+
+| 件数 | 観点 | 確かめていること |
+|---|---|---|
+| 6 | 正・異 | Firestore の REST の値への変換（文字・整数・小数・真偽・null・日時・並び・空の並び・入れ子）、公開ページにスキルシートだけの項目（`sheet`）と隠したプロジェクトを入れない、サンプルが架空のものだけ、偽物の Emulator に 5 つの文書を管理者（`Bearer owner`）として書く、もういる利用者ならログインして同じ uid、つなぎ先がない・書き込みに失敗したらエラー |
+
 ## 補助ファイル・差し替えの入口
 
 | もの | 使い方 |

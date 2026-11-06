@@ -34,7 +34,7 @@ flowchart TD
   s7 --> s8["8. Google Cloud へのデプロイ・運用<br/>（ここで初めて請求先アカウント）"]
 ```
 
-- 進み具合：0 は済み（未決の項目は [決めること](decisions.md)）。1 は済み（Repository は構造のデータで受け渡し、画面はすべて Riverpod の Provider から読み、URL は `/`・`/login`・`/me`・`/me/edit`。ログイン・マイページは `--dart-define=ENABLE_ACCOUNT=true` のときだけ）。
+- 進み具合：0 は済み（未決の項目は [決めること](decisions.md)）。1 は済み（Repository は構造のデータで受け渡し、画面はすべて Riverpod の Provider から読み、URL は `/`・`/login`・`/me`・`/me/edit`。ログイン・マイページは `--dart-define=ENABLE_ACCOUNT=true` のときだけ）。2 は済み（`compose.yaml` に Firebase Emulator とサンプルを入れる seed、`firebase/`・`services/` を用意。[ローカルのクラウド](../local-cloud.md)）。
 - 0〜7 は**ローカルだけ**で進められる（クラウドの契約・カードの登録はいらない）。
 - `develop` に push すると今の GitHub Pages に公開されるので、1 以外は別のブランチで進めるか、新しい画面をビルドの設定（`--dart-define`）で隠す。
 

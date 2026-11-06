@@ -20,7 +20,15 @@
 
 ## 2026-11-06 — 構成の分割・テスト・CI・ドキュメント
 
-### 次の構成の計画・Flutter の中の整理
+### ローカルのクラウド（段階 2）
+- **追加**：Firebase Emulator（`firebase/`）。Node 22 ＋ Java 21 ＋ `firebase-tools@15.34.0` のイメージ、Auth（9099）・Firestore（8080）・確認用の画面（4001）。プロジェクトは `demo-dev-portfolio`（本物の Firebase にはつながらない）。止めたとき（SIGINT）にデータを `firebase/emulator-data/`（Git 管理外）に書き出し、次の起動で読み込む
+- **追加**：Firestore のセキュリティルール（画面からの読み書きは全部断る。D-05 の案）
+- **追加**：サンプルを入れる `docker compose run --rm seed`（`firebase/seed/`。架空の利用者と、データ設計の 5 つの文書。公開ページには `sheet` を入れない。何度実行してもよい）とそのテスト（6 件）、CI の `firebase-seed` ジョブ
+- **追加**：`services/{auth-phoenix,api-hono,excel-fastapi}/`（置き場所と README だけ。中身は段階 3・4・6）
+- **変更**：`compose.yaml` に `firebase`・`seed` を足した。Firestore Emulator（8080）と重なるので、backend のこのパソコン側のポートを 8080 → **8081** に
+- **ドキュメント**：[ローカルのクラウド](docs/local-cloud.md) を追加（目的と決まり・全体の図・ポートと決めた理由・ファイルとイメージの中身・起動から止めるまでの流れ・データが残る操作と残らない操作・サンプル・つなぎ先の環境変数・セキュリティルール・よく使う操作・よくある失敗と対処・確かめたこと・これから）。開発ガイド・設計・ファイル構成・CI の設計と状況・テスト一覧・計画（サービスの構成・進め方）・CLAUDE.md・backend と firebase の README も更新
+
+### 次の構成の計画・Flutter の中の整理（`3979ae0`）
 
 #### 次の構成の計画
 - [次の構成の計画](docs/plan/README.md) を追加：ログイン・マイページ・Firestore への保存・公開ページの[要件定義](docs/plan/requirements.md)、[画面設計](docs/plan/screens.md)（画面の一覧・URL・遷移・表示設定）、[データ設計](docs/plan/data-model.md)（Excel の構成・項目と型・Firestore のコレクション・編集中 / 版 / 公開・無料枠の見積もり）、[サービスの構成](docs/plan/architecture.md)（Phoenix・Hono・FastAPI・Firebase の役割・ローカルと本番・無料枠と守り方）、[決めること](docs/plan/decisions.md)（D-01〜D-10、すべて未決）

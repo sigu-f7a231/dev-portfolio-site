@@ -59,3 +59,13 @@ jobs:
       - run: dart pub get
       - run: dart analyze
       - run: dart test
+
+  # Firebase Emulator にサンプルを入れるスクリプト（firebase/seed/）のテスト。Node の標準のテストだけ（パッケージはいらない）
+  firebase-seed:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --test firebase/seed/seed.test.mjs

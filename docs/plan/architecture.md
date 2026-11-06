@@ -35,6 +35,8 @@ sequenceDiagram
 
 ## 2. ローカルの構成
 
+> 用意した（段階 2）。使い方・データの残り方・よくある失敗は [ローカルのクラウド](../local-cloud.md)。
+
 `docker compose up` だけで全部が動く。クラウドの契約はいらない。
 
 ```mermaid
@@ -45,16 +47,16 @@ flowchart LR
   hono --> fapi["excel（FastAPI）<br/>:8001"]
   phx --> emu["Firebase Emulator<br/>Auth :9099・Firestore :8080<br/>確認用の画面 :4001"]
   hono --> emu
-  emu --- vol[("./emulator-data<br/>終了時に書き出し・起動時に読み込み<br/>Git 管理外")]
+  emu --- vol[("./firebase/emulator-data<br/>終了時に書き出し・起動時に読み込み<br/>Git 管理外")]
 ```
 
 | 決まり | 中身 |
 |---|---|
-| フォルダ | `frontend/`・`services/auth-phoenix/`・`services/api-hono/`・`services/excel-fastapi/`・`firebase/`（`firebase.json`・ルール・Emulator の設定） |
+| フォルダ | `frontend/`・`services/auth-phoenix/`・`services/api-hono/`・`services/excel-fastapi/`・`firebase/`（`firebase.json`・ルール・Emulator の設定）。**`firebase/` と `services/` の置き場所は用意した**（2026-11-06。各サービスの中身はこれから） |
 | ポート | Firebase Emulator の既定（確認用の画面 4000）と Phoenix の既定（4000）が重なるので、Phoenix を 4100、確認用の画面を 4001 にする |
 | つなぎ先 | 環境変数 `FIREBASE_AUTH_EMULATOR_HOST`・`FIRESTORE_EMULATOR_HOST` があれば Emulator、なければ本物 |
-| データ | Emulator のデータは Git 管理外。動作確認はサンプルのデータだけ（個人の情報は入れない） |
-| 今の backend | Hono が動いたら `backend/`（shelf）を消す |
+| データ | Emulator のデータ（`firebase/emulator-data/`）は Git 管理外。止めたとき（SIGINT）に書き出し、次の起動で読み込む。動作確認はサンプルのデータだけ（`docker compose run --rm seed`。個人の情報は入れない） |
+| 今の backend | Hono が動いたら `backend/`（shelf）を消す。それまでは、このパソコン側のポートを 8081 にして Firestore（8080）と重ならないようにした |
 
 ## 3. 本番の構成（案）
 

@@ -13,7 +13,9 @@ dev-portfolio-site/
 ├── README.md                      # プロジェクトの紹介（人向けの詳しい説明は docs/ の manual / design / structure / development へ案内）
 ├── CLAUDE.md                      # Claude 向けの入口（ここから docs/claude/ を読む）
 ├── docs/claude/                   # 開発メモ（構成・データの流れ・規約・テスト・運用・課題）
-├── compose.yaml                   # frontend（nginx :8000）と backend（:8080）を起動。docker compose up --build
+├── firebase/                      # Firebase Emulator（Auth :9099・Firestore :8080・確認用の画面 :4001）。seed/ にサンプルを入れるスクリプト
+├── services/                      # 次の構成のサービス（auth-phoenix・api-hono・excel-fastapi。まだ README だけ）
+├── compose.yaml                   # frontend（nginx :8000）・backend（:8081）・firebase を起動。docker compose up --build
 ├── backend/                       # API サーバー（shelf + shelf_router。Flutter に依存しない Dart）
 │   ├── bin/server.dart            # 起動（PORT / DATA_DIR / ALLOWED_ORIGIN）・SIGTERM で停止・`server healthcheck`
 │   ├── lib/src/app.dart           # ルーティング（/healthz・/api/profile・/api/projects/<work|private>）・エラーの JSON・CORS

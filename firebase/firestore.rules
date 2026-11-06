@@ -1,0 +1,13 @@
+rules_version = '2';
+
+// Firestore のセキュリティルール（docs/plan/data-model.md の 5. の案）
+// 読み書きはすべて Hono の API（サービスアカウント）を通す案なので、画面（ブラウザ）からの直接の読み書きは全部断る。
+// 画面から直接つなぐ案（docs/plan/decisions.md の D-05）に決めたら、ここを書き換え、Emulator でルールのテストを書く。
+// Emulator ではサンプルを入れるスクリプト（seed/seed.mjs）は「Authorization: Bearer owner」でルールを通らずに書き込む。
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

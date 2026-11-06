@@ -11,10 +11,13 @@ flowchart LR
   subgraph compose["docker compose（compose.yaml）"]
     direction LR
     fe["frontend<br/>nginx が Flutter Web を配信<br/>:8000"]
-    be["backend<br/>shelf + shelf_router<br/>:8080"]
+    be["backend<br/>shelf + shelf_router<br/>:8081"]
     data[("backend/data/*.yaml")]
     fe -- "/api/・/healthz を転送" --> be
     be -- "読む（更新日時が変われば読み直す）" --> data
+    emu["firebase<br/>Firebase Emulator（Auth・Firestore）<br/>確認用の画面 :4001"]
+    edata[("firebase/emulator-data<br/>止めたときに書き出し")]
+    emu --- edata
   end
   user -- ":8000" --> fe
   pages["GitHub Pages（公開ページ）<br/>Flutter Web のビルドだけ・backend なし"]

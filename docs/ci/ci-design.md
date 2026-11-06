@@ -14,6 +14,7 @@ flowchart TB
     direction LR
     fe["frontend<br/>analyze → test（網羅率）→ 網羅率の基準"]
     be["backend<br/>analyze → test"]
+    fb["firebase-seed<br/>node --test"]
   end
   subgraph deploy["Deploy（deploy.yml）"]
     direction LR
@@ -70,7 +71,15 @@ flowchart LR
 | 4 | `dart analyze` | | 指摘がある |
 | 5 | `dart test` | | テストが失敗 |
 
-2 つのジョブは並んで動く（どちらかが失敗しても、もう片方は最後まで動く）。
+### ジョブ：firebase-seed（リポジトリの直下で実行）
+
+| 順 | ステップ | 内容 | 失敗する条件 |
+|---|---|---|---|
+| 1 | checkout | | |
+| 2 | Node の用意 | `actions/setup-node@v4`、Node **22** | |
+| 3 | `node --test firebase/seed/seed.test.mjs` | Firebase Emulator にサンプルを入れるスクリプトのテスト（偽物の Emulator に送った中身を確かめる。パッケージはいらない） | テストが失敗 |
+
+3 つのジョブは並んで動く（どれかが失敗しても、ほかは最後まで動く）。Firebase Emulator そのものは CI では起動しない（段階 7 で、Emulator を使った各サービスのテストと一緒に足す）。
 
 ## 3. Deploy（deploy.yml）
 

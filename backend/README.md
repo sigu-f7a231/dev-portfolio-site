@@ -21,7 +21,7 @@ docker compose up --build
 
 # Dart で直接（backend/ で）
 dart pub get
-dart run bin/server.dart          # http://localhost:8080
+dart run bin/server.dart          # http://localhost:8080（Firebase Emulator の Firestore も 8080 なので、一緒に動かすときは PORT=8081 を付ける。compose ではこのパソコン側を 8081 にしている）
 dart test                         # テスト
 ```
 
