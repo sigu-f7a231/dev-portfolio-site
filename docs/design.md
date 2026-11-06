@@ -104,3 +104,5 @@ sessionStorage['profile'] / 起動時の指定 ─▶ ProfileStore ─▶ Home /
 - **費用をかけない本番構成**：配信は Cloudflare（Workers の静的アセット。`/api/` を Cloud Run へ転送してエッジでキャッシュ）、API は GCP の無料枠（Cloud Run・Artifact Registry・Cloud Storage、us-central1）
 - **IaC と CI/CD**：Terraform（google / cloudflare プロバイダ、state は GCS、GitHub Actions からは Workload Identity Federation）、frontend と IaC は GitHub Actions、API のイメージは Cloud Build
 - **監視**：Cloud Monitoring のアップタイムチェックと SLO（可用性・レイテンシ）のバーンレートアラート、構造化ログ（backend は対応済み）、予算のアラート
+
+テスト・CI を含めた進める順番は [今後の動き](roadmap.md)。

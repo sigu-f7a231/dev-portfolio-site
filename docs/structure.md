@@ -13,7 +13,10 @@ dev-portfolio-site/
 │   ├── manual.md                  # 操作説明書（使い方・データの書き方・カスタマイズ）
 │   ├── design.md                  # 設計（構成・データの流れ・API・技術スタック・課題・今後）
 │   ├── structure.md               # ファイル構成（このファイル）
-│   ├── development.md             # 開発ガイド（起動・テスト・CI / デプロイ）
+│   ├── development.md             # 開発ガイド（起動・テスト・CI のコマンドと案内）
+│   ├── roadmap.md                 # 今後の動き（テスト・CI・アプリ・インフラの段階）
+│   ├── testing/                   # test-plan.md（テスト計画書）・test-catalog.md（テスト一覧）
+│   ├── ci/                        # ci-design.md（CI の設計）・ci-status.md（CI の状況）
 │   └── claude/                    # AI 向けの開発メモ：architecture / data-flow / conventions / testing / operations / status
 ├── compose.yaml                   # frontend と backend をまとめて起動（docker compose up --build）
 ├── .gitignore                     # リポジトリ全体（OS・エディタ・ビルド結果・秘密情報・Terraform など）

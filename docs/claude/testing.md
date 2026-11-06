@@ -1,6 +1,7 @@
 # テスト
 
 > テストの実行・網羅率の基準・書き方の決まり・補助ファイル・テストの一覧。テストを足す・直すときに読む。
+> 人向けの計画と一覧は `docs/testing/test-plan.md`・`docs/testing/test-catalog.md`、CI は `docs/ci/`。テストを足したら test-catalog.md も直す。
 
 ## 実行（`frontend/` で）
 
