@@ -21,6 +21,7 @@ Flutter Web で作った SPA で、GitHub Pages で公開しています。API �
 | [操作説明書](docs/manual.md) | 使い方（プロフィール・Excel・［データ］・［ダウンロード］・アップロードの流れ）、データの書き方（YAML / Markdown）、カスタマイズ |
 | [設計](docs/design.md) | 構成、データの流れ、backend の API、技術スタック、現状と課題、今後の計画 |
 | [ファイル構成](docs/structure.md) | ディレクトリ構成、コンポーネントごとのファイルと中身 |
+| [ライブラリとスタイリング](docs/libraries-and-styling.md) | CSS・CSS フレームワークを使っていない理由、ライブラリの一覧（版・用途・ファイル）、画面ごとにどの部品・ライブラリをどう使っているか |
 | [デザインシステム](docs/design-system.md) | 色・文字・角丸・余白・動きのトークン、部品の選び方、スタイル（CSS に当たるもの）を書く場所、ダークモード |
 | [画面仕様書](docs/screens/README.md) | 画面の一覧（ID）と遷移図、画面ごとの項目・操作・条件・メッセージ（メイン画面・ダイアログ） |
 | [UI / UX](docs/ui-ux.md) | 画面の組み立てとブレークポイント、操作の流れ、UX の決まり、状態ごとの表示、アクセシビリティ、課題 |
@@ -29,6 +30,7 @@ Flutter Web で作った SPA で、GitHub Pages で公開しています。API �
 | [テスト計画書](docs/testing/test-plan.md) ／ [テスト一覧](docs/testing/test-catalog.md) | テストの目的・範囲・観点・合格の基準／各テストが確かめていること |
 | [CI の設計](docs/ci/ci-design.md) ／ [CI の状況](docs/ci/ci-status.md) | GitHub Actions の流れと失敗の条件／今の状態と注意点 |
 | [今後の動き](docs/roadmap.md) | テスト・CI・アプリ・インフラのこれからの段階 |
+| [更新履歴](CHANGELOG.md) | いつ・何を追加 / 変更 / 修正したか（コミットごと） |
 | [backend/README.md](backend/README.md) | API サーバーの詳細 |
 | [CLAUDE.md](CLAUDE.md) | AI（Claude）向けの開発メモの入口（詳細は `docs/claude/`） |
 

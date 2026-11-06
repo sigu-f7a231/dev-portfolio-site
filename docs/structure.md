@@ -9,11 +9,13 @@
 dev-portfolio-site/
 ├── README.md                      # プロジェクトの紹介（詳しい説明は docs/ へ案内）
 ├── CLAUDE.md                      # Claude（AI）向けの入口。詳細は docs/claude/
+├── CHANGELOG.md                   # 更新履歴（コミットごとの追加・変更・修正）
 ├── docs/
 │   ├── manual.md                  # 操作説明書（使い方・データの書き方・カスタマイズ）
 │   ├── design.md                  # 設計（構成・データの流れ・API・技術スタック・課題・今後）
 │   ├── structure.md               # ファイル構成（このファイル）
 │   ├── development.md             # 開発ガイド（起動・テスト・CI のコマンドと案内）
+│   ├── libraries-and-styling.md   # ライブラリとスタイリング（CSS の有無・ライブラリの一覧・画面ごとの使い方）
 │   ├── design-system.md           # デザインシステム（色・文字・形・余白・部品・スタイルを書く場所）
 │   ├── screens/                   # 画面仕様書：README.md（一覧・遷移・共通）・main.md（メイン画面）・dialogs.md（ダイアログ）
 │   ├── ui-ux.md                   # UI / UX（レイアウト・ブレークポイント・操作の流れ・UX の決まり・アクセシビリティ）
