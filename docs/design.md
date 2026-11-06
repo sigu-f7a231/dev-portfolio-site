@@ -5,26 +5,42 @@
 
 ## 構成
 
-```
-                      ┌──────────────────────────── docker compose（compose.yaml）────────────────────────────┐
-ブラウザ ── :8000 ──▶ │ frontend：nginx が Flutter Web（build/web）を配信                                       │
-                      │   └─ /api/・/healthz ──▶ backend：shelf + shelf_router（:8080）── backend/data/*.yaml │
-                      └────────────────────────────────────────────────────────────────────────────────────────┘
-
-GitHub Pages（公開ページ）：Flutter Web のビルドだけ（backend なし）
+```mermaid
+flowchart LR
+  user(["ブラウザ"])
+  subgraph compose["docker compose（compose.yaml）"]
+    direction LR
+    fe["frontend<br/>nginx が Flutter Web を配信<br/>:8000"]
+    be["backend<br/>shelf + shelf_router<br/>:8080"]
+    data[("backend/data/*.yaml")]
+    fe -- "/api/・/healthz を転送" --> be
+    be -- "読む（更新日時が変われば読み直す）" --> data
+  end
+  user -- ":8000" --> fe
+  pages["GitHub Pages（公開ページ）<br/>Flutter Web のビルドだけ・backend なし"]
+  user -. "公開ページ" .-> pages
 ```
 
 - **frontend**（`frontend/`）：画面のすべて。表示するデータは、リポジトリのサンプル（`assets/data/`）か、画面から読み込んだもの（ブラウザの sessionStorage）。Excel / PDF の作成もブラウザの中で行い、サーバーには何も送りません。
 - **backend**（`backend/`）：プロフィールと Work / Private を JSON で返す小さな API。今は frontend からは呼んでいません（次の段階で、frontend の読み込み先に API を足す予定）。
 - **データの流れ**（frontend）
 
-```
-assets/data/format_*.yaml ─────┐
-起動時の指定（tool/run.dart） ──┤
-sessionStorage['work'|'private'] ┴─▶ WorkYamlLoader / PrivateYamlLoader（優先：セッション → 起動時の指定 → メモリ → サンプル）
-                                      ├─▶ Project.fromMap（技術の振り分け・表記ゆれの整理）─▶ Projects（絞り込み・並び替え・ページ送り・詳細）
-                                      └─▶ skills_aggregator（分類ごとの割合 %）──────────────▶ Skills（棒 / 円グラフ）
-sessionStorage['profile'] / 起動時の指定 ─▶ ProfileStore ─▶ Home / About
+```mermaid
+flowchart LR
+  subgraph src["読み込み元（上から優先）"]
+    direction TB
+    s1["sessionStorage<br/>work / private"]
+    s2["起動時の指定<br/>tool/run.dart"]
+    s3["メモリ<br/>setCustomYaml"]
+    s4["サンプル<br/>assets/data/format_*.yaml"]
+  end
+  loader["WorkYamlLoader /<br/>PrivateYamlLoader"]
+  src --> loader
+  loader --> model["Project.fromMap<br/>技術の振り分け・表記ゆれの整理"]
+  loader --> agg["skills_aggregator<br/>分類ごとの割合（%）"]
+  model --> projects["Projects<br/>絞り込み・並び替え・ページ送り・詳細"]
+  agg --> skills["Skills<br/>棒 / 円グラフ"]
+  p1["sessionStorage profile /<br/>起動時の指定"] --> store["ProfileStore"] --> home["Home / About"]
 ```
 
 ---
@@ -99,6 +115,28 @@ sessionStorage['profile'] / 起動時の指定 ─▶ ProfileStore ─▶ Home /
 ---
 
 ## 今後
+
+目標の本番構成（費用ゼロ。まだ作っていない）：
+
+```mermaid
+flowchart LR
+  user(["ブラウザ"]) --> cf
+  subgraph cf["Cloudflare（無料）"]
+    worker["Workers<br/>静的アセット（Flutter Web）<br/>/api/ をエッジでキャッシュ"]
+  end
+  subgraph gcp["GCP（無料枠・us-central1）"]
+    run["Cloud Run<br/>backend（最小 0・最大 1〜2）"]
+    gcs[("Cloud Storage<br/>公開用の YAML")]
+    ar[("Artifact Registry<br/>イメージ")]
+    mon["Cloud Monitoring / Logging<br/>アップタイム・SLO・ログ"]
+  end
+  worker -- "/api/*" --> run --> gcs
+  ar -.-> run
+  mon -.-> run
+  gh["GitHub Actions<br/>frontend・Terraform"] -. "WIF（キーなし）" .-> gcp
+  gh -.-> cf
+  cb["Cloud Build<br/>backend のイメージ"] -.-> ar
+```
 
 - **frontend から API を読む**：状態管理を Riverpod にまとめ、Repository 層で読み先（サンプル・sessionStorage・API）を切り替える（画面は変えない）
 - **費用をかけない本番構成**：配信は Cloudflare（Workers の静的アセット。`/api/` を Cloud Run へ転送してエッジでキャッシュ）、API は GCP の無料枠（Cloud Run・Artifact Registry・Cloud Storage、us-central1）

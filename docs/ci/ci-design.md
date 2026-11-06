@@ -6,15 +6,20 @@
 
 ## 1. 全体の流れ
 
-```
-作業（develop ブランチ）
-   │ git push / プルリクエスト
-   ▼
-┌─ Test（test.yml）──────────────────────────────┐      ┌─ Deploy（deploy.yml）──────────────┐
-│ frontend：analyze → test（網羅率）→ 網羅率の基準  │      │ develop への push のときだけ        │
-│ backend ：analyze → test                        │      │ build web → GitHub Pages に公開     │
-└────────────────────────────────────────────────┘      └────────────────────────────────────┘
-        ※ 今は 2 つが独立して動く（Deploy は Test の結果を待たない。今後つなぐ）
+```mermaid
+flowchart TB
+  dev["作業（develop ブランチ）"] -- "git push / プルリクエスト" --> test
+  dev -- "develop への push のときだけ" --> deploy
+  subgraph test["Test（test.yml）"]
+    direction LR
+    fe["frontend<br/>analyze → test（網羅率）→ 網羅率の基準"]
+    be["backend<br/>analyze → test"]
+  end
+  subgraph deploy["Deploy（deploy.yml）"]
+    direction LR
+    build["build web"] --> pages["GitHub Pages に公開"]
+  end
+  test -. "今は待たない（今後つなぐ）" .-> deploy
 ```
 
 | ワークフロー | ファイル | いつ動くか | 目的 |
@@ -32,6 +37,18 @@
 | シークレット | なし | 外部のサービスを使わない |
 
 ### ジョブ：frontend（`frontend/` で実行）
+
+```mermaid
+flowchart LR
+  a["checkout"] --> b["Flutter 3.41.6"] --> c["pub get"] --> d{"analyze<br/>指摘 0 件？"}
+  d -- "はい" --> e{"test --coverage<br/>--branch-coverage<br/>全件成功？"}
+  e -- "はい" --> f{"coverage_check<br/>行・分岐 90% 以上？<br/>集計の漏れなし？"}
+  f -- "はい" --> ok(["成功"])
+  d -- "いいえ" --> ng(["失敗"])
+  e -- "いいえ" --> ng
+  f -- "いいえ" --> ng
+  e -.-> art["coverage/ を成果物に保存<br/>（失敗しても）"]
+```
 
 | 順 | ステップ | 内容 | 失敗する条件 |
 |---|---|---|---|

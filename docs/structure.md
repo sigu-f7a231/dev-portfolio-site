@@ -59,6 +59,33 @@ dev-portfolio-site/
 
 ## コンポーネント
 
+層の関係（上が下を使う。点線は見た目と値の参照）：
+
+```mermaid
+flowchart TB
+  subgraph pages["画面（lib/pages・lib/sections）"]
+    direction LR
+    home["HomePage"] --> header["Header<br/>［データ］［ダウンロード］"]
+    home --> hero["Hero"] & about["About"] & skills["Skills"] & projects["Projects"]
+  end
+  subgraph widgets["共通の部品（lib/widgets）"]
+    direction LR
+    w1["入力画面・アップロードの部品"] ~~~ w2["ポップアップ・切替・タグ入力・年月"]
+  end
+  subgraph utils["データと処理（lib/utils・lib/models）"]
+    direction LR
+    load["読み込み・保存<br/>ローダー・ProfileStore"] ~~~ valid["形式と検証<br/>YAML / Markdown"] ~~~ tech["技術名の整理"] ~~~ sheet["スキルシート<br/>Excel / PDF"]
+  end
+  subgraph entry["ブラウザの機能の入口（テストで差し替え）"]
+    direction LR
+    b1["browser.dart"] ~~~ b2["file_saver.dart"] ~~~ b3["file_pick.dart"] ~~~ b4["asset_text.dart"]
+  end
+  theme["見た目と値<br/>lib/theme・lib/constants・sections/config"]
+  pages --> widgets --> utils --> entry
+  pages -.-> theme
+  widgets -.-> theme
+```
+
 ### frontend：画面（`lib/pages/`・`lib/sections/`）
 
 | コンポーネント | 主なファイル | 中身 |

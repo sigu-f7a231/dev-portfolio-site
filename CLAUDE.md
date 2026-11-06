@@ -36,6 +36,7 @@
 - テストは正常系と異常系の両方。網羅率は行・分岐とも 90% 以上（testing.md）。lib/ にファイルを足したら `dart run tool/coverage_check.dart --update-imports`。
 - `// coverage:ignore-line` などの印は行の最後に置き、後ろに説明を書かない（testing.md）。
 - 個人情報（`frontend/assets/profile/*.yaml`、`skill_sheet_yaml/` の中身）は Git にもイメージにも入れない。
+- ドキュメント（README・`docs/`）の図は **Mermaid**（```mermaid）で描く。罫線や矢印の文字で図を描かない（ディレクトリのツリーは文字のままでよい）。GitHub で表示できるよう、ラベルは `["…"]` で囲み、改行は `<br/>`。
 
 ## Claude の作業メモ
 

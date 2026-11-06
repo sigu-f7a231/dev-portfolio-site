@@ -100,6 +100,15 @@
 
 ## 9. 進め方
 
+```mermaid
+flowchart LR
+  a["変更する<br/>（不具合なら先に再現するテスト）"] --> b["テストを足す<br/>正常系・異常系・境界・組み合わせ"]
+  b --> c["flutter test --coverage<br/>--branch-coverage"] --> d["coverage_check.dart"]
+  d --> e{"行・分岐<br/>90% 以上？"}
+  e -- "いいえ" --> f["uncovered.txt で<br/>通っていない行を見る"] --> b
+  e -- "はい" --> g["コミット → push"] --> h["CI（test.yml）が<br/>同じことを確かめる"]
+```
+
 1. 変更する（不具合なら、先に再現するテストを書く）
 2. 正常系・異常系・境界・組み合わせのテストを足す
 3. `flutter test --coverage --branch-coverage` → `dart run tool/coverage_check.dart`

@@ -7,6 +7,11 @@
 
 ## 段階の一覧
 
+```mermaid
+flowchart LR
+  s0["0. 今の変更を出す<br/>次の push まで"] --> s1["1. CI を守りにする<br/>短期"] --> s2["2. テストの幅を広げる<br/>短期〜中期"] --> s3["3. アプリを API につなぐ<br/>中期"] --> s4["4. 本番の構成（費用ゼロ）<br/>長期"]
+```
+
 | 段階 | 目安 | 中身 |
 |---|---|---|
 | 0. 今の変更を出す | 次の push まで | 残りのテストの確認、push、CI が初めて動くのを確かめる |
@@ -56,6 +61,26 @@
 | つなぎのテスト | backend の応答を frontend の読み込みに通すテスト（契約テスト） | 応答の形が変わったら気づける |
 
 ## 4. 本番の構成（費用ゼロ、長期）
+
+```mermaid
+flowchart LR
+  user(["ブラウザ"]) --> cf
+  subgraph cf["Cloudflare（無料）"]
+    worker["Workers<br/>静的アセット（Flutter Web）<br/>/api/ をエッジでキャッシュ"]
+  end
+  subgraph gcp["GCP（無料枠・us-central1）"]
+    run["Cloud Run<br/>backend（最小 0・最大 1〜2）"]
+    gcs[("Cloud Storage<br/>公開用の YAML")]
+    ar[("Artifact Registry<br/>イメージ")]
+    mon["Cloud Monitoring / Logging<br/>アップタイム・SLO・ログ"]
+  end
+  worker -- "/api/*" --> run --> gcs
+  ar -.-> run
+  mon -.-> run
+  gh["GitHub Actions<br/>frontend・Terraform"] -. "WIF（キーなし）" .-> gcp
+  gh -.-> cf
+  cb["Cloud Build<br/>backend のイメージ"] -.-> ar
+```
 
 | 作業 | 内容 |
 |---|---|

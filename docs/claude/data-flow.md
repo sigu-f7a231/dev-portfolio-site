@@ -5,13 +5,22 @@
 
 ## 全体
 
-```
-assets/data/format_*.yaml ─┐
-                           ├─> WorkYamlLoader / PrivateYamlLoader (utils/*_yaml_loader.dart)
-sessionStorage['work'|'private'] ─┘   優先順位: sessionStorage > メモリ > assets
-        │
-        ├─> projects/data/projects_{work,private}.dart → Project.fromMap → List<Project>
-        └─> skills/data/skills_{work,private}.dart → skills_aggregator.dart → Map<カテゴリ, Map<項目, %>>
+```mermaid
+flowchart LR
+  subgraph src["読み込み元（上から優先）"]
+    direction TB
+    s1["sessionStorage<br/>work / private"]
+    s2["起動時の指定<br/>tool/run.dart"]
+    s3["メモリ<br/>setCustomYaml"]
+    s4["サンプル<br/>assets/data/format_*.yaml"]
+  end
+  loader["WorkYamlLoader /<br/>PrivateYamlLoader"]
+  src --> loader
+  loader --> model["Project.fromMap<br/>技術の振り分け・表記ゆれの整理"]
+  loader --> agg["skills_aggregator<br/>分類ごとの割合（%）"]
+  model --> projects["Projects<br/>絞り込み・並び替え・ページ送り・詳細"]
+  agg --> skills["Skills<br/>棒 / 円グラフ"]
+  p1["sessionStorage profile /<br/>起動時の指定"] --> store["ProfileStore"] --> home["Home / About"]
 ```
 
 - **YAML のアップロード**: Header のダイアログでファイルを選択 → `_validateAgainstTemplate` で検証（`projects` 配列、各要素に `title` が必須、Work は `workflow` 必須、Private は `workflow` があると NG）→ `SessionStore.write(dataType, …)`（`utils/browser/browser.dart`。Web は sessionStorage、テストはメモリ）に保存 → `onYamlStateChanged` → `HomePage` が `ValueKey` を増やして Skills/Projects を作り直し、再読込させる。
