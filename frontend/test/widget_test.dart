@@ -3,18 +3,22 @@
 // ※ main.dart は Web 専用の機能（package:web / dart:js_interop）を間接的に読み込むため、
 //   VM 上で動く flutter test からは import しない。
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:dev_portfolio/theme/app_colors.dart';
+import 'package:dev_portfolio/state/providers.dart';
 import 'package:dev_portfolio/theme/app_theme.dart';
 
 void main() {
-  test('ThemeController でライト/ダークを切り替えられる', () {
-    final controller = ThemeController.instance;
-    controller.toggle(true);
-    expect(controller.value, ThemeMode.dark);
-    controller.toggle(false);
-    expect(controller.value, ThemeMode.light);
+  test('themeModeProvider でライト/ダークを切り替えられる（はじめはライト）', () {
+    final container = ProviderContainer();
+    addTearDown(container.dispose);
+    expect(container.read(themeModeProvider), ThemeMode.light);
+    container.read(themeModeProvider.notifier).toggle(true);
+    expect(container.read(themeModeProvider), ThemeMode.dark);
+    container.read(themeModeProvider.notifier).toggle(false);
+    expect(container.read(themeModeProvider), ThemeMode.light);
   });
 
   testWidgets('context.colors がテーマに応じた色を返す', (tester) async {

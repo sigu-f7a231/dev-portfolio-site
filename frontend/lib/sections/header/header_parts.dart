@@ -2,10 +2,12 @@
 //
 // ヘッダーの部品（M3）
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../config/header_config.dart';
 import '../../theme/app_theme.dart';
 import '../../theme/app_styles.dart';
 import '../../constants/app_texts.dart';
+import '../../state/providers.dart';
 
 /// ナビの行き先（ヘッダー・Drawer で共通）
 class NavDestination {
@@ -109,28 +111,29 @@ class HeaderUploadButton extends StatelessWidget {
 
 /// ライト / ダークの切り替え（M3 の Switch：つまみに太陽 / 月のアイコン）
 /// [compact] が true（スマホ）のときは、M3 のトグル式アイコンボタン（太陽 ⇄ 月）にする
-class ThemeModeSwitch extends StatelessWidget {
+class ThemeModeSwitch extends ConsumerWidget {
   final bool compact;
 
   const ThemeModeSwitch({super.key, this.compact = false});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final isDark = context.isDark;
+    final theme = ref.read(themeModeProvider.notifier);
     if (compact) {
       return IconButton(
         isSelected: isDark,
         tooltip: isDark ? AppTexts.toLightMode : AppTexts.toDarkMode,
         icon: const Icon(Icons.light_mode_outlined),
         selectedIcon: const Icon(Icons.dark_mode),
-        onPressed: () => ThemeController.instance.toggle(!isDark),
+        onPressed: () => theme.toggle(!isDark),
       );
     }
     return Tooltip(
       message: isDark ? AppTexts.toLightMode : AppTexts.toDarkMode,
       child: Switch(
         value: isDark,
-        onChanged: ThemeController.instance.toggle,
+        onChanged: theme.toggle,
         thumbIcon: WidgetStateProperty.resolveWith(
           (states) => Icon(
             states.contains(WidgetState.selected)

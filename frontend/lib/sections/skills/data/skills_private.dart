@@ -1,13 +1,10 @@
-import '../../../utils/private_yaml_loader.dart';
-import 'package:yaml/yaml.dart';
 import 'skills_aggregator.dart';
 import '../../../utils/tech_catalog.dart';
 
-Future<Map<String, Map<String, double>>> loadPrivateSkillsAll() async {
-
-  final yamlMap = await PrivateYamlLoader.loadPrivateYamlMap();
+/// Private のプロジェクト（構造のデータ）→ 分類ごとの割合（%）。読み込みは Provider（lib/state/providers.dart）が Repository から行う
+Map<String, Map<String, double>> privateSkillsOf(List<Object?> rawProjects) {
   // Skills・Tools に書かれたフロントエンド・バックエンドなどは、本来の分類に移してから数える
-  final projects = redistributeProjects(yamlMap['projects'] as YamlList);
+  final projects = redistributeProjects(rawProjects);
   final toolGroups = splitToolGroups(projects);
   final skillGroups = splitSkillGroups(projects);
 

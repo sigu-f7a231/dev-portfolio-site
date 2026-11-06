@@ -1,23 +1,22 @@
 // lib/sections/about_section.dart
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'config/about_section_config.dart';
 import '../theme/app_theme.dart';
 import '../theme/app_styles.dart';
 import '../constants/app_sizes.dart';
 import '../constants/app_texts.dart';
 import '../models/profile.dart';
-import '../utils/profile_store.dart';
+import '../state/providers.dart';
 
 /// About：自己紹介 ＋ 得意な領域 / 直近・過去の開発経験 / 強み / 開発スタイル ＋ 締めの一言
-class AboutSection extends StatelessWidget {
+class AboutSection extends ConsumerWidget {
   const AboutSection({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return ValueListenableBuilder<Profile?>(
-      valueListenable: ProfileStore.instance,
-      builder: (context, profile, _) => _build(context, profile ?? Profile.empty),
-    );
+  Widget build(BuildContext context, WidgetRef ref) {
+    // 表示中のプロフィール（Riverpod。変わったら作り直す）
+    return _build(context, ref.watch(profileProvider) ?? Profile.empty);
   }
 
   Widget _build(BuildContext context, Profile profile) {

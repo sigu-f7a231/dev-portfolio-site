@@ -6,6 +6,7 @@
 //
 // 実行：flutter test test/about_section_test.dart（frontend/ で）
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:dev_portfolio/constants/app_texts.dart';
@@ -51,9 +52,12 @@ Future<void> _pump(WidgetTester tester, Profile? profile, {double width = 1280, 
   tester.view.devicePixelRatio = 1;
   addTearDown(tester.view.reset);
   ProfileStore.instance.value = profile;
-  await tester.pumpWidget(MaterialApp(
-    theme: dark ? AppTheme.dark : AppTheme.light,
-    home: const Scaffold(body: SingleChildScrollView(child: AboutSection())),
+  // AboutSection は Riverpod（profileProvider）を使うので、ProviderScope の中に置く
+  await tester.pumpWidget(ProviderScope(
+    child: MaterialApp(
+      theme: dark ? AppTheme.dark : AppTheme.light,
+      home: const Scaffold(body: SingleChildScrollView(child: AboutSection())),
+    ),
   ));
   await tester.pump();
 }

@@ -3,12 +3,14 @@
 //
 // 実行：flutter test test/hero_section_test.dart（frontend/ で）
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:dev_portfolio/constants/app_texts.dart';
 import 'package:dev_portfolio/models/profile.dart';
 import 'package:dev_portfolio/sections/hero_section.dart';
 import 'package:dev_portfolio/sections/projects/models/projects_model.dart';
+import 'package:dev_portfolio/state/providers.dart';
 import 'package:dev_portfolio/theme/app_theme.dart';
 import 'package:dev_portfolio/utils/browser/browser_stub.dart' as stub;
 import 'package:dev_portfolio/utils/hero_summary.dart';
@@ -100,11 +102,14 @@ void main() {
       tester.view.physicalSize = Size(width, 1000);
       tester.view.devicePixelRatio = 1;
       addTearDown(tester.view.reset);
-      await tester.pumpWidget(MaterialApp(
-        theme: AppTheme.light,
-        home: Scaffold(
-          body: SingleChildScrollView(
-            child: HeroSection(onSkillsPressed: () {}, onProjectsPressed: onProjects),
+      // HeroSection は Riverpod（プロフィール・Work / Private）を使うので、ProviderScope の中に置く
+      await tester.pumpWidget(ProviderScope(
+        child: MaterialApp(
+          theme: AppTheme.light,
+          home: Scaffold(
+            body: SingleChildScrollView(
+              child: HeroSection(onSkillsPressed: () {}, onProjectsPressed: onProjects),
+            ),
           ),
         ),
       ));
@@ -176,23 +181,35 @@ void main() {
       expect(find.text('今の業務'), findsAtLeastNWidgets(2)); // まとめ＋詳細の見出し
     });
 
-    testWidgets('［データ］で案件が変わったら（refreshKey）、まとめを作り直す', (tester) async {
+    testWidgets('［データ］で案件が変わったら（dataRevisionProvider が増えたら）、まとめを作り直す', (tester) async {
       stub.SessionStore.write('work', _work);
-      tester.view.physicalSize = const Size(1280, 1000);
-      tester.view.devicePixelRatio = 1;
-      addTearDown(tester.view.reset);
-      Widget app(int key) => MaterialApp(
-            theme: AppTheme.light,
-            home: Scaffold(body: SingleChildScrollView(child: HeroSection(refreshKey: key))),
-          );
-      await tester.pumpWidget(app(0));
-      await tester.pumpAndSettle();
+      await pump(tester);
       expect(find.text(HeroContent.projectsCount(2 + 1)), findsOneWidget); // Private はサンプル 1 件
 
       stub.SessionStore.write('work', 'projects:\n  - title: 1 件だけ\n    workflow: {}\n');
-      await tester.pumpWidget(app(1));
+      await tester.pumpAndSettle();
+      expect(find.text(HeroContent.projectsCount(2 + 1)), findsOneWidget, reason: '知らせるまでは前のまま');
+
+      ProviderScope.containerOf(tester.element(find.byType(HeroSection))).read(dataRevisionProvider.notifier).bump();
       await tester.pumpAndSettle();
       expect(find.text(HeroContent.projectsCount(1 + 1)), findsOneWidget);
+    });
+
+    testWidgets('プロフィールが変わったら、名前も変わる', (tester) async {
+      await pump(tester);
+      expect(find.text('鈴木 一郎'), findsOneWidget);
+      ProfileStore.instance.value =
+          const Profile(name: '佐藤 花子', role: 'Web エンジニア', tagline: '紹介文です', intro: '自己紹介');
+      await tester.pumpAndSettle();
+      expect(find.text('佐藤 花子'), findsOneWidget);
+    });
+
+    testWidgets('Work / Private が読めなければ、まとめを出さない（名前などは出す）', (tester) async {
+      stub.SessionStore.write('work', 'projects: [\n');
+      await pump(tester);
+      expect(find.text('鈴木 一郎'), findsOneWidget);
+      expect(find.text(HeroContent.summaryProjects), findsNothing);
+      expect(tester.takeException(), isNull);
     });
   });
 }

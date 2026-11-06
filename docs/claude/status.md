@@ -4,7 +4,7 @@
 
 ## 現状（2026-11-06）
 
-- `flutter test`：全件成功（オーナーの手元で確認）。網羅率は行 96.2%・分岐 90.4%（基準 90%。`testing.md`）。
+- `flutter test`：全件成功（オーナーの手元で確認）。網羅率は行 96.3%・分岐 90.7%（基準 90%。`testing.md`）。
   - 2026-11-06 にページ送りのはみ出しを直し、`coverage_extra_test` にスマホで確かめるテストを足した。この 2 つはオーナーの手元で**未実行**。
 - `docker compose up --build` で frontend と backend が起動する（オーナーの手元で確認）。
 - 2026-11-06 にフォルダーを `frontend/` / `backend/` に分け、Docker・backend（shelf）・テスト・CI（`test.yml`）を足した。Git へのコミットはオーナーが行う。

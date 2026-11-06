@@ -33,7 +33,7 @@ backend は `backend/` で `dart test`。
 
 | ファイル | 件数 | 観点 | 確かめていること |
 |---|---|---|---|
-| `hero_section_test.dart` | 10 | 正・異・組 | まとめ（開発経験・件数・直近）の計算、中央寄せ、広い / 狭い画面の並び、押したとき、案件を変えたら作り直す、案件なし・期間なし |
+| `hero_section_test.dart` | 12 | 正・異・組 | まとめ（開発経験・件数・直近）の計算、中央寄せ、広い / 狭い画面の並び、押したとき、案件を変えたら（dataRevisionProvider）作り直す、プロフィールが変わったら名前も変わる、Work / Private が読めなければまとめを出さない、案件なし・期間なし |
 | `about_section_test.dart` | 10 | 正・異・組 | 全部書いた・自己紹介だけ・1 つだけ・技術だけ / 文章だけ・プロフィールなし、「領域：説明」の太字（全角・半角の `:`）、広い / 狭い画面、ダーク |
 
 ### Skills・技術名
@@ -67,7 +67,9 @@ backend は `backend/` で `dart test`。
 | `projects_yaml_validator_test.dart` | 9 | 正・異 | Work / Private の検証 |
 | `profile_bundle_test.dart` | 15 | 正・異 | プロフィールに Work / Private も書いたとき（YAML / Markdown） |
 | `browser_storage_test.dart` | 17 | 正・異 | sessionStorage（メモリ）、ローダー、ProfileStore |
-| `yaml_loaders_test.dart` | 9 | 正・異 | 読む順番（セッション → メモリ → サンプル）の全通りを Work / Private で、YAML の誤り、先頭が Map でない |
+| `yaml_loaders_test.dart` | 9 | 正・異 | 読む順番（セッション → サンプル）の全通りを Work / Private で、YAML の誤り、先頭が Map でない |
+| `portfolio_repository_test.dart` | 33 | 正・異 | 構造のデータ（`records.dart`）と YAML の行き来・壊れたデータ。`LocalPortfolioRepository` の文字（元の文字を保つ・保存 → 起動時の指定 → サンプル・サンプルかの判定）と構造のデータの読み書き、プロフィール（起動時の指定の成功 / 失敗 / なし、壊れた保存）。**構造のデータの 5 つだけを書いた偽物**に差し替えると、文字の読み書き・サンプル・ローダー・ProfileStore がそのまま動く（Firestore の実装の代わり） |
+| `app_state_test.dart` | 15 | 正・異 | Riverpod の Provider（Repository・データが変わった回数・テーマ・プロフィール・Work / Private・Skills の集計・Projects の一覧、読めないときは繰り返さない）、go_router（`/`、ない URL は `/` へ、`ENABLE_ACCOUNT` なしではログイン・マイページは `/` へ、ありなら空の画面、戻るボタン）、データが変わると画面を作り直して新しいデータを出す、テーマで画面がダークになる |
 | `project_append_test.dart` | 22 | 正・異 | 追加するプロジェクトの読み取り（3 つの書き方 / 見つからない 8 通り / 項目の形でない / title・workflow の過不足と番号）、今の一覧の後ろに足す、同じ名前、入力の候補 |
 | `project_data_test.dart` | 25 | 正・異 | ［データ］の画面の流れ（追加・更新・戻る）、入力フォーム、タグ入力、年月の選択、複数件のサンプル |
 | `projects_diff_test.dart` | 8 | 正 | 上書きの確認の違いの判定、テンプレートがそろっているか |
@@ -126,8 +128,11 @@ backend は `backend/` で `dart test`。
 | `lib/utils/file_pick.dart` の `pickFile` | 関数を入れて、選んだ・キャンセル・中身なし・拡張子違い・エラーを作る（`resetFilePicker` で戻す） |
 | `FileSaver.lastSaved`（`file_saver_stub.dart`） | 保存したもの（名前・中身）が残る |
 | `browser_stub.dart` の `SessionStore.clear()` / `dispatchedEvents` | sessionStorage を空にする、ブラウザに送ったイベントを見る |
-| `ProfileStore.fromArg` | 起動時に YAML を指定したときを作る（終わったら false に戻す） |
-| `ProjectDetailView.reset` / `ThemeController.instance.toggle(false)` | 詳細の表示の大きさ・テーマを戻す（tearDown で） |
+| `ProfileStore.fromArg` | 起動時に YAML を指定したときを作る（終わったら false に戻す。`LocalPortfolioRepository.fromArg` と同じもの） |
+| `PortfolioRepository.instance` / `reset()` | Repository を偽物に差し替える（`portfolio_repository_test` の `_FakeRepository`）。tearDown で `reset()` |
+| `ProviderScope` | `HomePage` は Riverpod を使うので、`ProviderScope(child: MaterialApp(...))` の中で pump する。Provider を差し替えるときは `ProviderScope(overrides: [...])` |
+| `ProjectDetailView.reset` | 詳細の表示の大きさを戻す（tearDown で） |
+| `themeModeProvider.overrideWith(...)` | 最初のテーマを決める（`ProviderScope(overrides: ...)`。テストごとに新しい ProviderScope なので戻す必要はない） |
 
 ## テストを足すときの置き場所
 

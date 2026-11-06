@@ -810,3 +810,15 @@ class SkillSheetTexts {
   static const String pdfShort = 'スキルシート（PDF）';
 }
 
+
+/// URL ごとの画面（lib/router/app_router.dart）。ログイン・マイページは準備中の空の画面
+class RouteTexts {
+  RouteTexts._(); // インスタンスを作らせないための private コンストラクタ（呼ばれない） // coverage:ignore-line
+
+  static const String login = 'ログイン';
+  static const String myPage = 'マイページ';
+  static const String edit = '編集';
+  static const String preparing = 'この画面は準備中です';
+  static String planned(String screenId) => '画面設計（docs/plan/screens.md）の $screenId で作ります。';
+  static const String backToPublic = '公開ページへ戻る';
+}

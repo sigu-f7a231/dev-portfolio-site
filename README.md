@@ -30,6 +30,7 @@ Flutter Web で作った SPA で、GitHub Pages で公開しています。API �
 | [テスト計画書](docs/testing/test-plan.md) ／ [テスト一覧](docs/testing/test-catalog.md) | テストの目的・範囲・観点・合格の基準／各テストが確かめていること |
 | [CI の設計](docs/ci/ci-design.md) ／ [CI の状況](docs/ci/ci-status.md) | GitHub Actions の流れと失敗の条件／今の状態と注意点 |
 | [今後の動き](docs/roadmap.md) | テスト・CI・アプリ・インフラのこれからの段階 |
+| [次の構成の計画](docs/plan/README.md) | ログイン・マイページ・クラウド（Phoenix・Hono・FastAPI・Firebase、費用ゼロ）の要件定義・画面設計・データ設計・決めること |
 | [更新履歴](CHANGELOG.md) | いつ・何を追加 / 変更 / 修正したか（コミットごと） |
 | [backend/README.md](backend/README.md) | API サーバーの詳細 |
 | [CLAUDE.md](CLAUDE.md) | AI（Claude）向けの開発メモの入口（詳細は `docs/claude/`） |

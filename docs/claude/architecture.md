@@ -50,13 +50,16 @@ dev-portfolio-site/
     │   │   └── config/            # セクション固有のレイアウト値（*_config.dart）※色・文言は置かない
     │   ├── theme/                 # ★色・テーマ・共通スタイル（conventions.md 参照）
     │   │   ├── app_colors.dart    #   色の定義（M3：seed → ColorScheme → トークン）。Colors.xxx を書いてよい唯一の場所
-    │   │   ├── app_theme.dart     #   ThemeController（切替）・ThemeData・context.colors / context.isDark
+    │   │   ├── app_theme.dart     #   ThemeData・context.colors / context.isDark（切替は state/providers.dart の themeModeProvider）
     │   │   └── app_styles.dart    #   共通スタイル（CSS 相当）：文字・角丸・カード・タグ・ボタン・グラフ文字・モーダル・ダイアログ
     │   ├── constants/             # ★ウィジェットに直接書かない値（conventions.md 参照）
     │   │   ├── app_sizes.dart     #   余白スケール（space4〜48）・時間（Duration）・ダイアログ幅などの数値
     │   │   └── app_texts.dart     #   画面の文言すべて（AppTexts）＋ Home / About の内容（HeroContent / AboutContent）
     │   ├── widgets/               # 共通部品：app_segment / app_filter_modal（ポップアップ）/ profile_setup_dialog（入力画面）/ upload_parts（手順・ファイル状態・確認画面・全画面ローディング）/ settled_reveal / app_loading_indicator
-    │   └── utils/                 # YAML ローダー、profile_store、file_saver / file_pick（保存・選択。テストでは差し替え）、app_ready、文字列分割、workflow 日本語化など
+    │   ├── data/                  # Repository（入口 PortfolioRepository・今の実装 LocalPortfolioRepository・構造のデータ records.dart）
+    │   ├── state/                 # Riverpod の Provider（テーマ・Repository・データが変わった回数・プロフィール・Work / Private・Skills・Projects）
+    │   ├── router/                # go_router の URL（/。ENABLE_ACCOUNT のときだけ /login・/me・/me/edit。ない URL は / へ）
+    │   └── utils/                 # YAML ローダー（中身は Repository）、profile_store、file_saver / file_pick（保存・選択。テストでは差し替え）、app_ready、文字列分割、workflow 日本語化など
     └── test/                      # テスト（一覧・書き方・補助ファイルは docs/claude/testing.md）
 ```
 

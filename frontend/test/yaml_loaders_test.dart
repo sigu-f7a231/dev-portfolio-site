@@ -1,5 +1,5 @@
 // Work / Private のローダーの正常系・異常系のテスト
-// 対象：lib/utils/work_yaml_loader.dart、lib/utils/private_yaml_loader.dart
+// 対象：lib/utils/work_yaml_loader.dart、lib/utils/private_yaml_loader.dart（中身は lib/data/local_portfolio_repository.dart）
 // 基本の動き（セッション優先・assets）は browser_storage_test.dart にある。ここでは読む順番の全通りと、壊れたデータを見る
 //
 // 実行：flutter test test/yaml_loaders_test.dart（frontend/ で）
@@ -44,25 +44,26 @@ void main() {
   });
 
   for (final l in _loaders) {
-    group('${l.key}：読む順番（セッション → メモリ → assets）', () {
+    group('${l.key}：読む順番（セッション → assets）', () {
       test('何もなければ assets のサンプル', () async {
         expect(await l.read(), File(l.asset).readAsStringSync());
       });
 
-      test('セッションとメモリの両方にあれば、セッション', () async {
-        l.set('projects:\n  - title: メモリ\n');
+      test('setCustomYaml はセッションに保存し、あとから書いたものが使われる', () async {
+        l.set('projects:\n  - title: 保存\n');
+        expect(SessionStore.read(l.key), contains('保存'));
         SessionStore.write(l.key, 'projects:\n  - title: セッション\n');
         expect(await l.read(), contains('セッション'));
       });
 
-      test('セッションが消えても、メモリにあればメモリ', () async {
-        l.set('projects:\n  - title: メモリ\n');
+      test('セッションが消えたら assets に戻る（メモリには残さない）', () async {
+        l.set('projects:\n  - title: 保存\n');
         SessionStore.remove(l.key);
-        expect(await l.read(), contains('メモリ'));
+        expect(await l.read(), File(l.asset).readAsStringSync());
       });
 
-      test('clearCustomYaml でメモリもセッションも消え、assets に戻る', () async {
-        l.set('projects:\n  - title: メモリ\n');
+      test('clearCustomYaml でセッションが消え、assets に戻る', () async {
+        l.set('projects:\n  - title: 保存\n');
         l.clear();
         expect(SessionStore.read(l.key), isNull);
         expect(await l.read(), File(l.asset).readAsStringSync());

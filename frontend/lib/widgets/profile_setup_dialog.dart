@@ -18,7 +18,7 @@ import '../utils/profile_store.dart';
 import '../utils/profile_bundle.dart';
 import '../utils/projects_diff.dart';
 import '../utils/data_format.dart';
-import '../utils/browser/browser.dart';
+import '../data/portfolio_repository.dart';
 import '../utils/work_yaml_loader.dart';
 import '../utils/private_yaml_loader.dart';
 import '../theme/app_theme.dart';
@@ -254,10 +254,11 @@ class _ProfileSetupDialogState extends State<_ProfileSetupDialog> {
     navigator.pop(); // 入力画面を閉じる（PopScope は戻る操作だけを止めるので、ここでは閉じられる）
 
     await runReloading(navigator, () async {
-      ProfileStore.instance.setUploaded(bundle.profileText!, bundle.profile!);
-      // Work / Private も書かれていれば、それぞれのアップロードと同じくセッションに保存して読み直す
-      if (bundle.workText != null) SessionStore.write('work', bundle.workText!);
-      if (bundle.privateText != null) SessionStore.write('private', bundle.privateText!);
+      await ProfileStore.instance.setUploaded(bundle.profileText!, bundle.profile!);
+      // Work / Private も書かれていれば、それぞれのアップロードと同じく Repository に保存して読み直す
+      final repository = PortfolioRepository.instance;
+      if (bundle.workText != null) await repository.saveProjectsText(ProjectsKind.work, bundle.workText!);
+      if (bundle.privateText != null) await repository.saveProjectsText(ProjectsKind.private, bundle.privateText!);
       if (hasProjects) {
         widget.onProjectsChanged?.call();
         await Future.wait([WorkYamlLoader.loadYamlString(), PrivateYamlLoader.loadYamlString()]);

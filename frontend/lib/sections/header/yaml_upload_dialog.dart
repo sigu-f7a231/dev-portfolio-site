@@ -29,7 +29,7 @@ import '../../widgets/upload_parts.dart';
 import '../../utils/projects_yaml_validator.dart';
 import '../../utils/data_format.dart';
 import '../../utils/projects_diff.dart';
-import '../../utils/browser/browser.dart';
+import '../../data/portfolio_repository.dart';
 import '../../utils/project_append.dart';
 import 'project_add_confirm.dart';
 
@@ -172,8 +172,8 @@ class _YamlUploadDialogState extends State<_YamlUploadDialog> {
     navigator.pop(); // アップロード画面を閉じる
 
     await runReloading(navigator, () async {
-      // セッションに保存（同じタブなら再読み込みしても残る）→ Skills / Projects を作り直して読み直す
-      SessionStore.write(widget.dataType, text);
+      // Repository に保存（今は同じタブなら再読み込みしても残る）→ Skills / Projects を作り直して読み直す
+      await PortfolioRepository.instance.saveProjectsText(ProjectsKind.of(widget.dataType), text);
       widget.onSaved?.call();
       await (_isWork ? WorkYamlLoader.loadYamlString() : PrivateYamlLoader.loadYamlString());
     });

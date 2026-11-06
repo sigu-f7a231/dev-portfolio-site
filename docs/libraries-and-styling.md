@@ -39,7 +39,7 @@ flowchart LR
 | デザイントークン（色・余白・角丸） | `tailwind.config` の theme | `AppColors`（色）・`AppSizes`（余白・時間）・`AppStyles`（角丸・文字・装飾） |
 | ユーティリティ（その場の見た目） | `class="p-4 rounded-lg"` | 使わない。見た目は `AppStyles` の名前付きのスタイルにまとめる |
 | レスポンシブ | `md:` などのブレークポイント | `LayoutBuilder` と `sections/config/*_config.dart` のブレークポイント |
-| ダークモード | `dark:` | `AppColors.light` / `AppColors.dark` と `ThemeController` |
+| ダークモード | `dark:` | `AppColors.light` / `AppColors.dark` と `themeModeProvider`（Riverpod） |
 | グリッド・並べ方 | `grid`・`flex` | `Row`・`Column`・`Wrap`・`Stack`（Flutter の部品） |
 
 詳しくは [デザインシステム](design-system.md#2-css-との対応)。
@@ -72,6 +72,8 @@ flowchart LR
 | **archive** | 4.0.9 | ファイル | Excel（.xlsx は zip）を開く・書き直す | `utils/xlsx_reader.dart`・`skill_sheet_writer.dart`・`xlsx_layout.dart` | DLG-01（Excel の読み込み）・MNU-01 |
 | **xml** | 6.6.1 | ファイル | Excel の中の XML を読む・書く | 同上 | 同上 |
 | **pdf** | 3.12.0 | ファイル | スキルシートの PDF を作る（IPA P ゴシックを埋め込む） | `utils/skill_sheet_pdf.dart` | MNU-01 |
+| **flutter_riverpod** | 3.3.2（`^3.0.0`） | 状態管理 | アプリ全体の状態（テーマ・Repository・データが変わった回数・プロフィール・Work / Private・Skills の集計・Projects の一覧）。`ProviderScope` は `main.dart` | `lib/state/providers.dart`・`main.dart`・`pages/home_page.dart`・`sections/{hero,about}_section.dart`・`skills_section.dart`・`projects_section.dart`・`header/header_parts.dart` | SCR-01 |
+| **go_router** | 17.5.0（`>=16.0.0 <19.0.0`。18 は Flutter 3.44 以上が必要） | 画面の URL | URL と画面の対応（`/`、`ENABLE_ACCOUNT` のときだけ `/login`・`/me`・`/me/edit` の空の画面。`#` 付きの URL のまま）。ない URL は `/` へ | `lib/router/app_router.dart`・`pages/placeholder_page.dart`・`main.dart` | SCR-01・（準備中の画面） |
 | image | 4.10.2 | （間接） | コードからは使っていない。pdf が使う画像ライブラリの版をそろえるために指定（`>=4.2.0 <4.11.0`） | ― | ― |
 | cupertino_icons | 1.0.9 | アイコン | **使っていない**（Flutter のひな形のまま残っている） | ― | ― |
 | shared_preferences | 2.5.5 | 保存 | **使っていない** | ― | ― |

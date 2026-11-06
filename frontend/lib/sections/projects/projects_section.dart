@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'data/projects_work.dart';
-import 'data/projects_private.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../state/providers.dart';
 import 'models/projects_model.dart';
 import 'views/projects_tab_view.dart';
 import 'projects_header.dart';
@@ -18,14 +18,14 @@ import '../../widgets/app_filter_modal.dart';
 /// Projects セクション
 /// 状態（Work/Private・表示形式・フィルター・並び替え）はここで持ち、ツールバー・パネル・一覧に渡す
 /// 並び替えは Work / Private を切り替えてもそのまま
-class ProjectsSection extends StatefulWidget {
+class ProjectsSection extends ConsumerStatefulWidget {
   const ProjectsSection({super.key});
 
   @override
-  State<ProjectsSection> createState() => _ProjectsSectionState();
+  ConsumerState<ProjectsSection> createState() => _ProjectsSectionState();
 }
 
-class _ProjectsSectionState extends State<ProjectsSection> {
+class _ProjectsSectionState extends ConsumerState<ProjectsSection> {
   /// [0] = Work、[1] = Private
   late final Future<List<List<Project>>> _projectsFuture;
 
@@ -38,7 +38,8 @@ class _ProjectsSectionState extends State<ProjectsSection> {
   @override
   void initState() {
     super.initState();
-    _projectsFuture = Future.wait([loadWorkProjects(), loadPrivateProjects()]);
+    // 一覧は Provider（lib/state/providers.dart）。データが変わると HomePage がこの画面を作り直し、読み直した結果を受け取る
+    _projectsFuture = ref.read(projectsListProvider.future);
   }
 
   /// タブを切り替えたら、候補が変わるのでフィルターはリセットする

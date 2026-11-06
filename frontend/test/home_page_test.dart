@@ -7,6 +7,7 @@
 //
 // 実行：flutter test test/home_page_test.dart（frontend/ で）
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:dev_portfolio/constants/app_texts.dart';
@@ -18,6 +19,7 @@ import 'package:dev_portfolio/sections/projects/projects_section.dart';
 import 'package:dev_portfolio/sections/projects/sort/project_sort.dart';
 import 'package:dev_portfolio/sections/skills/skills_section.dart';
 import 'package:dev_portfolio/sections/skills/widgets/skills_category_filter.dart';
+import 'package:dev_portfolio/state/providers.dart';
 import 'package:dev_portfolio/theme/app_theme.dart';
 import 'package:dev_portfolio/utils/browser/browser_stub.dart' as stub;
 import 'package:dev_portfolio/utils/private_yaml_loader.dart';
@@ -106,7 +108,7 @@ Future<void> _settle(WidgetTester tester, [int frames = 15]) async {
   }
 }
 
-/// アプリ本体（main.dart の DevPortfolioApp）と同じく、ThemeController の値でライト / ダークを切り替える
+/// アプリ本体（main.dart の DevPortfolioApp）と同じく、themeModeProvider の値でライト / ダークを切り替える
 Future<void> _pumpHome(
   WidgetTester tester, {
   double width = 1280,
@@ -114,19 +116,23 @@ Future<void> _pumpHome(
   String? work,
   String? private,
 }) async {
-  ThemeController.instance.toggle(dark);
   tester.view.physicalSize = Size(width, 900);
   tester.view.devicePixelRatio = 1;
   addTearDown(tester.view.reset);
   if (work != null) stub.SessionStore.write('work', work);
   if (private != null) stub.SessionStore.write('private', private);
-  await tester.pumpWidget(ValueListenableBuilder<ThemeMode>(
-    valueListenable: ThemeController.instance,
-    builder: (context, mode, _) => MaterialApp(
-      theme: AppTheme.light,
-      darkTheme: AppTheme.dark,
-      themeMode: mode,
-      home: const HomePage(),
+  // main.dart と同じく ProviderScope の中に置く（HomePage は Riverpod でデータの変化を見ている）
+  await tester.pumpWidget(ProviderScope(
+    overrides: [
+      themeModeProvider.overrideWith(() => ThemeModeNotifier(dark ? ThemeMode.dark : ThemeMode.light)),
+    ],
+    child: Consumer(
+      builder: (context, ref, _) => MaterialApp(
+        theme: AppTheme.light,
+        darkTheme: AppTheme.dark,
+        themeMode: ref.watch(themeModeProvider),
+        home: const HomePage(),
+      ),
     ),
   ));
   await _settle(tester);
@@ -159,7 +165,6 @@ void main() {
   });
   tearDown(() {
     ProfileStore.instance.value = null;
-    ThemeController.instance.toggle(false);
   });
 
   group('描画の組み合わせ（テーマ × 幅 × データ）', () {
@@ -253,10 +258,11 @@ void main() {
 
     testWidgets('テーマの切替', (tester) async {
       await pump(tester);
+      final container = ProviderScope.containerOf(tester.element(find.byType(HomePage)));
       await _tap(tester, find.byType(Switch));
-      expect(ThemeController.instance.value, ThemeMode.dark);
+      expect(container.read(themeModeProvider), ThemeMode.dark);
       await _tap(tester, find.byType(Switch));
-      expect(ThemeController.instance.value, ThemeMode.light);
+      expect(container.read(themeModeProvider), ThemeMode.light);
     });
   });
 

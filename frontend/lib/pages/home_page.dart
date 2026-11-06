@@ -1,5 +1,6 @@
 // lib/pages/home_page.dart
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../sections/header/header.dart';
 import '../sections/header/header_parts.dart';
 import '../utils/profile_store.dart';
@@ -11,21 +12,23 @@ import '../sections/projects/projects_section.dart';
 import '../controllers/scroll_controller.dart';
 import '../constants/app_sizes.dart';
 import '../constants/app_texts.dart';
+import '../state/providers.dart';
 
-class HomePage extends StatefulWidget {
+class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  ConsumerState<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _HomePageState extends ConsumerState<HomePage> {
   final SectionScrollController scroll = SectionScrollController();
 
   /// Drawer の並び順に対応するセクション
   static const List<String> _sections = ['home', 'about', 'skills', 'projects'];
-  int _refreshKey = 0;        // Projects用の再描画キー
-  int _skillsRefreshKey = 0;  // ★ Skills専用の再描画キーを追加
+
+  /// Work / Private が変わったことを知らせる（Provider が読み直し、Home のまとめ・Skills・Projects が作り直される）
+  void _dataChanged() => ref.read(dataRevisionProvider.notifier).bump();
 
   @override
   void initState() {
@@ -34,13 +37,7 @@ class _HomePageState extends State<HomePage> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted && ProfileStore.instance.value == null) {
         // プロフィールに Work / Private も書かれていれば、Skills / Projects も作り直す
-        showProfileSetupDialog(
-          context,
-          onProjectsChanged: () => setState(() {
-            _refreshKey++;
-            _skillsRefreshKey++;
-          }),
-        );
+        showProfileSetupDialog(context, onProjectsChanged: _dataChanged);
       }
     });
   }
@@ -53,6 +50,9 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    // データが変わった回数。変わったら下の ValueKey が変わり、Skills / Projects を作り直す
+    // （中のデータは Provider が読み直す。作り直すのは、選んでいたタブ・フィルター・ページを初めに戻すため。前と同じ動き）
+    final revision = ref.watch(dataRevisionProvider);
     return Scaffold(
       // M3 の NavigationDrawer（スマホ幅のときにメニューから開く）
       // スクロールで表示中のセクションが変わったら、選択表示も変わる
@@ -90,12 +90,7 @@ class _HomePageState extends State<HomePage> {
             onSkillsPressed: () => scroll.scrollTo('skills'),
             onProjectsPressed: () => scroll.scrollTo('projects'),
             activeSection: scroll.active,
-            onYamlStateChanged: () {
-              setState(() {
-                _refreshKey++;       // Projectsを再描画
-                _skillsRefreshKey++; // ★ Skillsも同時に独立して再描画・再集計させる
-              });
-            },
+            onYamlStateChanged: _dataChanged, // Skills / Projects を作り直して集計し直す
           ),
           Expanded(
             child: SingleChildScrollView(
@@ -106,21 +101,20 @@ class _HomePageState extends State<HomePage> {
                     key: scroll.keys['home'],
                     onSkillsPressed: () => scroll.scrollTo('skills'),
                     onProjectsPressed: () => scroll.scrollTo('projects'),
-                    refreshKey: _refreshKey, // 案件を変えたら、まとめ（件数・直近）も作り直す
                   ),
                   AboutSection(key: scroll.keys['about']),
-                  // ★ スクロール用キーは外側のContainerに持たせ、
-                  // 内部の SkillsSection に ValueKey を持たせることで確実に再構築・再集計させる
+                  // スクロール用キーは外側の Container に持たせ、
+                  // 中の SkillsSection に ValueKey を持たせることで、データが変わったら作り直して集計し直す
                   Container(
                     key: scroll.keys['skills'],
                     child: SkillsSection(
-                      key: ValueKey('skills_$_skillsRefreshKey'),
+                      key: ValueKey('skills_$revision'),
                     ),
                   ),
                   // Skills と同じく、スクロール用キーは外側の Container に持たせる
                   Container(
                     key: scroll.keys['projects'],
-                    child: ProjectsSection(key: ValueKey(_refreshKey)),
+                    child: ProjectsSection(key: ValueKey('projects_$revision')),
                   ),
                 ],
               ),

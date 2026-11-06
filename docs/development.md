@@ -36,6 +36,12 @@ dart run tool/run.dart my_profile.yaml   # プロフィールを指定して起�
 flutter run -d chrome                    # 起動後にプロフィールの入力画面が出る
 ```
 
+ログイン・マイページの URL（`#/login`・`#/me`・`#/me/edit`。今は準備中の空の画面）を開けるようにするには、`--dart-define=ENABLE_ACCOUNT=true` を付けて起動します（ふだんのビルド・公開ページでは開けず、`/` に移ります）。
+
+```bash
+flutter run -d chrome --dart-define=ENABLE_ACCOUNT=true
+```
+
 > `web/index.html`（起動時のローディング表示など）は Git で管理しています。CI の `flutter create . --platforms web` は既存のファイルを上書きしません。
 
 本番と同じ設定でビルドする場合：

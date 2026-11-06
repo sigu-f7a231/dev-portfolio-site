@@ -19,7 +19,7 @@ Web の CSS に慣れた人向けに、同じ役割のものを並べる。
 | CSS でいうと | このプロジェクト | 例 |
 |---|---|---|
 | カスタムプロパティ（`--color-primary`） | `AppColors` のトークン（`context.colors.primary`） | `context.colors.textSecondary` |
-| `:root` と `@media (prefers-color-scheme: dark)` | `AppColors.light` / `AppColors.dark`（`ThemeController` で切替） | ヘッダーの ☀️ / 🌙 |
+| `:root` と `@media (prefers-color-scheme: dark)` | `AppColors.light` / `AppColors.dark`（`themeModeProvider` で切替） | ヘッダーの ☀️ / 🌙 |
 | クラス（`.card`・`.tag`） | `AppStyles` の関数（`AppStyles.card(context)`・`AppStyles.skillTag(context)`） | 何度も使う見た目をまとめる |
 | フォントの指定・`font-size` の段階 | M3 のタイプスケール（`Theme.of(context).textTheme`）＋ `AppStyles` | `AppStyles.title`・`AppStyles.body` |
 | `border-radius` の段階 | `AppStyles.radiusSm`〜`radiusFull` | 角丸 4 / 8 / 12 / 16 / 28 / 全円 |
@@ -104,7 +104,7 @@ flowchart LR
 | 書くもの | 場所 | してはいけないこと |
 |---|---|---|
 | 色 | `lib/theme/app_colors.dart`（`AppColors.light` / `dark`） | `Colors.xxx` / `Color(...)` を `lib/theme/` の外に書く |
-| テーマ・切替 | `lib/theme/app_theme.dart`（`ThemeController`・`context.colors`・`context.isDark`） | `isDark` を引数でウィジェットに渡して回す |
+| テーマ・切替 | `lib/theme/app_theme.dart`（`context.colors`・`context.isDark`。切替は `lib/state/providers.dart` の `themeModeProvider`） | `isDark` を引数でウィジェットに渡して回す |
 | 何度も使う見た目 | `lib/theme/app_styles.dart` | 同じ `TextStyle` / `BoxDecoration` を複数のウィジェットに書く |
 | 文言 | `lib/constants/app_texts.dart` | ウィジェットに日本語を直接書く |
 | 余白・時間・汎用の大きさ | `lib/constants/app_sizes.dart` | 数値を直接書く（ページ計算の 0 / 1、% の 100 などのロジックの数は除く） |
@@ -134,7 +134,7 @@ M3 の標準の部品を使う。同じ役割には同じ部品を使い、見�
 
 ## 6. ダークモード
 
-- `ThemeController.instance.toggle(bool)` で切り替え、`main.dart` が MaterialApp を作り直す（切替はアニメーションする）。
+- `ref.read(themeModeProvider.notifier).toggle(bool)`（Riverpod）で切り替え、`main.dart` が MaterialApp を作り直す（切替はアニメーションする）。
 - 選んだテーマは保存しない（開き直すとライト）。OS の設定（`prefers-color-scheme`）にも合わせていない → [UI / UX の課題](ui-ux.md#8-課題)。
 - ダークは同じ seed から作るので、トークンの名前は共通。ダークだけ控えめにしたい文字は `textSoft` を使う。
 

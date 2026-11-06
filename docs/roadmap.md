@@ -53,14 +53,19 @@ flowchart LR
 
 ## 3. アプリを API につなぐ（中期）
 
+> ログイン・マイページ・Firestore への保存まで含めた詳しい計画は [次の構成の計画](plan/README.md)。そこでは backend（shelf）は Hono に置き換わる。
+
 | 作業 | 内容 | 完了の目安 |
 |---|---|---|
-| 状態管理の整理 | Riverpod で、データの読み込みと作り直しをまとめる（画面の見た目・操作は変えない。ゴールデンテストで確かめながら） | `ValueKey` での作り直しがなくなる |
-| Repository 層 | 読み先（サンプル・sessionStorage・API）を切り替えられるようにし、API から自分のデータを最初に表示する | 画面を変えずに API から読める |
+| 状態管理の整理 | Riverpod で、データの読み込みと作り直しをまとめる（画面の見た目・操作は変えない。ゴールデンテストで確かめながら）。**済み**（2026-11-06）：テーマ・プロフィール・Work / Private・Skills の集計・Projects の一覧を Provider にし、Home・About・Skills・Projects は Provider から読む。データが変わったときに Skills / Projects を作り直す `ValueKey` は、タブ・フィルターを初めに戻すために残した（前と同じ動き） | 画面が Provider から読む |
+| Repository 層 | 読み先（サンプル・sessionStorage・API）を切り替えられるようにし、API から自分のデータを最初に表示する。**済み**（2026-11-06）：`PortfolioRepository`（`lib/data/`）は構造のデータ（Map）で受け渡し、実装が書くのは 5 つの読み書きだけ。書き込みはすべて Repository 経由。残り：API の実装 | 画面を変えずに API から読める |
+| 画面の URL | go_router で URL を分ける。**済み**（2026-11-06）：`/`、`ENABLE_ACCOUNT` のときだけ `/login`・`/me`・`/me/edit`（空の画面。`#` 付きのまま）。残り：中身（[画面設計](plan/screens.md)） | 画面ごとに URL がある |
 | 共通の検証 | `utils/data_format.dart` を共通のパッケージに分け、frontend と backend で同じ検証を使う | 検証が 1 か所 |
 | つなぎのテスト | backend の応答を frontend の読み込みに通すテスト（契約テスト） | 応答の形が変わったら気づける |
 
 ## 4. 本番の構成（費用ゼロ、長期）
+
+> サービスごとの置き場所と無料枠の守り方は [サービスの構成](plan/architecture.md)。
 
 ```mermaid
 flowchart LR

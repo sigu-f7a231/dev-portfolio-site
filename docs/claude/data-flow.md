@@ -11,19 +11,21 @@ flowchart LR
     direction TB
     s1["sessionStorage<br/>work / private"]
     s2["起動時の指定<br/>tool/run.dart"]
-    s3["メモリ<br/>setCustomYaml"]
     s4["サンプル<br/>assets/data/format_*.yaml"]
   end
-  loader["WorkYamlLoader /<br/>PrivateYamlLoader"]
-  src --> loader
-  loader --> model["Project.fromMap<br/>技術の振り分け・表記ゆれの整理"]
-  loader --> agg["skills_aggregator<br/>分類ごとの割合（%）"]
+  repo["PortfolioRepository<br/>（今は LocalPortfolioRepository）"]
+  prov["projectRecordsProvider（Riverpod）<br/>構造のデータ（Map の並び）"]
+  src --> repo --> prov
+  prov --> model["projectsListProvider<br/>Project.fromMap・技術の振り分け"]
+  prov --> agg["skillsDataProvider<br/>skills_aggregator（割合 %）"]
   model --> projects["Projects<br/>絞り込み・並び替え・ページ送り・詳細"]
   agg --> skills["Skills<br/>棒 / 円グラフ"]
-  p1["sessionStorage profile /<br/>起動時の指定"] --> store["ProfileStore"] --> home["Home / About"]
+  p1["sessionStorage profile /<br/>起動時の指定"] --> repo2["PortfolioRepository"] --> store["ProfileStore"] --> pp["profileProvider"] --> home["Home / About"]
+  prov --> home
+  rev["dataRevisionProvider<br/>（Riverpod）"] -. "変わったら作り直す" .-> skills & projects
 ```
 
-- **YAML のアップロード**: Header のダイアログでファイルを選択 → `_validateAgainstTemplate` で検証（`projects` 配列、各要素に `title` が必須、Work は `workflow` 必須、Private は `workflow` があると NG）→ `SessionStore.write(dataType, …)`（`utils/browser/browser.dart`。Web は sessionStorage、テストはメモリ）に保存 → `onYamlStateChanged` → `HomePage` が `ValueKey` を増やして Skills/Projects を作り直し、再読込させる。
+- **YAML のアップロード**: Header のダイアログでファイルを選択 → `_validateAgainstTemplate` で検証（`projects` 配列、各要素に `title` が必須、Work は `workflow` 必須、Private は `workflow` があると NG）→ `PortfolioRepository.instance.saveProjectsText`（`lib/data/`。今の実装は sessionStorage。テストではメモリ）に保存 → `onYamlStateChanged` → `dataRevisionProvider`（Riverpod、`lib/state/providers.dart`）を 1 増やす → `HomePage` がそれを見て `ValueKey` を変え、Skills/Projects を作り直して再読込させる。
 - **スキル集計**: カテゴリごとに出現回数を数え、合計に対する % にする。`利用なし` は除外。`workflow` は true の割合（%）。
 - **Skills・Tools の振り分け**（`utils/tech_catalog.dart` の `redistributeProject`）：読み込んだ Work / Private の skills / tools に書かれた、よく知られた技術（`_known`・`_languages`。表記ゆれは無視）は本来の分類へ移してから使う（React → frontend_frameworks、Django → backend_frameworks、Docker → container、tools の Python → skills、Lambda → aws_services ＋ cloud_platforms に AWS）。`Project.fromMap` と Skills の集計（`skills_{work,private}.dart` の `redistributeProjects`）の両方で行う。保存されている YAML 自体は書き換えない。移した先の「利用なし」は外し、空になった分類は「利用なし」。Excel からの振り分け（`skill_sheet.dart`）も同じ一覧（`classifyTech`）を使う。
 - **Tools のグループ分け**（`tech_catalog.dart` の `ToolGroup` / `toolGroupOf`）：Tools は名前から推測して バージョン管理・エディタ / 開発ツール・環境 / ミドルウェア・CI/CD / 構成管理・プロジェクト管理 / 連絡・デザイン・その他 に分ける（よく知られた名前の一覧 `_toolNames` → なければ名前に含まれる言葉 `_toolHints` → その他）。Skills のカテゴリは `tools_vcs` などグループごと（`splitToolGroups` で数える。パネルでは「ツール」の見出しの下）、Projects のフィルターも Tools をグループごとの見出しに分ける（選んだ値は同じ `tools` のキーで絞り込む）。YAML には書かない（表示のときに推測）。
@@ -87,7 +89,7 @@ flowchart LR
 - ひな形：`assets/data/format_profile.yaml`（`home:` name★ / role★ / tagline★ / card、`about:` intro★ / domains / strengths / style / closing。★は必須、ほかは空なら表示しない）。
 - トップの `sheet:`（任意）：スキルシートだけの個人の項目（furigana / gender / age / birthday / nationality / spouse / station / education。`ExcelTexts.sheetLabels`）。画面には出さず、［ダウンロード］のスキルシートに書く。Excel から読むと入る。テンプレート（format_profile.*）にはサンプルを入れてある。
 - `about:` には、ほかに recent / past（直近 / 過去の開発経験。複数行）・recent_tech / past_tech（分類 → 技術の並び）も書ける（Excel から作ると入る。About に「直近の開発経験」「過去の開発経験」の行として表示）。テンプレート（format_profile.*）には入れていない。Markdown の `## recent_tech` の下は「- キー: 値」のキーが英数字だけなので、日本語の分類名は書けない（YAML なら書ける）。
-- 読み込み順（`utils/profile_store.dart` の `ProfileStore`）：
+- 読み込み順（`lib/data/local_portfolio_repository.dart`。`ProfileStore` は表示中のプロフィールを持つだけで、読み書きは Repository に任せる）：
   1. `dart run tool/run.dart xxx.yaml` で起動 → スクリプトが `assets/profile/profile.yaml` にコピーし `--dart-define=PROFILE_FROM_ARG=true` を付けて `flutter run -d chrome` を実行 → アプリはこの印があるときだけそのファイルを読む。
   2. 入力画面でアップロード済み → `sessionStorage['profile']`。
   3. どちらもない → `HomePage` が最初に `showProfileSetupDialog`（`widgets/profile_setup_dialog.dart`）を出す。正しい YAML を読み込むまで閉じられない（barrierDismissible: false / PopScope）。ⓘ で書き方の説明とテンプレートの保存。

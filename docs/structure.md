@@ -21,6 +21,7 @@ dev-portfolio-site/
 │   ├── ui-ux.md                   # UI / UX（レイアウト・ブレークポイント・操作の流れ・UX の決まり・アクセシビリティ）
 │   ├── performance.md             # パフォーマンス（起動・待ち時間・重い処理・配信・測り方）
 │   ├── roadmap.md                 # 今後の動き（テスト・CI・アプリ・インフラの段階）
+│   ├── plan/                      # 次の構成の計画（要件定義・画面設計・データ設計・サービスの構成・決めること）
 │   ├── testing/                   # test-plan.md（テスト計画書）・test-catalog.md（テスト一覧）
 │   ├── ci/                        # ci-design.md（CI の設計）・ci-status.md（CI の状況）
 │   └── claude/                    # AI 向けの開発メモ：architecture / data-flow / conventions / testing / operations / status
@@ -123,7 +124,9 @@ flowchart TB
 
 | 分野 | ファイル | 中身 |
 |---|---|---|
-| 読み込み・保存 | `work_yaml_loader.dart`・`private_yaml_loader.dart`・`profile_store.dart`・`app_ready.dart` | データを読む順番、プロフィールの保持、起動時の先読みと「準備できた」の知らせ |
+| データの入口（Repository） | `lib/data/portfolio_repository.dart`・`lib/data/local_portfolio_repository.dart`・`lib/data/records.dart` | データの読み書きの入口（`PortfolioRepository`）。実装が書くのは構造のデータ（`DataRecord`。Firestore の文書と同じ形）の読み書き 5 つだけで、YAML の文字・サンプルはそこから作る。今の実装（このタブの sessionStorage・起動時の指定）は元の文字を保つ。API の実装に差し替える場所 |
+| 状態・画面の URL | `lib/state/providers.dart`・`lib/router/app_router.dart`・`lib/pages/placeholder_page.dart` | Riverpod の Provider（テーマ・Repository・データが変わった回数・プロフィール・Work / Private・Skills の集計・Projects の一覧）、go_router の URL（`/`。`ENABLE_ACCOUNT` のときだけ `/login`・`/me`・`/me/edit` の空の画面） |
+| 読み込み・保存 | `work_yaml_loader.dart`・`private_yaml_loader.dart`・`profile_store.dart`・`app_ready.dart` | Work / Private の YAML を読む手伝い（中身は Repository）、表示中のプロフィールの保持、起動時の先読みと「準備できた」の知らせ |
 | ブラウザの機能（差し替えの入口） | `browser/browser.dart`・`file_saver.dart`・`file_pick.dart`・`asset_text.dart` | sessionStorage・ファイルの保存・ファイルの選択・アセットの読み込み。Web では本物、テストでは代わりの実装（`*_stub.dart`）や差し替えた関数を使う |
 | 形式と検証 | `data_format.dart`・`models/profile.dart`・`projects_yaml_validator.dart`・`profile_bundle.dart`・`project_append.dart`・`projects_diff.dart`・`yaml_writer.dart` | YAML / Markdown の見分けと変換、プロフィール・Work / Private の検証、追加、上書きの違いの判定、YAML の書き出し |
 | 技術名の整理 | `skill_name.dart`・`tech_catalog.dart`・`string_utils.dart`・`language_utils.dart` | 表記ゆれのまとめ、本来の分類への振り分け、Skills / Tools のグループ分け、工程名の日本語化 |
@@ -134,7 +137,7 @@ flowchart TB
 | ファイル | 中身 |
 |---|---|
 | `theme/app_colors.dart` | 色（Material 3：seed → ColorScheme → トークン）。ライト / ダークの両方 |
-| `theme/app_theme.dart` | テーマ（`ThemeController` で切替）、`context.colors` / `context.isDark` |
+| `theme/app_theme.dart` | ThemeData、`context.colors` / `context.isDark`（ライト / ダークの切り替えは `themeModeProvider`、`lib/state/providers.dart`） |
 | `theme/app_styles.dart` | 共通の見た目（文字・角丸・カード・タグ・ボタン・グラフ・ダイアログ） |
 | `constants/app_texts.dart` / `app_sizes.dart` | 画面の文言すべて／余白・時間・大きさ |
 

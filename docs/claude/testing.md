@@ -21,7 +21,7 @@ backend は `backend/` で `dart test`。
 ## 網羅率の基準
 
 - **行（C0）・分岐（C1）とも 90% 以上**。`.github/workflows/test.yml` で push・PR ごとに確かめ、届かなければ失敗にする。
-- 2026-11-06 時点：行 96.2%・分岐 90.4%（95 ファイル）。
+- 2026-11-06 時点：行 96.3%・分岐 90.7%（99 ファイル）。
 - `tool/coverage_check.dart`：lcov.info を読み、全体の網羅率・基準に届かないファイル（通っていない分岐が多い順）を出し、通っていない行・分岐の行番号を `coverage/uncovered.txt` に書く。基準に届かない・分岐の情報がない・集計に入っていないファイルがあると終了コード 1（または 2）。
 - **集計の漏れを防ぐ**：flutter test は、テストから読み込まれたファイルしか lcov.info に入れない（テストのないファイルが集計から漏れ、網羅率が高く出る）。`test/all_files_loaded_test.dart` が lib/ の全ファイルを読み込む。これは `--update-imports` で作るので手で直さない。lib/ にファイルを足したら作り直す（作り直していないと coverage_check が「集計に入っていないファイル」として失敗にする）。
 - **集計から除くもの**：`lib/main.dart`（runApp だけ）と `*_web.dart`（Web 専用。テストでは `*_stub.dart` が使われる）。`tool/coverage_check.dart` の `_excluded` に、理由と一緒に書く。
@@ -50,9 +50,11 @@ backend は `backend/` で `dart test`。
 | `lib/utils/file_pick.dart` の `pickFile` | ファイル選択のダイアログ。テストで関数を入れて、選んだ・キャンセル・中身なし・拡張子違い・エラーを作る（`resetFilePicker` で戻す）。アプリのコードは `FilePicker` を直接使わない |
 | `lib/utils/file_saver_stub.dart` の `FileSaver.lastSaved` | 保存したもの（名前・中身）が残る。保存は「ダウンロードした」扱い |
 | `lib/utils/browser/browser_stub.dart` | `SessionStore`（メモリ。`clear()` で空に）、`dispatchedEvents`（ブラウザに送ったイベントの名前） |
-| `ProfileStore.fromArg` | テストでだけ書き換えられる（`@visibleForTesting`）。`tool/run.dart` で YAML を指定して起動したときの読み込みを確かめる。終わったら false に戻す |
+| `PortfolioRepository.instance` / `reset()` | Repository（`lib/data/`）を偽物に差し替える。tearDown で `reset()` |
+| `ProviderScope` | `HomePage` は Riverpod（`lib/state/providers.dart`）を使うので、`ProviderScope` の中で pump する（`home_page_test` の `_pumpHome`・`app_state_test` の `_pumpApp`） |
+| `ProfileStore.fromArg` | テストでだけ書き換えられる（`@visibleForTesting`。中身は `LocalPortfolioRepository.fromArg`）。`tool/run.dart` で YAML を指定して起動したときの読み込みを確かめる。終わったら false に戻す |
 | `ProjectDetailView.reset` | 詳細の表示の大きさ（static）を戻す。`tearDown(ProjectDetailView.reset)` |
-| `ThemeController.instance.toggle(false)` | テーマを戻す。テーマを切り替えるテストは、アプリと同じく `ValueListenableBuilder` で MaterialApp を作る（`home_page_test` の `_pumpHome`） |
+| `themeModeProvider.overrideWith(() => ThemeModeNotifier(ThemeMode.dark))` | 最初のテーマを決める（`ProviderScope(overrides: ...)`）。テーマを切り替えるテストは、アプリと同じく `Consumer` で `ref.watch(themeModeProvider)` を MaterialApp に渡す（`home_page_test` の `_pumpHome`）。以前の ThemeController はなくなった |
 
 ## テストを書くときの注意
 
@@ -73,7 +75,7 @@ backend は `backend/` で `dart test`。
 | 画面全体 | `home_page_test` | テーマ × 幅 × データの組み合わせ（18 通り）、ナビ・グラフ・並び替え・ページ送り・フィルター・テーマ切替・スマホのメニュー、0 件・項目なし・プロフィールなし |
 | 画面全体 | `all_files_loaded_test` | lib/ の全ファイルを読み込む（集計の漏れを防ぐ。自動生成） |
 | 画面全体 | `min_width_scaler_test` | 320px より狭い画面での縮小 |
-| 画面全体 | `widget_test` | テーマ（ThemeController / context.colors） |
+| 画面全体 | `widget_test` | テーマ（themeModeProvider / context.colors） |
 | Home / About | `hero_section_test` | Home の中央寄せ・まとめ（開発経験・件数・直近）・押したとき・作り直し |
 | Home / About | `about_section_test` | 書いた項目だけを出す、開発経験の行（「領域：説明」の太字）、広い / 狭い画面、ダーク |
 | Skills | `skills_aggregator_test` | 割合の集計（表記ゆれ・重複・利用なし・0 件・YAML のまま）、工程の担当率 |
@@ -88,7 +90,8 @@ backend は `backend/` で `dart test`。
 | Projects | `coverage_extra_test` | ページ番号の出し方（「…」の位置・狭いとき・スマホではみ出さない）、起動時の読み込み、起動時に YAML を指定したとき、詳細の拡大の上限・キー操作・下の ‹ ›・公開ページ・技術のグループ |
 | データの入出力 | `data_format_test` | YAML / Markdown の見分け・変換・行番号付きのエラー・アセットの登録 |
 | データの入出力 | `profile_yaml_test` / `projects_yaml_validator_test` / `profile_bundle_test` | プロフィール・Work / Private の検証、プロフィールに Work / Private も書いたとき |
-| データの入出力 | `browser_storage_test` / `yaml_loaders_test` | sessionStorage（メモリ）、読む順番（セッション → 起動時の指定 → メモリ → サンプル）、壊れたデータ |
+| データの入出力 | `browser_storage_test` / `yaml_loaders_test` | sessionStorage（メモリ）、読む順番（セッション → 起動時の指定 → サンプル）、壊れたデータ |
+| Repository・状態・URL | `portfolio_repository_test` / `app_state_test` | Repository の読み書き・偽物への差し替え、Riverpod の Provider、go_router、データが変わったら作り直す |
 | データの入出力 | `project_append_test` / `project_data_test` | 追加するプロジェクトの読み取り・足す・同じ名前・候補（正常系・異常系）、［データ］の画面の流れ・入力フォーム・タグ入力・年月の選択 |
 | データの入出力 | `projects_diff_test` | 上書きの確認の違いの判定、テンプレートがそろっているか |
 | データの入出力 | `yaml_writer_test` | 書いた YAML を読み直すと同じ、誤読されうる文字列（31 種類）を囲む |

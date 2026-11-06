@@ -20,7 +20,21 @@
 
 ## 2026-11-06 — 構成の分割・テスト・CI・ドキュメント
 
-### ライブラリとスタイリング・更新履歴
+### 次の構成の計画・Flutter の中の整理
+
+#### 次の構成の計画
+- [次の構成の計画](docs/plan/README.md) を追加：ログイン・マイページ・Firestore への保存・公開ページの[要件定義](docs/plan/requirements.md)、[画面設計](docs/plan/screens.md)（画面の一覧・URL・遷移・表示設定）、[データ設計](docs/plan/data-model.md)（Excel の構成・項目と型・Firestore のコレクション・編集中 / 版 / 公開・無料枠の見積もり）、[サービスの構成](docs/plan/architecture.md)（Phoenix・Hono・FastAPI・Firebase の役割・ローカルと本番・無料枠と守り方）、[決めること](docs/plan/decisions.md)（D-01〜D-10、すべて未決）
+- README・ファイル構成・CLAUDE.md から案内、更新履歴の前のコミットにハッシュを付けた
+
+#### Flutter の中の整理（見た目・操作は変えない）
+- **追加**：Repository（`lib/data/`）。プロフィール・Work / Private の読み書きはすべてここを通し、どこに置くかを画面から隠した。受け渡しは構造のデータ（`DataRecord`。YAML の項目と同じキーの Map＝Firestore の文書と同じ形）。新しい実装（API・Firestore）が書くのは読み書きの 5 つだけで、YAML の文字・サンプルはそこから作る。今の実装（`LocalPortfolioRepository`。sessionStorage・起動時の指定）は元の文字（コメント・書き方）を保つ
+- **追加**：Riverpod（`flutter_riverpod`）。`main.dart` に `ProviderScope`、`lib/state/providers.dart` にテーマ・Repository・データが変わった回数・プロフィール・Work / Private・Skills の集計・Projects の一覧の Provider。Home・About・Skills・Projects・テーマの切り替えは Provider から読む。読めないときは繰り返さない
+- **追加**：go_router（`lib/router/app_router.dart`）。`MaterialApp.router` にし、`/`（公開ページ）と、`--dart-define=ENABLE_ACCOUNT=true` のときだけ `/login`・`/me`・`/me/edit`（準備中の空の画面、`lib/pages/placeholder_page.dart`）。`#` 付きの URL のまま（GitHub Pages のため）。ない URL は `/` へ
+- **変更**：`ThemeController` を `themeModeProvider` に置き換えた。`WorkYamlLoader`・`PrivateYamlLoader`・`ProfileStore` は Repository を呼ぶだけにした。アップロード・追加・入力画面の保存（`SessionStore.write` を直接呼んでいた 3 か所）を Repository 経由に。HomePage の作り直しの数（`_refreshKey`・`_skillsRefreshKey`）は `dataRevisionProvider` に、Home の `refreshKey` はなくした（Provider が読み直す）
+- **削除**：ローダーのメモリ上の控え（`setCustomYaml` の 3 番目の読み先。アプリからは使われていなかった）、Skills / Projects のデータの読み込みの関数（`loadWorkSkillsAll` など。Provider に移した）
+- **テスト・CI**：`portfolio_repository_test`（33 件）・`app_state_test`（15 件）を追加、Home に 2 件を追加。`yaml_loaders_test` をメモリの控えがない形に、`home_page_test`・`hero_section_test`・`about_section_test` を `ProviderScope` の中で pump する形に、`widget_test` のテーマを Provider に、`all_files_loaded_test` を作り直し（116 ファイル）
+
+### ライブラリとスタイリング・更新履歴（`e076f79`）
 - **ドキュメント**：[ライブラリとスタイリング](docs/libraries-and-styling.md) を追加：CSS・CSS フレームワークを使っていない理由（Flutter Web は canvas に描く）、CSS を書いている唯一の場所（`web/index.html` の起動時のローディング）、ライブラリの一覧（版・用途・使っているファイル）、画面ごとにどの部品・ライブラリをどう使っているか
 - **ドキュメント**：画面仕様書・デザインシステム・UI / UX の誤りを直した：フィルターの件数とフォームの技術のボタンで `Badge.count` を使っている、「進行中のみ」はスイッチではなくチップ、案件が 0 件のときは「ヒットしませんでした」
 - **ドキュメント**：この更新履歴（CHANGELOG.md）を追加し、README・ファイル構成・CLAUDE.md から案内

@@ -5,9 +5,10 @@
 // まとめは Skills・Projects の中身をくり返さず、全体の大きさと、いちばん新しい案件だけを出す（lib/utils/hero_summary.dart）
 // - プロジェクトの件数を押す → Projects へ。直近のプロジェクトを押す → その案件の詳細
 // - 幅があれば 3 つを横に、狭ければ縦に積む
-// 名前などはプロフィール（ProfileStore）、まとめは今の Work / Private（WorkYamlLoader / PrivateYamlLoader）から作る。
-// ［データ］で案件を変えたときは home_page.dart が [refreshKey] を変えて読み直させる
+// 名前などはプロフィール（profileProvider）、まとめは今の Work / Private（projectRecordsProvider）から作る（lib/state/providers.dart）。
+// ［データ］で案件を変えると dataRevisionProvider が増え、Work / Private を読み直してまとめも作り直す
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../constants/app_sizes.dart';
 import '../constants/app_texts.dart';
@@ -15,77 +16,36 @@ import '../models/profile.dart';
 import '../theme/app_styles.dart';
 import '../theme/app_theme.dart';
 import '../utils/hero_summary.dart';
-import '../utils/private_yaml_loader.dart';
-import '../utils/profile_store.dart';
-import '../utils/project_append.dart';
-import '../utils/work_yaml_loader.dart';
+import '../state/providers.dart';
 import 'config/hero_section_config.dart';
 import 'projects/models/projects_model.dart';
 import 'projects/views/project_list/project_list_modal_function.dart';
 
-class HeroSection extends StatefulWidget {
+class HeroSection extends ConsumerWidget {
   final VoidCallback? onSkillsPressed;
   final VoidCallback? onProjectsPressed;
-
-  /// 変わったら Work / Private を読み直す（［データ］で追加・更新したとき）
-  final int refreshKey;
 
   const HeroSection({
     super.key,
     this.onSkillsPressed,
     this.onProjectsPressed,
-    this.refreshKey = 0,
   });
 
   @override
-  State<HeroSection> createState() => _HeroSectionState();
-}
-
-class _HeroSectionState extends State<HeroSection> {
-  HeroSummary? _summary;
-
-  @override
-  void initState() {
-    super.initState();
-    // プロフィールと一緒に Work / Private を読み込んだときも作り直す
-    ProfileStore.instance.addListener(_load);
-    _load();
+  Widget build(BuildContext context, WidgetRef ref) {
+    // 名前などはプロフィール、まとめは Work / Private から（どちらも Riverpod。［データ］で変えたら作り直す）
+    final profile = ref.watch(profileProvider) ?? Profile.empty;
+    final records = ref.watch(projectRecordsProvider).value; // 読み込み中は前の値、読めなければ null（まとめを出さない）
+    final summary = records == null
+        ? null
+        : HeroSummary.of(
+            [for (final p in records.work) Project.fromMap(p)],
+            [for (final p in records.private) Project.fromMap(p)],
+          );
+    return _build(context, profile, summary);
   }
 
-  @override
-  void didUpdateWidget(HeroSection old) {
-    super.didUpdateWidget(old);
-    if (old.refreshKey != widget.refreshKey) _load();
-  }
-
-  @override
-  void dispose() {
-    ProfileStore.instance.removeListener(_load);
-    super.dispose();
-  }
-
-  Future<void> _load() async {
-    try {
-      final texts =
-          await Future.wait([WorkYamlLoader.loadYamlString(), PrivateYamlLoader.loadYamlString()]);
-      List<Project> projects(String text) => [for (final p in projectsOf(text)) Project.fromMap(p)];
-      final summary = HeroSummary.of(projects(texts[0]), projects(texts[1]));
-      if (mounted) setState(() => _summary = summary);
-    } catch (_) {
-      if (mounted) setState(() => _summary = null); // 読めなければまとめを出さない
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return ValueListenableBuilder<Profile?>(
-      valueListenable: ProfileStore.instance,
-      builder: (context, profile, _) => _build(context, profile ?? Profile.empty),
-    );
-  }
-
-  Widget _build(BuildContext context, Profile profile) {
-    final summary = _summary;
+  Widget _build(BuildContext context, Profile profile, HeroSummary? summary) {
     return Container(
       width: double.infinity,
       constraints: BoxConstraints(minHeight: HeroSectionConfig.height(context)),
@@ -103,12 +63,12 @@ class _HeroSectionState extends State<HeroSection> {
                 _Intro(
                   profile: profile,
                   isWide: isWide,
-                  onSkillsPressed: widget.onSkillsPressed,
-                  onProjectsPressed: widget.onProjectsPressed,
+                  onSkillsPressed: onSkillsPressed,
+                  onProjectsPressed: onProjectsPressed,
                 ),
                 if (summary != null && !summary.isEmpty) ...[
                   const SizedBox(height: HeroSectionConfig.summaryGap),
-                  _Summary(summary: summary, onProjectsPressed: widget.onProjectsPressed),
+                  _Summary(summary: summary, onProjectsPressed: onProjectsPressed),
                 ],
               ],
             );

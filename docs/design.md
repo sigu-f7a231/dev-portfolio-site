@@ -31,16 +31,18 @@ flowchart LR
     direction TB
     s1["sessionStorage<br/>work / private"]
     s2["起動時の指定<br/>tool/run.dart"]
-    s3["メモリ<br/>setCustomYaml"]
     s4["サンプル<br/>assets/data/format_*.yaml"]
   end
-  loader["WorkYamlLoader /<br/>PrivateYamlLoader"]
-  src --> loader
-  loader --> model["Project.fromMap<br/>技術の振り分け・表記ゆれの整理"]
-  loader --> agg["skills_aggregator<br/>分類ごとの割合（%）"]
+  repo["PortfolioRepository<br/>（今は LocalPortfolioRepository）"]
+  prov["projectRecordsProvider（Riverpod）<br/>構造のデータ（Map の並び）"]
+  src --> repo --> prov
+  prov --> model["projectsListProvider<br/>Project.fromMap・技術の振り分け"]
+  prov --> agg["skillsDataProvider<br/>skills_aggregator（割合 %）"]
   model --> projects["Projects<br/>絞り込み・並び替え・ページ送り・詳細"]
   agg --> skills["Skills<br/>棒 / 円グラフ"]
-  p1["sessionStorage profile /<br/>起動時の指定"] --> store["ProfileStore"] --> home["Home / About"]
+  p1["sessionStorage profile /<br/>起動時の指定"] --> repo2["PortfolioRepository"] --> store["ProfileStore"] --> pp["profileProvider"] --> home["Home / About"]
+  prov --> home
+  rev["dataRevisionProvider<br/>（Riverpod）"] -. "変わったら作り直す" .-> skills & projects
 ```
 
 ---
@@ -138,7 +140,7 @@ flowchart LR
   cb["Cloud Build<br/>backend のイメージ"] -.-> ar
 ```
 
-- **frontend から API を読む**：状態管理を Riverpod にまとめ、Repository 層で読み先（サンプル・sessionStorage・API）を切り替える（画面は変えない）
+- **frontend から API を読む**：Repository 層（`lib/data/`。構造のデータで受け渡す）・Riverpod（`lib/state/`。画面はすべて Provider から読む）・go_router（`lib/router/`）は入れた（2026-11-06）。次は API の Repository（構造のデータの 5 つ）を足し、読み先（サンプル・sessionStorage・API）を切り替える（画面は変えない）
 - **費用をかけない本番構成**：配信は Cloudflare（Workers の静的アセット。`/api/` を Cloud Run へ転送してエッジでキャッシュ）、API は GCP の無料枠（Cloud Run・Artifact Registry・Cloud Storage、us-central1）
 - **IaC と CI/CD**：Terraform（google / cloudflare プロバイダ、state は GCS、GitHub Actions からは Workload Identity Federation）、frontend と IaC は GitHub Actions、API のイメージは Cloud Build
 - **監視**：Cloud Monitoring のアップタイムチェックと SLO（可用性・レイテンシ）のバーンレートアラート、構造化ログ（backend は対応済み）、予算のアラート

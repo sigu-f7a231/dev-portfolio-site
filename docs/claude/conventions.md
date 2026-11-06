@@ -15,7 +15,7 @@
   - 起動時（Flutter エンジン読み込み中）は `web/index.html` の SVG ＋ スクリプトで、Flutter の CircularProgressIndicator と同じ動き（1333ms で伸縮・2222ms で 1 周・fastOutSlowIn）を再現し。消すタイミングはアプリ側の合図：`main.dart` が `AppReady.preload()`（Work/Private の YAML を先読み）→ `runApp` → 描画が `AppSizes.settleFrames`（6）フレーム落ち着いたら `AppReady.notifyWhenSettled()` が `app-ready` イベントを送り、index.html は最低 1.5 秒表示＋0.3 秒待ってからフェード（合図が来なければ最初の描画から 4 秒で消す）。色は seed から作った primary / secondaryContainer / surface の近似値を CSS に直書きしているので、`AppColors.seedColor` を変えたらここも合わせる。
   - 色は `lib/theme/app_colors.dart` の `AppColors.light` / `AppColors.dark` だけで定義する。`Colors.xxx` / `Color(...)` は lib/theme/ の外に書かない。
   - ウィジェットからは `context.colors.<トークン>`、ダーク判定は `context.isDark`（`theme/app_theme.dart`）。**`isDark` を引数でウィジェットに渡して回さない。**
-  - 切替は `ThemeController.instance.toggle(bool)`。`main.dart` が `ValueListenableBuilder` で MaterialApp を再構築する。
+  - 切替は `ref.read(themeModeProvider.notifier).toggle(bool)`（Riverpod、`lib/state/providers.dart`）。`main.dart` が `ref.watch(themeModeProvider)` で MaterialApp を再構築する。
   - 何度も使う見た目（文字・角丸・カード・タグ・切替ボタン・グラフ文字・モーダル・ダイアログ・Hero / About）は `AppStyles` に置く。
   - 新しい色は `AppColors` にフィールドを追加し、light と dark の両方に値を入れる。
 - **値の置き場所（ウィジェットのファイルに数値や文言を直接書かない）**

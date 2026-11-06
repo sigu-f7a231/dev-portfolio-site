@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'data/skills_work.dart';
-import 'data/skills_private.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../state/providers.dart';
 import 'widgets/skills_header.dart';
 import 'widgets/skills_card.dart';
 import 'widgets/skills_chart_switch.dart';
@@ -17,14 +17,14 @@ import '../../widgets/app_loading_indicator.dart';
 /// カテゴリ → （項目名 → 割合%）
 typedef SkillsData = Map<String, Map<String, double>>;
 
-class SkillsSection extends StatefulWidget {
+class SkillsSection extends ConsumerStatefulWidget {
   const SkillsSection({super.key});
 
   @override
-  State<SkillsSection> createState() => _SkillsSectionState();
+  ConsumerState<SkillsSection> createState() => _SkillsSectionState();
 }
 
-class _SkillsSectionState extends State<SkillsSection> {
+class _SkillsSectionState extends ConsumerState<SkillsSection> {
   bool _showPie = false;
 
   /// [0] = Work、[1] = Private
@@ -113,7 +113,8 @@ class _SkillsSectionState extends State<SkillsSection> {
   @override
   void initState() {
     super.initState();
-    _skillsFuture = Future.wait([loadWorkSkillsAll(), loadPrivateSkillsAll()]);
+    // 集計は Provider（lib/state/providers.dart）。データが変わると HomePage がこの画面を作り直し、読み直した結果を受け取る
+    _skillsFuture = ref.read(skillsDataProvider.future);
   }
 
   List<String> _getAllCategories(bool isWork) {

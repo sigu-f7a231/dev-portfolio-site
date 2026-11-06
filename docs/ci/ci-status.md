@@ -12,7 +12,7 @@
 | Test（test.yml） | **追加済み・GitHub 上ではまだ動いていない**（追加したコミット `bb305d0` を push していないため） |
 | Deploy（deploy.yml） | フォルダーの改名（`dev_portfolio/` → `frontend/`）に合わせてパスを直した。**改名後はまだ動いていない**（同じく未 push） |
 | ローカルのテスト | 1 件を除いて成功（オーナーの手元）。その 1 件は原因を直したが、直したあとの実行はまだ（2 章） |
-| ローカルの網羅率 | 行 **96.2%**・分岐 **90.4%**（基準 90% を満たす） |
+| ローカルの網羅率 | 行 **96.3%**・分岐 **90.7%**（基準 90% を満たす） |
 | Docker | `docker compose up --build` で起動を確認（オーナーの手元） |
 
 GitHub 上の実行の履歴（Actions のタブ）は、Claude の作業環境からは見られない。push したあとの結果はオーナーが確かめる。
@@ -21,9 +21,9 @@ GitHub 上の実行の履歴（Actions のタブ）は、Claude の作業環境�
 
 | 確認 | 結果 | 日時 |
 |---|---|---|
-| `flutter test`（全体） | 約 730 件（約 20 秒）のうち、ページ送りのテスト 1 件を除いて成功。その 1 件の原因（スマホでボタンの当たり判定が広がり、› が画面の外に出る不具合）を直した | 2026-11-06 |
-| `flutter test test/coverage_extra_test.dart` | **未実行**：ページ送りの修正と、スマホでのはみ出しを確かめるテストを足したあと | ― |
-| `dart run tool/coverage_check.dart` | 行 96.2%（5874 / 6107）・分岐 90.4%（2149 / 2377）、基準を満たす | 2026-11-06 |
+| `flutter test --coverage --branch-coverage`（全体） | 成功（Repository・Riverpod・go_router を入れたあと。ページ送りの修正のテストも含む） | 2026-11-06 |
+| `flutter test` / `flutter analyze`（URL・構造のデータの Repository・画面が Provider から読む形にしたあと） | **未確認**（このあとオーナーの手元で実行） | ― |
+| `dart run tool/coverage_check.dart` | 行 96.3%（5900 / 6125）・分岐 90.7%（2173 / 2397）、99 ファイル、基準を満たす。新しいファイル（`lib/data/`・`lib/state/`・`lib/router/`）は行・分岐とも 100% | 2026-11-06 |
 | `dart test`（backend） | エディタでの依存関係の解決は確認。テストの実行結果は未確認 | ― |
 | `flutter analyze` / `dart analyze` | 未確認（CI で初めて確かめることになる） | ― |
 

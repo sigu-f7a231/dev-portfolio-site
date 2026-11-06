@@ -10,20 +10,17 @@ import '../../constants/app_sizes.dart';
 import '../../constants/app_texts.dart';
 import '../../theme/app_styles.dart';
 import '../../theme/app_theme.dart';
-import '../../utils/browser/browser.dart';
-import '../../utils/private_yaml_loader.dart';
-import '../../utils/profile_store.dart';
+import '../../data/portfolio_repository.dart';
 import '../../utils/project_append.dart';
-import '../../utils/work_yaml_loader.dart';
 import '../../widgets/upload_parts.dart';
 
 /// 今の一覧を読む（セッション → 起動時の指定 → サンプル）
 Future<String> _loadCurrent(String dataType) =>
-    dataType == 'work' ? WorkYamlLoader.loadYamlString() : PrivateYamlLoader.loadYamlString();
+    PortfolioRepository.instance.loadProjectsText(ProjectsKind.of(dataType));
 
 /// 今表示しているのがサンプル（アセット）か
-Future<bool> _isSample(String dataType) async =>
-    SessionStore.read(dataType) == null && await ProfileStore.startupProjects(dataType) == null;
+Future<bool> _isSample(String dataType) =>
+    PortfolioRepository.instance.isSampleProjects(ProjectsKind.of(dataType));
 
 /// 確認画面を出し、OK なら [context] の画面を閉じて保存する。保存したら true
 Future<bool> confirmAndAppendProjects(
@@ -59,7 +56,7 @@ Future<bool> confirmAndAppendProjects(
   final navigator = Navigator.of(context, rootNavigator: true);
   navigator.pop(); // 呼び出し元の画面を閉じる
   await runReloading(navigator, () async {
-    SessionStore.write(dataType, merged);
+    await PortfolioRepository.instance.saveProjectsText(ProjectsKind.of(dataType), merged);
     onSaved?.call();
     await _loadCurrent(dataType);
   });
