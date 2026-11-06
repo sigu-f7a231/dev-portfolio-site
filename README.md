@@ -21,6 +21,10 @@ Flutter Web で作った SPA で、GitHub Pages で公開しています。API �
 | [操作説明書](docs/manual.md) | 使い方（プロフィール・Excel・［データ］・［ダウンロード］・アップロードの流れ）、データの書き方（YAML / Markdown）、カスタマイズ |
 | [設計](docs/design.md) | 構成、データの流れ、backend の API、技術スタック、現状と課題、今後の計画 |
 | [ファイル構成](docs/structure.md) | ディレクトリ構成、コンポーネントごとのファイルと中身 |
+| [デザインシステム](docs/design-system.md) | 色・文字・角丸・余白・動きのトークン、部品の選び方、スタイル（CSS に当たるもの）を書く場所、ダークモード |
+| [画面仕様書](docs/screens/README.md) | 画面の一覧（ID）と遷移図、画面ごとの項目・操作・条件・メッセージ（メイン画面・ダイアログ） |
+| [UI / UX](docs/ui-ux.md) | 画面の組み立てとブレークポイント、操作の流れ、UX の決まり、状態ごとの表示、アクセシビリティ、課題 |
+| [パフォーマンス](docs/performance.md) | 起動の流れ、待ち時間の設計、重い処理、配信の設定、測り方と目標（案） |
 | [開発ガイド](docs/development.md) | 起動（Docker / Flutter / backend）、テスト・CI のコマンドと案内 |
 | [テスト計画書](docs/testing/test-plan.md) ／ [テスト一覧](docs/testing/test-catalog.md) | テストの目的・範囲・観点・合格の基準／各テストが確かめていること |
 | [CI の設計](docs/ci/ci-design.md) ／ [CI の状況](docs/ci/ci-status.md) | GitHub Actions の流れと失敗の条件／今の状態と注意点 |

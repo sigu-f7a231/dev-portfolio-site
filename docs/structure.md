@@ -14,6 +14,10 @@ dev-portfolio-site/
 │   ├── design.md                  # 設計（構成・データの流れ・API・技術スタック・課題・今後）
 │   ├── structure.md               # ファイル構成（このファイル）
 │   ├── development.md             # 開発ガイド（起動・テスト・CI のコマンドと案内）
+│   ├── design-system.md           # デザインシステム（色・文字・形・余白・部品・スタイルを書く場所）
+│   ├── screens/                   # 画面仕様書：README.md（一覧・遷移・共通）・main.md（メイン画面）・dialogs.md（ダイアログ）
+│   ├── ui-ux.md                   # UI / UX（レイアウト・ブレークポイント・操作の流れ・UX の決まり・アクセシビリティ）
+│   ├── performance.md             # パフォーマンス（起動・待ち時間・重い処理・配信・測り方）
 │   ├── roadmap.md                 # 今後の動き（テスト・CI・アプリ・インフラの段階）
 │   ├── testing/                   # test-plan.md（テスト計画書）・test-catalog.md（テスト一覧）
 │   ├── ci/                        # ci-design.md（CI の設計）・ci-status.md（CI の状況）

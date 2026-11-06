@@ -48,4 +48,5 @@
 17. **未使用の依存パッケージ**：`shared_preferences`（未使用のファイル 9 つは 2026-11-06 に削除済み）。
 18. **未使用の定数・スタイル**（作り直しで使わなくなったもの。参照 0 件を確認済み）：`AppSizes.filterPanelDuration`、`AppStyles.filterPanel` / `toggle` / `toggleText`、`AppTexts.selectYamlFile` / `uploadYaml` / `workUploadNote` / `privateUploadNote` / `darkMode` / `save`、`ProfileTexts.upload`、`ProjectsListConfig.separator` / `cardPadding`、`SkillsHeaderConfig.panelMargin`、`PieChartLayout.pieInactiveBorderWidth`、ローダーの `setCustomYaml`（テストからのみ使用）。
 19. `pubspec.yaml` の `description` が Flutter テンプレートのまま（`"A new Flutter project."`）。
-20. `graph_utils.dart` の `mapIndexed` は 2 回繰り返すと番号が 0 に戻らない（今の使い方では問題ない）。`ProjectsPaginationLogic.getPaginatedProjects` は 0 以下のページを渡すとエラー（画面からは起きない）。
+20. 使われていない文言：`AppTexts.noProjects`（「No projects」。`ProjectsListConfig.empty` / `ProjectsTabConfig.empty` も未使用）、`AppTexts.privateHidden`。Projects が 0 件のときはフィルターを使っていなくても「フィルターの条件を減らすと表示されます」と出る（`docs/ui-ux.md` の課題）。
+21. `graph_utils.dart` の `mapIndexed` は 2 回繰り返すと番号が 0 に戻らない（今の使い方では問題ない）。`ProjectsPaginationLogic.getPaginatedProjects` は 0 以下のページを渡すとエラー（画面からは起きない）。

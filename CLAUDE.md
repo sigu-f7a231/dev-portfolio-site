@@ -26,7 +26,7 @@
 | 起動・Docker・backend・CI / デプロイ | [operations.md](docs/claude/operations.md) |
 | 大きな変更の前、不具合・課題の確認 | [status.md](docs/claude/status.md) |
 
-人向けの説明は README とそこから案内する `docs/`：[README.md](README.md)（プロジェクトの紹介）・[docs/manual.md](docs/manual.md)（操作説明書・データの書き方）・[docs/design.md](docs/design.md)（設計・API）・[docs/structure.md](docs/structure.md)（ファイル構成・コンポーネント）・[docs/development.md](docs/development.md)（起動・テスト・CI の案内）・[docs/testing/](docs/testing/test-plan.md)（テスト計画書・テスト一覧）・[docs/ci/](docs/ci/ci-design.md)（CI の設計・状況）・[docs/roadmap.md](docs/roadmap.md)（今後の動き）、backend の詳細は [backend/README.md](backend/README.md)。画面・データの形・起動方法・テストを変えたら、該当する人向けの説明も直す（テストを足したら test-catalog.md、CI を動かした・変えたら ci-status.md / ci-design.md、段階を進めたら roadmap.md）。
+人向けの説明は README とそこから案内する `docs/`：[README.md](README.md)（プロジェクトの紹介）・[docs/manual.md](docs/manual.md)（操作説明書・データの書き方）・[docs/design.md](docs/design.md)（設計・API）・[docs/structure.md](docs/structure.md)（ファイル構成・コンポーネント）・[docs/development.md](docs/development.md)（起動・テスト・CI の案内）・[docs/testing/](docs/testing/test-plan.md)（テスト計画書・テスト一覧）・[docs/ci/](docs/ci/ci-design.md)（CI の設計・状況）・[docs/roadmap.md](docs/roadmap.md)（今後の動き）・[docs/design-system.md](docs/design-system.md)（色・文字・部品・スタイル）・[docs/screens/](docs/screens/README.md)（画面仕様書）・[docs/ui-ux.md](docs/ui-ux.md)（レイアウト・UX の決まり・アクセシビリティ）・[docs/performance.md](docs/performance.md)（体感の速さ）、backend の詳細は [backend/README.md](backend/README.md)。画面・データの形・起動方法・テストを変えたら、該当する人向けの説明も直す（テストを足したら test-catalog.md、CI を動かした・変えたら ci-status.md / ci-design.md、段階を進めたら roadmap.md、画面の項目・文言・動きを変えたら docs/screens/、色・文字・部品・ブレークポイントを変えたら design-system.md / ui-ux.md、待ち時間・重い処理・配信を変えたら performance.md）。
 
 ## 必ず守ること（詳細は各ファイル）
 
