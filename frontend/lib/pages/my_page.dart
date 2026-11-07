@@ -2,7 +2,9 @@
 //
 // マイページ（画面設計の M-01・M-07・M-08 の一部）
 // - 公開ページの名前（slug）を決める、公開する・公開を止める、ログアウト、退会
-// - 内容の編集は、今は公開ページ（/）の［データ］から（ログイン中はアカウントに保存される）。編集・表示設定の画面は段階 5-2
+// - 中身（MyPagePanel）は、/me の画面と、公開ページの上のバー（lib/widgets/account_bar.dart）の［マイページ］の
+//   ダイアログの両方で使う
+// - 内容の編集は、公開ページ（/）の［データ］から（ログイン中はアカウントに保存される）。編集・表示設定の画面は段階 5-2
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -14,14 +16,47 @@ import '../constants/app_sizes.dart';
 import '../constants/app_texts.dart';
 import '../router/app_router.dart';
 
-class MyPage extends ConsumerStatefulWidget {
+/// /me の画面
+class MyPage extends ConsumerWidget {
   const MyPage({super.key});
 
   @override
-  ConsumerState<MyPage> createState() => _MyPageState();
+  Widget build(BuildContext context, WidgetRef ref) {
+    final loggedIn = ref.watch(authControllerProvider) != null;
+    return Scaffold(
+      appBar: AppBar(title: const Text(RouteTexts.myPage)),
+      body: loggedIn ? const MyPagePanel() : const _NeedLogIn(),
+    );
+  }
 }
 
-class _MyPageState extends ConsumerState<MyPage> {
+class _NeedLogIn extends StatelessWidget {
+  const _NeedLogIn();
+
+  @override
+  Widget build(BuildContext context) => Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(AccountTexts.needLogIn),
+            const SizedBox(height: AppSizes.space16),
+            FilledButton(onPressed: () => context.go(AppRoutes.login), child: const Text(AccountTexts.logIn)),
+          ],
+        ),
+      );
+}
+
+/// マイページの中身。[inDialog] なら公開ページの上のダイアログの中（［公開ページで編集する］は出さず、終わったら閉じる）
+class MyPagePanel extends ConsumerStatefulWidget {
+  const MyPagePanel({super.key, this.inDialog = false});
+
+  final bool inDialog;
+
+  @override
+  ConsumerState<MyPagePanel> createState() => _MyPagePanelState();
+}
+
+class _MyPagePanelState extends ConsumerState<MyPagePanel> {
   final _slug = TextEditingController();
   MeInfo? _me;
   String? _email;
@@ -32,7 +67,7 @@ class _MyPageState extends ConsumerState<MyPage> {
   void initState() {
     super.initState();
     // 最初の build の後に読む（initState の中では setState できないため）
-    if (ref.read(authControllerProvider) != null) Future.microtask(_load);
+    Future.microtask(_load);
   }
 
   @override
@@ -74,9 +109,19 @@ class _MyPageState extends ConsumerState<MyPage> {
         if (mounted) setState(() => _me = me);
       }, done: done);
 
+  /// 終わったら：ダイアログなら閉じる、画面ならその URL へ（ログインを使うビルドでは、ログアウトしたら自動でログインに移る）
+  void _leave(String location) {
+    if (!mounted) return;
+    if (widget.inDialog) {
+      Navigator.of(context).pop();
+    } else {
+      context.go(location);
+    }
+  }
+
   Future<void> _logOut() async {
     await ref.read(authControllerProvider.notifier).logOut();
-    if (mounted) context.go(AppRoutes.login);
+    _leave(AppRoutes.login);
   }
 
   Future<void> _delete() async {
@@ -99,31 +144,12 @@ class _MyPageState extends ConsumerState<MyPage> {
     if (ok != true || !mounted) return;
     await _run(() async {
       await ref.read(authControllerProvider.notifier).deleteAccount();
-      if (mounted) context.go(AppRoutes.home);
+      _leave(AppRoutes.home);
     }, done: AccountTexts.deleted);
   }
 
   @override
   Widget build(BuildContext context) {
-    final loggedIn = ref.watch(authControllerProvider) != null;
-    return Scaffold(
-      appBar: AppBar(title: const Text(RouteTexts.myPage)),
-      body: loggedIn ? _body(context) : _needLogIn(context),
-    );
-  }
-
-  Widget _needLogIn(BuildContext context) => Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text(AccountTexts.needLogIn),
-            const SizedBox(height: AppSizes.space16),
-            FilledButton(onPressed: () => context.go(AppRoutes.login), child: const Text(AccountTexts.logIn)),
-          ],
-        ),
-      );
-
-  Widget _body(BuildContext context) {
     final me = _me;
     final textTheme = Theme.of(context).textTheme;
     final published = me?.publishedVersion;
@@ -186,13 +212,15 @@ class _MyPageState extends ConsumerState<MyPage> {
                     ),
                 ],
               ),
-              const SizedBox(height: AppSizes.space24),
-              Text(AccountTexts.editHint, style: textTheme.bodyMedium),
-              const SizedBox(height: AppSizes.space8),
-              Align(
-                alignment: Alignment.centerLeft,
-                child: OutlinedButton(onPressed: () => context.go(AppRoutes.home), child: const Text(AccountTexts.openEditor)),
-              ),
+              if (!widget.inDialog) ...[
+                const SizedBox(height: AppSizes.space24),
+                Text(AccountTexts.editHint, style: textTheme.bodyMedium),
+                const SizedBox(height: AppSizes.space8),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: OutlinedButton(onPressed: () => context.go(AppRoutes.home), child: const Text(AccountTexts.openEditor)),
+                ),
+              ],
               const SizedBox(height: AppSizes.space36),
               const Divider(),
               Wrap(

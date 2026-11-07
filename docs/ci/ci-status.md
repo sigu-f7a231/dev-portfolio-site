@@ -31,7 +31,9 @@ GitHub 上の実行の履歴（Actions のタブ）は、Claude の作業環境�
 | `npm run typecheck`・`npm test`（api-hono 全体） | 型の誤りが 1 件（テストのヘッダーの型）→ 直して、`tsc` は通り、テストは 47 件すべて成功（Emulator の上の 4 件は環境変数がないので飛ばす） | 2026-11-06 |
 | `docker compose up --build`（backend を api に置き換えたあと） | firebase・api・frontend がすべて起動し、api は healthy、`curl http://localhost:8787/healthz` → `{"status":"ok"}`（オーナーの手元。最初はファイルの権限で api が起動せず、`COPY --chown` で直した） | 2026-11-06 |
 | `mix compile --warnings-as-errors`・`mix test`（auth-phoenix。elixir:1.18-alpine＝OTP 28） | コンパイルは警告なしで通った。テストは 31 件のうち 1 件が失敗（Phoenix 1.8 は 404・400 の例外を投げ直さないのに、投げ直す前提で書いていた）→ テストを直した。直したあとは**未確認** | 2026-11-06 |
-| `flutter analyze` | 未確認（CI で初めて確かめることになる） | ― |
+| GitHub Actions の Test（作業用ブランチ `wip/stage5-6` で手動実行。段階 4〜6 のあと） | 5 つのジョブがすべて成功（[実行 42399896477](https://github.com/sigu-f7a231/dev-portfolio-site/actions/runs/42399896477)）。frontend：`flutter analyze` 指摘なし、テスト 895 件成功、行 96.7%（6490 / 6714）・分岐 91.6%（2449 / 2675）、126 ファイル。excel-fastapi：21 件成功（本物のコマンドの 2 件を含む）、網羅率 100%。api-hono・auth-phoenix・firebase-seed も成功。途中で excel-fastapi のテストの誤り 2 つ（手伝いの関数の名前・PDF の文字の空白）を直した | 2026-11-08 |
+| `docker compose`（`make smoke`。段階 4〜6 のあと） | 37 項目すべて PASS（起動・ログイン・API・名前と公開・見る人向けの PDF と Excel・FastAPI のテスト）。途中で Excel のテンプレートの 403・seed の残り・nginx の住所を直した | 2026-11-08 |
+| `flutter analyze` | 成功（上の GitHub Actions で。指摘なし） | 2026-11-08 |
 
 ## 3. 初めて動かすときの注意点
 

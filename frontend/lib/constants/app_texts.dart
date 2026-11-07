@@ -866,6 +866,11 @@ class AccountTexts {
   static const String deleteConfirm = '退会する';
   static const String deleted = '退会しました';
 
+  // 公開ページの上のバー（lib/widgets/account_bar.dart）
+  static const String loggedIn = 'ログイン中';
+  static const String logOutShort = 'ログアウト';
+  static const String close = '閉じる';
+
   // API
   static const String network = 'サーバーにつながりません。しばらくしてからお試しください';
   static const String unknownError = 'エラーが起きました';

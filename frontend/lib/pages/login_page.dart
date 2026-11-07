@@ -1,7 +1,7 @@
 // lib/pages/login_page.dart
 //
 // ログイン・登録（画面設計の A-01・A-02）。パスワードを忘れたら、再設定のメールを送る（A-03 の入口）
-// 成功したら、開こうとしていた URL（/login?from=…）か、マイページ（/me）へ。入力の確認は画面でも行い、最後はサーバー（認証）が確かめる
+// 成功したら、開こうとしていた URL（/login?from=…）か、公開ページ（/。上のバーからマイページの操作ができる）へ。入力の確認は画面でも行い、最後はサーバー（認証）が確かめる
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -66,7 +66,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       } else {
         await auth.logIn(_email.text, _password.text);
       }
-      // 開こうとしていた URL（/login?from=…）へ。なければマイページ
+      // 開こうとしていた URL（/login?from=…）へ。なければ公開ページ
       if (mounted) context.go(AppRoutes.afterLogin(GoRouterState.of(context).uri.queryParameters['from']));
     }, done: _signUp ? AccountTexts.signedUp : null);
   }
@@ -135,10 +135,6 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   ),
                   if (!_signUp)
                     TextButton(onPressed: _busy ? null : _forgot, child: const Text(AccountTexts.forgotPassword)),
-                  TextButton(
-                    onPressed: () => context.go(AppRoutes.home),
-                    child: const Text(RouteTexts.backToPublic),
-                  ),
                 ],
               ),
             ),

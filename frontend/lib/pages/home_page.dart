@@ -13,6 +13,8 @@ import '../controllers/scroll_controller.dart';
 import '../constants/app_sizes.dart';
 import '../constants/app_texts.dart';
 import '../state/providers.dart';
+import '../auth/auth_controller.dart';
+import '../widgets/account_bar.dart';
 
 class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
@@ -34,7 +36,9 @@ class _HomePageState extends ConsumerState<HomePage> {
   void initState() {
     super.initState();
     // YAML を指定せずに起動した（かつ未アップロード）ときは、最初に入力画面を出す
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    // ログインした直後など、プロフィールを読んでいる途中なら、読み終わるまで待ってから決める
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await ProfileStore.instance.loading.catchError((_) {});
       if (mounted && ProfileStore.instance.value == null) {
         // プロフィールに Work / Private も書かれていれば、Skills / Projects も作り直す
         showProfileSetupDialog(context, onProjectsChanged: _dataChanged);
@@ -84,6 +88,8 @@ class _HomePageState extends ConsumerState<HomePage> {
       ),
       body: Column(
         children: [
+          // ログイン中は、一番上にマイページの操作（公開する・マイページ・ログアウト）
+          if (ref.watch(authControllerProvider) != null) const AccountBar(),
           Header(
             onHomePressed: () => scroll.scrollTo('home'),
             onAboutPressed: () => scroll.scrollTo('about'),

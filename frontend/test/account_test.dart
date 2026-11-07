@@ -17,12 +17,14 @@ import 'package:dev_portfolio/data/api_portfolio_repository.dart';
 import 'package:dev_portfolio/data/local_portfolio_repository.dart';
 import 'package:dev_portfolio/data/portfolio_repository.dart';
 import 'package:dev_portfolio/pages/login_page.dart';
+import 'package:dev_portfolio/pages/home_page.dart';
 import 'package:dev_portfolio/pages/my_page.dart';
 import 'package:dev_portfolio/router/app_router.dart';
 import 'package:dev_portfolio/state/providers.dart';
 import 'package:dev_portfolio/theme/app_theme.dart';
 import 'package:dev_portfolio/utils/browser/browser_stub.dart' as stub;
 import 'package:dev_portfolio/utils/profile_store.dart';
+import 'package:dev_portfolio/widgets/account_bar.dart';
 
 import 'fake_backend.dart';
 import 'test_assets.dart';
@@ -205,16 +207,16 @@ void main() {
       // ログインしている
       expect(go('/', loggedIn: true), isNull);
       expect(go('/me', loggedIn: true), isNull);
-      expect(go('/login', loggedIn: true), AppRoutes.myPage);
+      expect(go('/login', loggedIn: true), AppRoutes.home);
       expect(go('/login?from=%2Fme%2Fedit', loggedIn: true), AppRoutes.edit);
     });
 
-    test('afterLogin：このサイトの中の URL だけ。ほかはマイページ', () {
-      expect(AppRoutes.afterLogin(null), AppRoutes.myPage);
+    test('afterLogin：このサイトの中の URL だけ。ほかは公開ページ（/）', () {
+      expect(AppRoutes.afterLogin(null), AppRoutes.home);
       expect(AppRoutes.afterLogin('/me/edit'), AppRoutes.edit);
       expect(AppRoutes.afterLogin('/'), AppRoutes.home);
       for (final bad in ['', 'me', 'https://example.com', '//example.com', '/login', '/login?from=%2F']) {
-        expect(AppRoutes.afterLogin(bad), AppRoutes.myPage, reason: bad);
+        expect(AppRoutes.afterLogin(bad), AppRoutes.home, reason: bad);
       }
     });
 
@@ -237,13 +239,13 @@ void main() {
     });
 
     testWidgets('ログインしていなければ / を開いてもログイン画面', (tester) async {
-      final router = await _pumpApp(tester, _container(FakeBackend()), AppRoutes.home, gate: true);
+      final router = await _pumpApp(tester, _container(FakeBackend(withProfile: true)), AppRoutes.home, gate: true);
       expect(find.byType(LoginPage), findsOneWidget);
       expect(_path(router), AppRoutes.login);
     });
 
     testWidgets('/me/edit を開く → ログイン → 開こうとした /me/edit に移る', (tester) async {
-      final router = await _pumpApp(tester, _container(FakeBackend()), AppRoutes.edit, gate: true);
+      final router = await _pumpApp(tester, _container(FakeBackend(withProfile: true)), AppRoutes.edit, gate: true);
       expect(find.byType(LoginPage), findsOneWidget);
       expect(router.routerDelegate.currentConfiguration.uri.queryParameters['from'], AppRoutes.edit);
 
@@ -255,14 +257,15 @@ void main() {
       expect(find.text(RouteTexts.edit), findsOneWidget);
     });
 
-    testWidgets('ログイン中に /login を開くとマイページ。ログアウトするとログイン画面', (tester) async {
-      final container = _container(FakeBackend());
+    testWidgets('ログイン中に /login を開くと公開ページ（上にバー）。バーでログアウトするとログイン画面', (tester) async {
+      final container = _container(FakeBackend(withProfile: true));
       await tester.runAsync(() => container.read(authControllerProvider.notifier).logIn(FakeBackend.email, FakeBackend.password));
       final router = await _pumpApp(tester, container, AppRoutes.login, gate: true);
-      expect(_path(router), AppRoutes.myPage);
-      expect(find.byType(MyPage), findsOneWidget);
+      expect(_path(router), AppRoutes.home);
+      expect(find.byType(HomePage), findsOneWidget);
+      expect(find.byType(AccountBar), findsOneWidget);
 
-      await tester.tap(find.byKey(const Key('my-logout')));
+      await tester.tap(find.byKey(const Key('bar-logout')));
       await _settle(tester);
       expect(_path(router), AppRoutes.login);
       expect(find.byType(LoginPage), findsOneWidget);
@@ -270,8 +273,8 @@ void main() {
   });
 
   group('ログイン画面', () {
-    testWidgets('ログインするとマイページに移り、メールアドレスと公開の状態を出す', (tester) async {
-      final backend = FakeBackend();
+    testWidgets('ログインすると公開ページに移り、上のバーにメールアドレスと公開の状態を出す', (tester) async {
+      final backend = FakeBackend(withProfile: true);
       final router = await _pumpApp(tester, _container(backend), AppRoutes.login);
       expect(find.byType(LoginPage), findsOneWidget);
 
@@ -280,10 +283,12 @@ void main() {
       await tester.tap(find.byKey(const Key('login-submit')));
       await _settle(tester);
 
-      expect(_path(router), AppRoutes.myPage);
-      expect(find.byType(MyPage), findsOneWidget);
+      expect(_path(router), AppRoutes.home);
+      expect(find.byType(HomePage), findsOneWidget);
+      expect(find.byType(AccountBar), findsOneWidget);
       expect(find.text(FakeBackend.email), findsOneWidget);
       expect(find.text(AccountTexts.notPublished), findsOneWidget);
+      expect(find.text('偽物 太郎'), findsWidgets, reason: '公開ページは API のデータ');
       expect(tester.takeException(), isNull);
     });
 
@@ -313,8 +318,8 @@ void main() {
       expect(_path(router), AppRoutes.login);
     });
 
-    testWidgets('登録に切り替える：パスワードの案内。もう登録済みならエラー、新しければ登録してマイページへ', (tester) async {
-      final backend = FakeBackend();
+    testWidgets('登録に切り替える：パスワードの案内。もう登録済みならエラー、新しければ登録して公開ページへ', (tester) async {
+      final backend = FakeBackend(withProfile: true);
       final router = await _pumpApp(tester, _container(backend), AppRoutes.login);
       await tester.tap(find.text(AccountTexts.toSignUp));
       await tester.pump();
@@ -334,7 +339,7 @@ void main() {
       backend.signedUp = false;
       await tester.tap(find.byKey(const Key('login-submit')));
       await _settle(tester);
-      expect(_path(router), AppRoutes.myPage);
+      expect(_path(router), AppRoutes.home);
       expect(find.text(AccountTexts.signedUp), findsOneWidget);
 
     });
@@ -361,13 +366,100 @@ void main() {
       expect(find.text(AccountTexts.resetSent), findsOneWidget);
       expect(backend.calls, ['POST /auth/password/reset']);
     });
+  });
 
-    testWidgets('［公開ページへ戻る］で / に戻る', (tester) async {
+  group('公開ページの上のバー（AccountBar）', () {
+    Future<(FakeBackend, ProviderContainer, GoRouter)> openHome(WidgetTester tester, {FakeBackend? backend}) async {
+      final b = backend ?? FakeBackend(withProfile: true);
+      final container = _container(b);
+      await tester.runAsync(() => container.read(authControllerProvider.notifier).logIn(FakeBackend.email, FakeBackend.password));
+      await tester.runAsync(() => ProfileStore.instance.loading);
+      final router = await _pumpApp(tester, container, AppRoutes.home, gate: true);
+      return (b, container, router);
+    }
+
+    testWidgets('ログインしていなければ出さない', (tester) async {
       ProfileStore.instance.value = null;
-      final router = await _pumpApp(tester, _container(FakeBackend()), AppRoutes.login);
-      await tester.tap(find.text(RouteTexts.backToPublic));
+      await _pumpApp(tester, _container(FakeBackend()), AppRoutes.home);
+      expect(find.byType(AccountBar), findsNothing);
+    });
+
+    testWidgets('公開する・公開を止める（バーの表示が切り替わる）', (tester) async {
+      final backend = FakeBackend(withProfile: true)..slug = 'sample';
+      await openHome(tester, backend: backend);
+      expect(find.text(AccountTexts.notPublished), findsOneWidget);
+
+      await tester.tap(find.byKey(const Key('bar-publish')));
       await _settle(tester);
+      expect(find.text(AccountTexts.published(1)), findsOneWidget);
+      expect(find.text(AccountTexts.publishedDone), findsOneWidget);
+
+      await tester.tap(find.byKey(const Key('bar-unpublish')));
+      await _settle(tester);
+      expect(backend.publishedVersion, isNull);
+      expect(find.byKey(const Key('bar-publish')), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('異常系：公開できなければ理由を出す（名前がまだない）', (tester) async {
+      await openHome(tester);
+      await tester.tap(find.byKey(const Key('bar-publish')));
+      await _settle(tester);
+      expect(find.text('公開する前に名前を決めてください'), findsOneWidget);
+      expect(find.text(AccountTexts.notPublished), findsOneWidget);
+    });
+
+    testWidgets('［マイページ］はダイアログ：名前を決めて閉じると、バーも読み直す（公開ページで編集するは出さない）', (tester) async {
+      final (backend, _, router) = await openHome(tester);
+      await tester.tap(find.byKey(const Key('bar-mypage')));
+      await _settle(tester);
+      expect(find.byType(MyPagePanel), findsOneWidget);
+      expect(find.text(AccountTexts.openEditor), findsNothing);
+
+      await tester.enterText(find.byKey(const Key('my-slug')), 'sample');
+      await tester.tap(find.byKey(const Key('my-slug-save')));
+      await _settle(tester);
+      expect(backend.slug, 'sample');
+      await tester.tap(find.byKey(const Key('my-publish')));
+      await _settle(tester);
+
+      await tester.tap(find.byKey(const Key('bar-mypage-close')));
+      await _settle(tester);
+      expect(find.byType(MyPagePanel), findsNothing);
+      expect(find.text(AccountTexts.published(1)), findsOneWidget, reason: '閉じたらバーを読み直す');
       expect(_path(router), AppRoutes.home);
+    });
+
+    testWidgets('ダイアログでログアウトすると、ダイアログを閉じてログイン画面', (tester) async {
+      final (_, container, router) = await openHome(tester);
+      await tester.tap(find.byKey(const Key('bar-mypage')));
+      await _settle(tester);
+      await tester.tap(find.byKey(const Key('my-logout')));
+      await _settle(tester);
+      expect(container.read(authControllerProvider), isNull);
+      expect(find.byType(MyPagePanel), findsNothing);
+      expect(_path(router), AppRoutes.login);
+    });
+
+    testWidgets('ダイアログで退会すると、ダイアログを閉じてログイン画面', (tester) async {
+      final (backend, container, router) = await openHome(tester);
+      await tester.tap(find.byKey(const Key('bar-mypage')));
+      await _settle(tester);
+      await tester.tap(find.byKey(const Key('my-delete')));
+      await _settle(tester, 5);
+      await tester.tap(find.byKey(const Key('delete-confirm')));
+      await _settle(tester);
+      expect(_count(backend, 'DELETE /auth/account'), 1);
+      expect(container.read(authControllerProvider), isNull);
+      expect(find.byType(MyPagePanel), findsNothing);
+      expect(_path(router), AppRoutes.login);
+    });
+
+    testWidgets('異常系：読めなければ、バーはメールアドレスの代わりに「ログイン中」', (tester) async {
+      final backend = FakeBackend(withProfile: true)..failures['GET /api/me'] = 500;
+      await openHome(tester, backend: backend);
+      expect(find.text(AccountTexts.loggedIn), findsOneWidget);
+      expect(find.text('失敗 500'), findsOneWidget);
     });
   });
 

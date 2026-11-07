@@ -10,7 +10,7 @@
 // - URL は # 付き（Flutter Web の既定）のまま。GitHub Pages は # のない URL をすべて index.html に向けられないため
 // - ない URL を開いたら / に移る
 // - ログインを使うビルドでは、ログインしていなければどの URL もログイン（/login?from=開こうとした URL）に移る。
-//   ログインしたら開こうとした URL へ（なければマイページ）。ログイン中に /login を開いたら、マイページへ
+//   ログインしたら開こうとした URL へ（なければ公開ページ /。上のバーからマイページの操作ができる）。ログイン中に /login を開いたら / へ
 //   （公開ページ /u/:slug は段階 5-3 で作り、ここでログインなしで開けるものとして外す）
 import 'package:go_router/go_router.dart';
 
@@ -37,10 +37,10 @@ class AppRoutes {
   /// 編集（M-02〜M-06。/me の下）
   static const String edit = '/me/edit';
 
-  /// ログインのあとに移る先。[from]（開こうとした URL）がこのサイトの中の URL ならそこ、ほかはマイページ
+  /// ログインのあとに移る先。[from]（開こうとした URL）がこのサイトの中の URL ならそこ、ほかは公開ページ（/）
   /// （ほかのサイトの URL（//example.com など）には移らない）
   static String afterLogin(String? from) {
-    if (from == null || !from.startsWith('/') || from.startsWith('//') || from.startsWith(login)) return myPage;
+    if (from == null || !from.startsWith('/') || from.startsWith('//') || from.startsWith(login)) return home;
     return from;
   }
 }

@@ -14,6 +14,19 @@ import 'package:dev_portfolio/api/portfolio_api.dart';
 import 'package:dev_portfolio/auth/auth_api.dart';
 
 class FakeBackend {
+  /// [withProfile] なら、はじめからプロフィールを保存してある（ログインした直後の公開ページに、入力画面を出さない）
+  FakeBackend({bool withProfile = false}) {
+    if (withProfile) {
+      data = {
+        'profile': {
+          'home': {'name': '偽物 太郎', 'role': 'エンジニア', 'tagline': '紹介文'},
+          'about': {'intro': '自己紹介'},
+        },
+      };
+      updatedAt = 'seeded';
+    }
+  }
+
   static const String email = 'test@example.com';
   static const String password = 'password123';
   static const String base = 'http://fake';

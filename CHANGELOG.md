@@ -29,6 +29,7 @@
 - API（`services/api-hono`）に本人の情報（`GET /api/me`）・公開ページの名前（`PUT /api/me/slug`）・公開する／止める（`POST`・`DELETE /api/me/publish`）・データをすべて消す（`DELETE /api/me`）を追加。公開ページにはスキルシートだけの項目と表示設定で隠したものを入れない（`src/publish.ts`）
 - Flutter：認証・API の呼び出し（`lib/api/`・`lib/auth/auth_api.dart`、パッケージ `http`）、ログインの状態（`lib/auth/auth_controller.dart`。ID トークンの取り直し、このタブで続けてログイン）
 - ログイン中の Repository（`lib/data/api_portfolio_repository.dart`・`api_records.dart`）。ログインすると保存先がこのタブの中から API（Firestore）に替わる。ほかの場所で先に変わっていたら 3 回までやり直す
+- ログインしたら公開ページ（`/`）に移り、一番上のバー（`lib/widgets/account_bar.dart`）から公開する・止める・［マイページ］（名前・ログアウト・退会のダイアログ）・ログアウトを操作する。マイページの中身は `MyPagePanel` にまとめ、`/me` とダイアログで共通。ログイン画面の［公開ページへ戻る］は外した（公開ページもログインが要るため）。ログインした直後の公開ページが、プロフィールを読み終わる前に入力画面を出さないようにした（`ProfileStore.loading`）
 - ログインを使うビルドでは、ログインしていなければどの URL もログイン画面（`/login?from=開こうとした URL`）に移り、ログインしたら開こうとした URL へ戻る（`loginRedirect`・`lib/auth/auth_gate.dart`。ほかのサイトの URL には移らない）
 - ログイン・登録・パスワードの再設定の画面（`/login`）、マイページ（`/me`：公開ページの名前・公開する／止める・ログアウト・退会）。`ENABLE_ACCOUNT` のときだけ。`compose.yaml` の frontend は `ENABLE_ACCOUNT=true` でビルド
 - テスト：`api_client_test`・`api_records_test`・`account_test`（認証・API は偽物の `test/fake_backend.dart`）
