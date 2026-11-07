@@ -1,5 +1,5 @@
 // 状態（Riverpod）と画面の URL（go_router）のテスト
-// 対象：lib/state/providers.dart、lib/router/app_router.dart、lib/pages/placeholder_page.dart、
+// 対象：lib/state/providers.dart、lib/router/app_router.dart、lib/pages/placeholder_page.dart（ログイン・マイページは account_test.dart）、
 //       HomePage・Home・About・Skills・Projects が Provider からデータを読むこと
 //
 // 実行：flutter test test/app_state_test.dart（frontend/ で）
@@ -13,6 +13,8 @@ import 'package:dev_portfolio/data/local_portfolio_repository.dart';
 import 'package:dev_portfolio/data/portfolio_repository.dart';
 import 'package:dev_portfolio/models/profile.dart';
 import 'package:dev_portfolio/pages/home_page.dart';
+import 'package:dev_portfolio/pages/login_page.dart';
+import 'package:dev_portfolio/pages/my_page.dart';
 import 'package:dev_portfolio/pages/placeholder_page.dart';
 import 'package:dev_portfolio/router/app_router.dart';
 import 'package:dev_portfolio/sections/projects/projects_section.dart';
@@ -170,24 +172,24 @@ void main() {
       }
     });
 
-    testWidgets('ENABLE_ACCOUNT のときは、ログイン・マイページ・編集の空の画面を開ける', (tester) async {
-      for (final (location, title, id) in [
-        (AppRoutes.login, RouteTexts.login, 'A-01'),
-        (AppRoutes.myPage, RouteTexts.myPage, 'M-01'),
-        (AppRoutes.edit, RouteTexts.edit, 'M-02〜M-06'),
+    testWidgets('ENABLE_ACCOUNT のときは、ログイン・マイページ・編集（まだ空の画面）を開ける', (tester) async {
+      for (final (location, page) in [
+        (AppRoutes.login, LoginPage),
+        (AppRoutes.myPage, MyPage),
+        (AppRoutes.edit, PlaceholderPage),
       ]) {
         final router = createAppRouter(initialLocation: location, enableAccount: true);
         await _pumpApp(tester, router);
-        expect(find.byType(PlaceholderPage), findsOneWidget, reason: location);
-        expect(find.text(title), findsOneWidget);
-        expect(find.text(RouteTexts.preparing), findsOneWidget);
-        expect(find.text(RouteTexts.planned(id)), findsOneWidget);
+        expect(find.byType(page), findsOneWidget, reason: location);
         expect(_path(router), location);
       }
+      expect(find.text(RouteTexts.edit), findsOneWidget);
+      expect(find.text(RouteTexts.preparing), findsOneWidget);
+      expect(find.text(RouteTexts.planned('M-02〜M-06')), findsOneWidget);
     });
 
     testWidgets('空の画面の［公開ページへ戻る］で / に戻る', (tester) async {
-      final router = createAppRouter(initialLocation: AppRoutes.myPage, enableAccount: true);
+      final router = createAppRouter(initialLocation: AppRoutes.edit, enableAccount: true);
       await _pumpApp(tester, router);
       await tester.tap(find.text(RouteTexts.backToPublic));
       await _settle(tester);
@@ -195,8 +197,8 @@ void main() {
       expect(_path(router), AppRoutes.home);
     });
 
-    test('main.dart が使う appRouter は / から始まる', () {
-      expect(appRouter.routeInformationProvider.value.uri.path, AppRoutes.home);
+    test('createAppRouter は既定で / から始まる', () {
+      expect(createAppRouter().routeInformationProvider.value.uri.path, AppRoutes.home);
     });
   });
 

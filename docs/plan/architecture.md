@@ -9,10 +9,10 @@
 
 | サービス | 言語・フレームワーク | 役割 | 持たないもの |
 |---|---|---|---|
-| frontend | Dart・Flutter Web | 公開ページ・ログイン・マイページの画面。Excel の読み込み・書き出し（[D-06](decisions.md#d-06-fastapi-に任せる範囲) で決めるまで今のまま） | データの保存（API を呼ぶだけ） |
+| frontend | Dart・Flutter Web | 公開ページ・ログイン・マイページの画面。Excel の読み込み・書き出し（[D-06](decisions.md#d-06-fastapi-に任せる範囲)：ブラウザのまま） | データの保存（API を呼ぶだけ） |
 | auth | Elixir・Phoenix | 登録・ログイン・ログアウト・パスワードの変更と再設定・トークンの発行と取り直し・総当たりの対策 | プロフィールなどのデータ |
 | api | TypeScript・Hono | マイページの API（プロフィール・スキル・職務経歴・表示設定・編集中・版・公開）、公開ページのデータを返す。受け取ったデータの形を確かめる | パスワード |
-| excel | Python・FastAPI | Excel の処理のうち、ブラウザでやらないと決めたものだけ | データの保存（api から呼ばれる） |
+| excel | Python・FastAPI | 公開ページを見る人向けのスキルシート（Excel・PDF）を作る（[D-06](decisions.md#d-06-fastapi-に任せる範囲)。[比べた結果](excel.md)）。Excel の読み込み・本人の Excel・PDF はブラウザ | データの保存（api から呼ばれる） |
 | Firebase Auth | （マネージド） | パスワードを安全に持つ・確認のメール・トークンの署名（[D-01](decisions.md#d-01-認証の形) の案 B） | ─ |
 | Firestore | （マネージド） | データの置き場所 | ─ |
 
@@ -35,7 +35,7 @@ sequenceDiagram
 
 ## 2. ローカルの構成
 
-> 用意した（段階 2）。使い方・データの残り方・よくある失敗は [ローカルのクラウド](../local-cloud.md)。
+> 用意した（段階 2）。api（段階 3）・auth（段階 4）も compose で動く。使い方・データの残り方・よくある失敗は [ローカルのクラウド](../local-cloud.md)。
 
 `docker compose up` だけで全部が動く。クラウドの契約はいらない。
 
@@ -44,7 +44,7 @@ flowchart LR
   browser["ブラウザ<br/>localhost:8000"] --> nginx["frontend<br/>nginx＋Flutter Web<br/>:8000"]
   nginx -- "/auth/" --> phx["auth（Phoenix）<br/>:4100"]
   nginx -- "/api/" --> hono["api（Hono・Node）<br/>:8787"]
-  hono --> fapi["excel（FastAPI）<br/>:8001"]
+  hono --> fapi["excel（FastAPI）<br/>:8001<br/>見る人向けのスキルシート"]
   phx --> emu["Firebase Emulator<br/>Auth :9099・Firestore :8080<br/>確認用の画面 :4001"]
   hono --> emu
   emu --- vol[("./firebase/emulator-data<br/>終了時に書き出し・起動時に読み込み<br/>Git 管理外")]

@@ -83,7 +83,7 @@
         { "id": "projects", "visible": true }
       ],
       "projects": { "tabs": { "work": true, "private": true }, "hidden": [], "view": "list" },
-      "allowSheetDownload": false,
+      "allowSheetDownload": true,
       "theme": "system"
     }
   }

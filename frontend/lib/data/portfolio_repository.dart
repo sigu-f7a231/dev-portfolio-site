@@ -50,6 +50,9 @@ abstract class PortfolioRepository {
   @visibleForTesting
   static void reset() => _instance = LocalPortfolioRepository();
 
+  /// ログイン・ログアウトで実装を切り替える（AuthController が呼ぶ。ログイン中は API、ログアウトしたら Local）
+  static void use(PortfolioRepository repository) => _instance = repository;
+
   /// 自分のデータがないときに見せるサンプル（テンプレート）の場所
   static String sampleAssetPath(ProjectsKind kind) => 'assets/data/format_${kind.name}.yaml';
 

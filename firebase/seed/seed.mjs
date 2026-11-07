@@ -4,10 +4,16 @@
 //   docker compose run --rm seed
 // - Auth：サンプルの利用者（sample.json の user。Emulator の中だけのアカウント）
 // - Firestore：docs/plan/data-model.md の形で users/{uid}・drafts/current・versions/1・slugs/{slug}・publicPages/{slug}
-// - 何度実行しても同じ中身になる（あれば上書き）
+// - 何度実行しても同じ中身になる（あれば上書き。前に増えた版（versions/2 など）や、ほかの名前（slugs・publicPages）は消す）
 // - 本物の Firebase には書かない（つなぎ先は Emulator だけ。下の 2 つの環境変数がないと止まる）
 // 依存するパッケージはない（Node 22 の fetch だけ）。
 import { readFile } from 'node:fs/promises';
+
+/** 進み具合の表示（テストでは止める。node --test は子の標準出力を使うので、たくさん書くと読み違えることがある） */
+let log = console.log;
+export function setLog(fn) {
+  log = fn;
+}
 
 
 /** JavaScript の値 → Firestore の REST の値（https://firebase.google.com/docs/firestore/reference/rest/v1/Value） */
@@ -72,7 +78,44 @@ async function setDoc(firestoreHost, project, path, data) {
   const url = `http://${firestoreHost}/v1/projects/${project}/databases/(default)/documents/${path}`;
   const res = await request(url, { method: 'PATCH', body: { fields: toFields(data) }, owner: true });
   if (!res.ok) throw new Error(`${path} を書けませんでした（${res.status}）：${JSON.stringify(res.json)}`);
-  console.log(`  書きました：${path}`);
+  log(`  書きました：${path}`);
+}
+
+/** コレクションの文書（REST の document の並び）。なければ空 */
+async function listDocs(firestoreHost, project, collection) {
+  const url = `http://${firestoreHost}/v1/projects/${project}/databases/(default)/documents/${collection}?pageSize=300`;
+  const res = await request(url, { owner: true });
+  if (!res.ok) throw new Error(`${collection} を読めませんでした（${res.status}）：${JSON.stringify(res.json)}`);
+  return res.json.documents ?? [];
+}
+
+/** 文書を消す（name は REST の document の name：projects/…/documents/…） */
+async function deleteDoc(firestoreHost, name) {
+  const res = await request(`http://${firestoreHost}/v1/${name}`, { method: 'DELETE', owner: true });
+  if (!res.ok) throw new Error(`${name} を消せませんでした（${res.status}）：${JSON.stringify(res.json)}`);
+  log(`  消しました：${name.split('/documents/')[1]}`);
+}
+
+/**
+ * 前に動かしたときに増えたもの（版 2 以降・ほかの名前の slugs と publicPages）を消す。消した文書のパスを返す
+ * （残っていると、次の「公開する」が「版がもうある」で失敗する）
+ */
+async function removeLeftovers(firestoreHost, project, uid, slug) {
+  const removed = [];
+  for (const doc of await listDocs(firestoreHost, project, `users/${uid}/versions`)) {
+    if (doc.name.endsWith('/versions/1')) continue;
+    await deleteDoc(firestoreHost, doc.name);
+    removed.push(doc.name.split('/documents/')[1]);
+  }
+  for (const doc of await listDocs(firestoreHost, project, 'slugs')) {
+    const other = doc.name.split('/').pop();
+    if (other === slug || doc.fields?.uid?.stringValue !== uid) continue;
+    for (const name of [doc.name, doc.name.replace('/documents/slugs/', '/documents/publicPages/')]) {
+      await deleteDoc(firestoreHost, name);
+      removed.push(name.split('/documents/')[1]);
+    }
+  }
+  return removed;
 }
 
 /**
@@ -83,9 +126,9 @@ export async function seed({ authHost, firestoreHost, project, sample, now = new
   if (!authHost || !firestoreHost) {
     throw new Error('FIREBASE_AUTH_EMULATOR_HOST と FIRESTORE_EMULATOR_HOST を指定してください（Emulator にだけ書くため）');
   }
-  console.log(`Firebase Emulator（${project}）にサンプルを入れます`);
+  log(`Firebase Emulator（${project}）にサンプルを入れます`);
   const uid = await ensureUser(authHost, sample.user);
-  console.log(`  利用者：${sample.user.email}（uid ${uid}）`);
+  log(`  利用者：${sample.user.email}（uid ${uid}）`);
 
   const { slug } = sample.user;
   const data = { schemaVersion: 1, ...sample.data };
@@ -97,7 +140,8 @@ export async function seed({ authHost, firestoreHost, project, sample, now = new
     [`publicPages/${slug}`, { data: publicDataOf(data), version: 1, publishedAt: now }],
   ];
   for (const [path, doc] of docs) await setDoc(firestoreHost, project, path, doc);
-  console.log('終わりました。確認用の画面：http://localhost:4001');
+  await removeLeftovers(firestoreHost, project, uid, slug);
+  log('終わりました。確認用の画面：http://localhost:4001');
   return docs.map(([path]) => path);
 }
 

@@ -29,6 +29,8 @@ export interface DocStore {
   get(path: string): Promise<StoredDoc | null>;
   /** まとめて書く（全部書けるか、どれも書かないか）。前提が崩れていたら ConflictError */
   commit(writes: Write[]): Promise<void>;
+  /** コレクションの中の文書のパス（例 users/a/versions → ['users/a/versions/1', ...]） */
+  list(collectionPath: string): Promise<string[]>;
 }
 
 export type AccessTokenProvider = () => Promise<string>;
@@ -82,6 +84,21 @@ export class FirestoreRestStore implements DocStore {
     if (!res.ok) throw new Error(`Firestore から読めませんでした（${res.status}）：${await res.text()}`);
     const doc = (await res.json()) as { fields?: Fields; updateTime: string };
     return { data: fromFields(doc.fields ?? {}), updateTime: doc.updateTime };
+  }
+
+  async list(collectionPath: string): Promise<string[]> {
+    const paths: string[] = [];
+    let pageToken: string | undefined;
+    do {
+      const query = new URLSearchParams({ pageSize: '300', 'mask.fieldPaths': '__name__' });
+      if (pageToken) query.set('pageToken', pageToken);
+      const res = await this.fetchFn(`${this.base}/${collectionPath}?${query}`, { headers: await this.headers() });
+      if (!res.ok) throw new Error(`Firestore の一覧を読めませんでした（${res.status}）：${await res.text()}`);
+      const json = (await res.json()) as { documents?: { name: string }[]; nextPageToken?: string };
+      for (const doc of json.documents ?? []) paths.push(doc.name.slice(this.documentsName.length + 1));
+      pageToken = json.nextPageToken;
+    } while (pageToken);
+    return paths;
   }
 
   async commit(writes: Write[]): Promise<void> {

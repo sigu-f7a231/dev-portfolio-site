@@ -145,3 +145,86 @@ test('公開ページ：あれば返し、ない・名前の形が違うは同�
   await rejectsWith(service.getPublicPage('none'), 404, 'not_found');
   await rejectsWith(service.getPublicPage('../users/a'), 404, 'not_found');
 });
+
+// ---------------- 本人の情報・公開ページの名前・公開・退会 ----------------
+
+const publishable = {
+  ...emptyDraftData(),
+  profile: {
+    home: { name: '公開 太郎', role: 'エンジニア', tagline: '紹介' },
+    about: { intro: '自己紹介' },
+    sheet: { furigana: 'こうかい たろう' },
+  },
+  projects: [workProject],
+};
+
+test('本人の情報：はじめては既定の値', async () => {
+  const { service } = setup();
+  assert.deepEqual(await service.getMe('a'), { slug: null, latestVersion: 0, publishedVersion: null, updatedAt: null });
+});
+
+test('公開ページの名前：決める・変える（前の名前は空く）。形の誤り・使えない名前は 400、使われていれば 409', async () => {
+  const { store, service } = setup();
+  assert.equal((await service.setSlug('a', 'taro-dev')).slug, 'taro-dev');
+  assert.deepEqual(store.docs.get('slugs/taro-dev')!.data, { uid: 'a' });
+
+  for (const bad of ['ab', 'Taro', '-taro', 'taro-', 'た', 'me', 'login', 1, undefined]) {
+    await rejectsWith(service.setSlug('b', bad), 400);
+  }
+  await rejectsWith(service.setSlug('b', 'taro-dev'), 409, 'slug_taken');
+
+  await service.setSlug('a', 'taro');
+  assert.equal(store.docs.has('slugs/taro-dev'), false, '前の名前は空く');
+  assert.equal((await service.setSlug('b', 'taro-dev')).slug, 'taro-dev');
+  assert.equal((await service.setSlug('a', 'taro')).slug, 'taro', '同じ名前は何もしない');
+});
+
+test('公開：名前がない・保存していない・必須が足りないときは公開しない', async () => {
+  const { service } = setup();
+  await rejectsWith(service.publish('a'), 409, 'slug_required');
+  await service.setSlug('a', 'taro');
+  await rejectsWith(service.publish('a'), 409, 'nothing_to_publish');
+  await service.saveDraft('a', emptyDraftData(), null);
+  await assert.rejects(service.publish('a'), (e: unknown) => e instanceof ApiError && e.status === 400 && e.details.length === 4);
+});
+
+test('公開：版を残し、公開する項目だけを公開ページに（sheet は入れない）。もう一度で版が増える。止めると消える', async () => {
+  const { store, service } = setup();
+  await service.setSlug('a', 'taro');
+  await service.saveDraft('a', publishable, null);
+
+  const me = await service.publish('a');
+  assert.equal(me.latestVersion, 1);
+  assert.equal(me.publishedVersion, 1);
+  assert.equal((store.docs.get('users/a/versions/1')!.data.data as typeof publishable).profile.sheet.furigana, 'こうかい たろう');
+  const page = await service.getPublicPage('taro');
+  assert.equal(page.version, 1);
+  assert.equal(((page.data as typeof publishable).profile as Record<string, unknown>).sheet, undefined);
+  assert.equal((store.docs.get('users/a/drafts/current')!.data.baseVersion as number), 1);
+
+  assert.equal((await service.publish('a')).publishedVersion, 2);
+
+  // 公開中に名前を変えると、公開ページも移る
+  await service.setSlug('a', 'taro-new');
+  await rejectsWith(service.getPublicPage('taro'), 404);
+  assert.equal((await service.getPublicPage('taro-new')).version, 2);
+
+  const after = await service.unpublish('a');
+  assert.equal(after.publishedVersion, null);
+  assert.equal(after.latestVersion, 2, '版は残す');
+  await rejectsWith(service.getPublicPage('taro-new'), 404);
+  assert.equal((await service.unpublish('a')).publishedVersion, null, '2 回目は何もしない');
+});
+
+test('退会：本人のデータ（版・編集中・本人の情報・名前・公開ページ）をすべて消し、ほかの人のものは残す', async () => {
+  const { store, service } = setup();
+  await service.setSlug('a', 'taro');
+  await service.saveDraft('a', publishable, null);
+  await service.publish('a');
+  await service.publish('a');
+  await service.saveDraft('b', emptyDraftData(), null);
+
+  await service.deleteAll('a');
+  assert.deepEqual([...store.docs.keys()].sort(), ['users/b', 'users/b/drafts/current']);
+  await service.deleteAll('nobody'); // ないものを消してもエラーにしない
+});

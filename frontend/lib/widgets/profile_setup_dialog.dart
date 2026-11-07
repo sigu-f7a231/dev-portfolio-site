@@ -253,7 +253,7 @@ class _ProfileSetupDialogState extends State<_ProfileSetupDialog> {
     final messenger = ScaffoldMessenger.of(context);
     navigator.pop(); // 入力画面を閉じる（PopScope は戻る操作だけを止めるので、ここでは閉じられる）
 
-    await runReloading(navigator, () async {
+    final error = await runReloading(navigator, () async {
       await ProfileStore.instance.setUploaded(bundle.profileText!, bundle.profile!);
       // Work / Private も書かれていれば、それぞれのアップロードと同じく Repository に保存して読み直す
       final repository = PortfolioRepository.instance;
@@ -265,7 +265,7 @@ class _ProfileSetupDialogState extends State<_ProfileSetupDialog> {
       }
     });
 
-    messenger.showSnackBar(const SnackBar(content: Text(ProfileTexts.uploaded)));
+    messenger.showSnackBar(SnackBar(content: Text(error == null ? ProfileTexts.uploaded : AppTexts.saveFailed(error))));
   }
 
   @override

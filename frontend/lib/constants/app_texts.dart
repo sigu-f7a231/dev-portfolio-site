@@ -128,6 +128,9 @@ class AppTexts {
       'テンプレートは、アップロード画面の「テンプレートを保存」「テンプレートをコピー」から用意できます'
       '（形式を「Markdown」にすると Markdown のひな形になります）。';
   static String downloadFailed(Object e) => '保存に失敗しました: $e';
+
+  /// 読み込んだものを保存できなかった（ログイン中なら API の誤りの理由）
+  static String saveFailed(Object e) => '保存できませんでした: $e';
   static String formatSaved(String fileName) => '$fileName を保存しました';
   static const String yamlFileDescription = 'YAML ファイル';
   static const String formatHelpTooltip = '書き方の説明';
@@ -821,4 +824,49 @@ class RouteTexts {
   static const String preparing = 'この画面は準備中です';
   static String planned(String screenId) => '画面設計（docs/plan/screens.md）の $screenId で作ります。';
   static const String backToPublic = '公開ページへ戻る';
+}
+
+/// ログイン・マイページ・API の文言（lib/auth/・lib/pages/login_page.dart・my_page.dart・lib/api/）
+class AccountTexts {
+  AccountTexts._(); // インスタンスを作らせないための private コンストラクタ（呼ばれない） // coverage:ignore-line
+
+  // ログイン
+  static const String email = 'メールアドレス';
+  static const String password = 'パスワード';
+  static const String passwordHint = '8 文字以上';
+  static const String logIn = 'ログイン';
+  static const String signUp = '登録する';
+  static const String toSignUp = 'はじめての方は登録';
+  static const String toLogIn = '登録済みの方はログイン';
+  static const String forgotPassword = 'パスワードを忘れた';
+  static const String resetSent = '再設定のメールを送りました（登録があれば届きます）';
+  static const String emailRequired = 'メールアドレスを入れてください';
+  static const String passwordTooShort = 'パスワードは 8 文字以上にしてください';
+  static const String signedUp = '登録しました。確認のメールを送りました';
+
+  // マイページ
+  static const String needLogIn = 'ログインしてください';
+  static const String slug = '公開ページの名前';
+  static const String slugHint = '英小文字・数字・-（3〜40 文字）';
+  static const String save = '保存';
+  static const String slugSaved = '公開ページの名前を保存しました';
+  static const String notPublished = 'まだ公開していません';
+  static String published(int version) => '版 $version を公開中';
+  static String latest(int version) => '保存した版：$version';
+  static const String publish = '公開する';
+  static const String unpublish = '公開を止める';
+  static const String publishedDone = '公開しました';
+  static const String unpublishedDone = '公開を止めました';
+  static const String editHint = '内容の編集は、公開ページ（/）の［データ］から行えます（ログイン中はアカウントに保存されます）';
+  static const String openEditor = '公開ページで編集する';
+  static const String logOut = 'ログアウト（すべての端末）';
+  static const String deleteAccount = '退会する';
+  static const String deleteConfirmTitle = '退会しますか？';
+  static const String deleteConfirmBody = 'アカウントと、保存したデータ・公開ページをすべて消します。元に戻せません。';
+  static const String deleteConfirm = '退会する';
+  static const String deleted = '退会しました';
+
+  // API
+  static const String network = 'サーバーにつながりません。しばらくしてからお試しください';
+  static const String unknownError = 'エラーが起きました';
 }

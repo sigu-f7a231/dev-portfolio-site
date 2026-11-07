@@ -11,6 +11,7 @@
 | [data-model.md](data-model.md) | データ設計：Excel の構成、項目と型、Firestore のコレクション、編集中・保存・版・公開 |
 | [architecture.md](architecture.md) | サービスの役割（Flutter・Phoenix・Hono・FastAPI・Firebase）、ローカルの構成、本番の構成、無料枠と守り方 |
 | [decisions.md](decisions.md) | 決めること：選択肢・案・状態（未決 / 決定） |
+| [excel.md](excel.md) | Excel：ブラウザか FastAPI か（段階 6 で比べた結果と計測） |
 
 ---
 
@@ -34,7 +35,7 @@ flowchart TD
   s7 --> s8["8. Google Cloud へのデプロイ・運用<br/>（ここで初めて請求先アカウント）"]
 ```
 
-- 進み具合：0 は済み（未決の項目は [決めること](decisions.md)）。1 は済み（Repository は構造のデータで受け渡し、画面はすべて Riverpod の Provider から読み、URL は `/`・`/login`・`/me`・`/me/edit`。ログイン・マイページは `--dart-define=ENABLE_ACCOUNT=true` のときだけ）。2 は済み（`compose.yaml` に Firebase Emulator とサンプルを入れる seed、`firebase/`・`services/` を用意。[ローカルのクラウド](../local-cloud.md)）。3 は済み（`services/api-hono/`：プロフィール・スキル・職務経歴・表示設定・編集中のデータの読み書き、ID トークンで本人だけ、Emulator の上のテスト。`backend/` は削除。版と公開の API は段階 5 で）。
+- 進み具合：0 は済み（未決の項目は [決めること](decisions.md)）。1 は済み（Repository は構造のデータで受け渡し、画面はすべて Riverpod の Provider から読み、URL は `/`・`/login`・`/me`・`/me/edit`。ログイン・マイページは `--dart-define=ENABLE_ACCOUNT=true` のときだけ）。2 は済み（`compose.yaml` に Firebase Emulator とサンプルを入れる seed、`firebase/`・`services/` を用意。[ローカルのクラウド](../local-cloud.md)）。3 は済み（`services/api-hono/`：プロフィール・スキル・職務経歴・表示設定・編集中のデータの読み書き、ID トークンで本人だけ、Emulator の上のテスト。`backend/` は削除。版と公開の API は段階 5 で）。4 は作った（`services/auth-phoenix/`：D-01 の B。登録・ログイン・取り直し・ログアウト・パスワードの再設定と変更・退会）。5 は 3 つに分けて進める：5-1 は作った（API に本人の情報・公開ページの名前・公開する／止める・データの削除。Flutter にログインの状態・API の Repository・ログイン画面・マイページ）。5-2 は編集・表示設定の画面、5-3 は表示設定に従う公開ページ（`/u/:slug`）。6 は作った（D-06：Excel の読み込みと本人の Excel・PDF はブラウザのまま。ログイン中も同じ処理で読み書きでき、API に送る形を直した。FastAPI（`services/excel-fastapi/`）には見る人向けのスキルシート（Excel・PDF）だけを任せた。[比べた結果](excel.md)）。
 - 0〜7 は**ローカルだけ**で進められる（クラウドの契約・カードの登録はいらない）。
 - `develop` に push すると今の GitHub Pages に公開されるので、1 以外は別のブランチで進めるか、新しい画面をビルドの設定（`--dart-define`）で隠す。
 

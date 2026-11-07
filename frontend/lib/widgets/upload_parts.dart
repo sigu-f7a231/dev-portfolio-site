@@ -195,13 +195,16 @@ Future<bool> confirmUpload(
 /// アップロード後の全画面ローディング（起動時の表示と同じ見た目）
 /// [task]（保存・読み直し）が終わり、最低 AppSizes.reloadMinDuration たって、
 /// 描画が落ち着いてから消す。読み込みが終わらなくても reloadMaxDuration で打ち切る。
-Future<void> runReloading(NavigatorState navigator, Future<void> Function() task) async {
+/// 失敗したら、その理由を返す（成功なら null）。呼び出し側が「保存できませんでした」を出す
+Future<Object?> runReloading(NavigatorState navigator, Future<void> Function() task) async {
+  Object? error;
   final done = Future<void>(() async {
     final work = () async {
       try {
         await task();
-      } catch (_) {
-        // 失敗しても画面は戻す（各セクションが空やエラーの表示になる）
+      } catch (e) {
+        // 失敗しても画面は戻す（各セクションが空やエラーの表示になる）。ログイン中なら API の誤りの理由など
+        error = e;
       }
       for (var i = 0; i < AppSizes.settleFrames; i++) {
         await WidgetsBinding.instance.endOfFrame;
@@ -223,6 +226,7 @@ Future<void> runReloading(NavigatorState navigator, Future<void> Function() task
   navigator.push(route);
   await done;
   if (route.isActive) navigator.removeRoute(route);
+  return error;
 }
 
 class _ReloadingScreen extends StatelessWidget {

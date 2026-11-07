@@ -171,14 +171,16 @@ class _YamlUploadDialogState extends State<_YamlUploadDialog> {
     final messenger = ScaffoldMessenger.of(context);
     navigator.pop(); // アップロード画面を閉じる
 
-    await runReloading(navigator, () async {
+    final error = await runReloading(navigator, () async {
       // Repository に保存（今は同じタブなら再読み込みしても残る）→ Skills / Projects を作り直して読み直す
       await PortfolioRepository.instance.saveProjectsText(ProjectsKind.of(widget.dataType), text);
       widget.onSaved?.call();
       await (_isWork ? WorkYamlLoader.loadYamlString() : PrivateYamlLoader.loadYamlString());
     });
 
-    messenger.showSnackBar(SnackBar(content: Text(AppTexts.uploadSaved(widget.dataType))));
+    messenger.showSnackBar(SnackBar(
+      content: Text(error == null ? AppTexts.uploadSaved(widget.dataType) : AppTexts.saveFailed(error)),
+    ));
   }
 
   @override

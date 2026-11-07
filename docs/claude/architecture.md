@@ -14,8 +14,8 @@ dev-portfolio-site/
 ├── CLAUDE.md                      # Claude 向けの入口（ここから docs/claude/ を読む）
 ├── docs/claude/                   # 開発メモ（構成・データの流れ・規約・テスト・運用・課題）
 ├── firebase/                      # Firebase Emulator（Auth :9099・Firestore :8080・確認用の画面 :4001）。seed/ にサンプルを入れるスクリプト
-├── services/                      # サービス：api-hono（マイページの API。Hono・TypeScript）、auth-phoenix・excel-fastapi（まだ README だけ）
-├── compose.yaml                   # frontend（nginx :8000）・api（:8787）・firebase を起動。docker compose up --build
+├── services/                      # サービス：api-hono（マイページの API。Hono・TypeScript）、auth-phoenix（認証。Phoenix）、excel-fastapi（見る人向けのスキルシート（Excel・PDF）。FastAPI）
+├── compose.yaml                   # frontend（nginx :8000）・api（:8787）・auth（:4100）・firebase を起動。docker compose up --build
 └── frontend/                      # Flutter アプリ本体（コマンドはここで実行。パッケージ名は dev_portfolio のまま）
     ├── Dockerfile                 # flutter build web → nginx（nginx/default.conf.template。/api/ と /healthz を api へ転送）
     ├── .dockerignore              # assets/profile/ の個人のプロフィールをイメージに入れない
@@ -53,6 +53,8 @@ dev-portfolio-site/
     │   ├── data/                  # Repository（入口 PortfolioRepository・今の実装 LocalPortfolioRepository・構造のデータ records.dart）
     │   ├── state/                 # Riverpod の Provider（テーマ・Repository・データが変わった回数・プロフィール・Work / Private・Skills・Projects）
     │   ├── router/                # go_router の URL（/。ENABLE_ACCOUNT のときだけ /login・/me・/me/edit。ない URL は / へ）
+    │   ├── auth/                  # 認証の呼び出し・ログインの状態（Riverpod）
+    │   ├── api/                   # JSON の送受信・API の呼び出し
     │   └── utils/                 # YAML ローダー（中身は Repository）、profile_store、file_saver / file_pick（保存・選択。テストでは差し替え）、app_ready、文字列分割、workflow 日本語化など
     └── test/                      # テスト（一覧・書き方・補助ファイルは docs/claude/testing.md）
 ```

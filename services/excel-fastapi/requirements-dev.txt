@@ -1,0 +1,7 @@
+# テスト（CI・ローカル）。pip install -r requirements-dev.txt
+-r requirements.txt
+pytest==8.3.4
+pytest-cov==6.0.0
+httpx==0.28.1
+pypdf==5.1.0
+openpyxl==3.1.5

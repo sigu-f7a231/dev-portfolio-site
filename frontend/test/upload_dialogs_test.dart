@@ -14,7 +14,10 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:yaml/yaml.dart';
 
+import 'package:dev_portfolio/api/json_client.dart';
 import 'package:dev_portfolio/constants/app_texts.dart';
+import 'package:dev_portfolio/data/local_portfolio_repository.dart';
+import 'package:dev_portfolio/data/portfolio_repository.dart';
 import 'package:dev_portfolio/sections/header/yaml_upload_dialog.dart';
 import 'package:dev_portfolio/theme/app_theme.dart';
 import 'package:dev_portfolio/utils/browser/browser.dart';
@@ -23,6 +26,13 @@ import 'package:dev_portfolio/utils/profile_store.dart';
 import 'package:dev_portfolio/widgets/profile_setup_dialog.dart';
 
 import 'test_assets.dart';
+
+/// 保存で失敗する Repository（ログイン中に API が弾いたとき）
+class _FailingRepository extends LocalPortfolioRepository {
+  @override
+  Future<void> saveProjectsText(ProjectsKind kind, String text) async =>
+      throw ApiException(400, 'invalid', '正しくありません', ['projects[0].title：100 文字までです']);
+}
 
 const _workYaml = '''
 projects:
@@ -167,6 +177,23 @@ void main() {
       expect(saved, 1);
       expect(find.text(AppTexts.workUploadTitle), findsNothing); // 画面は閉じた
       expect(find.text(AppTexts.uploadSaved('work')), findsOneWidget);
+    });
+
+    testWidgets('異常系：保存に失敗したら（ログイン中に API が弾いたなど）、理由を出し、「読み込みました」とは言わない',
+        (tester) async {
+      PortfolioRepository.use(_FailingRepository());
+      addTearDown(PortfolioRepository.reset);
+      await _pumpOpener(tester, (c) => showYamlUploadDialog(c, dataType: 'work'));
+      await _paste(tester, _workYaml);
+      await tester.tap(find.text(AppTexts.upload));
+      await tester.pumpAndSettle();
+      await _confirmOk(tester);
+      await _waitReloading(tester);
+
+      expect(find.text(AppTexts.uploadSaved('work')), findsNothing);
+      expect(find.textContaining('保存できませんでした'), findsOneWidget);
+      expect(find.textContaining('100 文字までです'), findsOneWidget);
+      expect(SessionStore.read('work'), isNull);
     });
 
     testWidgets('確認画面で「戻る」なら反映しない', (tester) async {

@@ -65,6 +65,7 @@ flowchart LR
 |---|---|---|---|---|---|
 | **flutter**（material・widgets・services） | Flutter 3.41.6 | UI フレームワーク（SDK） | 画面の部品・テーマ・レイアウト・アニメーション・キーボード・クリップボード | `lib/` のほぼすべて | すべて |
 | **fl_chart** | 1.2.0 | グラフ | **円グラフだけ**（棒グラフは自作） | `sections/skills/charts/pie_chart/pie_graph.dart` | SEC-03 Skills |
+| **http** | `^1.2.0` | 通信 | API（services/api-hono）・認証（services/auth-phoenix）に JSON を送って受け取る。テストは `package:http/testing.dart` の `MockClient` | `lib/api/json_client.dart` | A-01・M-01 |
 | **yaml** | 3.1.3 | データ | YAML の読み込み（プロフィール・Work / Private・検証・違いの判定） | `utils/*_yaml_loader.dart`・`data_format.dart`・`models/profile.dart` ほか 14 ファイル | すべて（データの読み込み） |
 | **file_picker** | 8.3.7 | ブラウザの機能 | ファイル選択のダイアログ | `utils/file_pick.dart`（ここ 1 か所だけ。ほかは `pickFile` を使う） | DLG-01・DLG-03・DLG-07 |
 | **url_launcher** | 6.3.2 | ブラウザの機能 | ［公開ページを見る］で新しいタブを開く | `sections/projects/views/project_list/project_list_modal_function.dart` | MDL-01 案件の詳細 |
@@ -73,7 +74,7 @@ flowchart LR
 | **xml** | 6.6.1 | ファイル | Excel の中の XML を読む・書く | 同上 | 同上 |
 | **pdf** | 3.12.0 | ファイル | スキルシートの PDF を作る（IPA P ゴシックを埋め込む） | `utils/skill_sheet_pdf.dart` | MNU-01 |
 | **flutter_riverpod** | 3.3.2（`^3.0.0`） | 状態管理 | アプリ全体の状態（テーマ・Repository・データが変わった回数・プロフィール・Work / Private・Skills の集計・Projects の一覧）。`ProviderScope` は `main.dart` | `lib/state/providers.dart`・`main.dart`・`pages/home_page.dart`・`sections/{hero,about}_section.dart`・`skills_section.dart`・`projects_section.dart`・`header/header_parts.dart` | SCR-01 |
-| **go_router** | 17.5.0（`>=16.0.0 <19.0.0`。18 は Flutter 3.44 以上が必要） | 画面の URL | URL と画面の対応（`/`、`ENABLE_ACCOUNT` のときだけ `/login`・`/me`・`/me/edit` の空の画面。`#` 付きの URL のまま）。ない URL は `/` へ | `lib/router/app_router.dart`・`pages/placeholder_page.dart`・`main.dart` | SCR-01・（準備中の画面） |
+| **go_router** | 17.5.0（`>=16.0.0 <19.0.0`。18 は Flutter 3.44 以上が必要） | 画面の URL | URL と画面の対応（`/`、`ENABLE_ACCOUNT` のときだけ `/login`（ログイン）・`/me`（マイページ）・`/me/edit`（空の画面）。`#` 付きの URL のまま）。ない URL は `/` へ | `lib/router/app_router.dart`・`pages/placeholder_page.dart`・`main.dart` | SCR-01・（準備中の画面） |
 | image | 4.10.2 | （間接） | コードからは使っていない。pdf が使う画像ライブラリの版をそろえるために指定（`>=4.2.0 <4.11.0`） | ― | ― |
 | cupertino_icons | 1.0.9 | アイコン | **使っていない**（Flutter のひな形のまま残っている） | ― | ― |
 | shared_preferences | 2.5.5 | 保存 | **使っていない** | ― | ― |
@@ -90,6 +91,15 @@ flowchart LR
 | @types/node | 22.x（開発だけ） | Node の型 |
 
 Firestore・Firebase Auth は SDK を使わず、REST と Web Crypto で読み書き・確認している（Workers でも動かすため。[decisions.md](plan/decisions.md#d-02-hono-を動かす場所) の D-02）。テストは Node の標準（`node --test`）。
+
+### auth（`services/auth-phoenix/mix.exs`）
+
+| ライブラリ | 版 | 何に使うか |
+|---|---|---|
+| phoenix | `~> 1.7` | ルーティング・コントローラー・エラーの JSON |
+| bandit | `~> 1.5` | HTTP サーバー（Phoenix の既定） |
+| jason | `~> 1.4` | JSON |
+| req | `~> 0.5` | Firebase Auth の REST を呼ぶ。テストでは `Req.Test` で差し替える |
 
 ### 実行環境・ツール
 

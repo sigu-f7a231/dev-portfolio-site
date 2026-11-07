@@ -6,6 +6,8 @@
 //   FIRESTORE_EMULATOR_HOST       あれば Firestore Emulator につなぐ（例 firebase:8080）
 //   FIREBASE_AUTH_EMULATOR_HOST   あれば Auth Emulator のトークンを受け付ける（署名を確かめない。例 firebase:9099）
 //   ALLOWED_ORIGIN                ブラウザから別のオリジンで呼ぶときに許すオリジン（例 http://localhost:5000）
+//   EXCEL_ORIGIN                  見る人向けのスキルシート（Excel・PDF）を作る excel（services/excel-fastapi）。なければその URL は 503（例 http://excel:8001）
+//   EXCEL_INTERNAL_TOKEN          excel を呼ぶときの X-Internal-Token（excel の INTERNAL_TOKEN と同じ値）
 
 export type Config = {
   port: number;
@@ -13,6 +15,8 @@ export type Config = {
   firestoreEmulatorHost?: string;
   authEmulatorHost?: string;
   allowedOrigin?: string;
+  excelOrigin?: string;
+  excelToken?: string;
 };
 
 export function configFrom(env: Record<string, string | undefined>): Config {
@@ -25,6 +29,8 @@ export function configFrom(env: Record<string, string | undefined>): Config {
     firestoreEmulatorHost: env.FIRESTORE_EMULATOR_HOST || undefined,
     authEmulatorHost: env.FIREBASE_AUTH_EMULATOR_HOST || undefined,
     allowedOrigin: env.ALLOWED_ORIGIN || undefined,
+    excelOrigin: env.EXCEL_ORIGIN || undefined,
+    excelToken: env.EXCEL_INTERNAL_TOKEN || undefined,
   };
   // demo- のプロジェクトは Emulator にしかない。本物に向けて動かすことはない
   if (projectId.startsWith('demo-') && (!config.firestoreEmulatorHost || !config.authEmulatorHost)) {

@@ -87,3 +87,19 @@ test('メタデータサーバーのトークン：期限まで使い回す。�
   assert.equal((f.calls[0].init?.headers as Record<string, string>)['Metadata-Flavor'], 'Google');
   await assert.rejects(metadataServerToken(fakeFetch(() => new Response('', { status: 403 })).fn)(), /403/);
 });
+
+test('list：コレクションの中の文書のパス（ページをまたいで全部）。読めなければエラー', async () => {
+  const prefix = 'projects/demo-p/databases/(default)/documents';
+  const f = fakeFetch(({ url }) =>
+    url.includes('pageToken=next')
+      ? json({ documents: [{ name: `${prefix}/users/a/versions/2` }] })
+      : json({ documents: [{ name: `${prefix}/users/a/versions/1` }], nextPageToken: 'next' }),
+  );
+  const store = new FirestoreRestStore({ projectId: 'demo-p', emulatorHost: 'h:1', fetchFn: f.fn });
+  assert.deepEqual(await store.list('users/a/versions'), ['users/a/versions/1', 'users/a/versions/2']);
+  assert.ok(f.calls[0].url.startsWith(`http://h:1/v1/${prefix}/users/a/versions?`));
+  assert.ok(f.calls[0].url.includes('mask.fieldPaths=__name__'));
+  assert.deepEqual(await new FirestoreRestStore({ projectId: 'demo-p', emulatorHost: 'h:1', fetchFn: fakeFetch(() => json({})).fn }).list('x'), []);
+  const broken = new FirestoreRestStore({ projectId: 'p', emulatorHost: 'h:1', fetchFn: fakeFetch(() => new Response('no', { status: 500 })).fn });
+  await assert.rejects(broken.list('x'), /一覧を読めませんでした（500）/);
+});

@@ -27,6 +27,8 @@ npm run dev:workers
 | `FIREBASE_PROJECT` | `demo-dev-portfolio` | Firebase のプロジェクト。`demo-` で始まる名前は Emulator だけ（本物には向かない） |
 | `FIRESTORE_EMULATOR_HOST` | なし | あれば Firestore Emulator につなぐ（`firebase:8080` / `localhost:8080`）。管理者（`Bearer owner`）として読み書きする |
 | `FIREBASE_AUTH_EMULATOR_HOST` | なし | あれば Auth Emulator のトークン（署名なし）を受け付ける。`FIRESTORE_EMULATOR_HOST` もないと起動しない（本物のデータを署名なしのトークンで読ませないため） |
+| `EXCEL_ORIGIN` | なし | 見る人向けのスキルシート（Excel・PDF）を作る excel（compose では `http://excel:8001`） |
+| `EXCEL_INTERNAL_TOKEN` | なし | excel を呼ぶときの `X-Internal-Token`（excel の `INTERNAL_TOKEN` と同じ値） |
 | `ALLOWED_ORIGIN` | なし | ブラウザから別のオリジンで呼ぶときに許すオリジン（`flutter run --web-port 5000` なら `http://localhost:5000`） |
 
 ## API
@@ -36,7 +38,13 @@ npm run dev:workers
 | メソッド | パス | ログイン | 中身 |
 |---|---|---|---|
 | GET | `/healthz` | いらない | 動作確認。`{"status":"ok"}` |
+| GET | `/api/public/:slug/skill-sheet.pdf` | いらない | 見る人向けのスキルシート（Excel・PDF）。表示設定の `allowSheetDownload` が `true` のときだけ（ほかは 404）。excel（`services/excel-fastapi`）に作らせる。設定がなければ 503、excel が失敗したら 502。5 分キャッシュ |
 | GET | `/api/public/:slug` | いらない | 公開ページのデータ（`publicPages/{slug}`）。なければ 404。CDN で 60 秒キャッシュ |
+| GET | `/api/me` | 要る | 本人の情報 `{ slug, latestVersion, publishedVersion }`（まだなければ slug は null・版は 0・null） |
+| DELETE | `/api/me` | 要る | 本人のデータをすべて消す（204。退会のとき。`users/{uid}` の下・`slugs`・`publicPages`） |
+| PUT | `/api/me/slug` | 要る | 公開ページの名前 `{ "slug": "..." }`。英小文字・数字・`-` の 3〜40 文字、予約語（`api`・`login` など）は 400、ほかの人が使っていれば 409。公開中なら公開ページも新しい名前に移す |
+| POST | `/api/me/publish` | 要る | 編集中のデータを新しい版として保存し、公開する（`publicPages/{slug}`）。名前がまだない・何も保存していなければ 409、必須の項目（名前・職種・紹介文・自己紹介）が足りなければ 400。スキルシートだけの項目・表示設定で隠したものは公開ページに入れない |
+| DELETE | `/api/me/publish` | 要る | 公開を止める（`publicPages/{slug}` を消す。版は残す） |
 | GET / PUT | `/api/me/draft` | 要る | 編集中のデータ全体。PUT は `{ "data": ..., "updatedAt": 読んだときの値（はじめては null） }`。違えば 409（別のタブ・端末で先に変わった） |
 | GET / PUT | `/api/me/profile` | 要る | プロフィール（`home`・`about`・`sheet`）を置き換え |
 | GET / PUT | `/api/me/skills` | 要る | スキル（`recentTech`・`pastTech`）を置き換え |

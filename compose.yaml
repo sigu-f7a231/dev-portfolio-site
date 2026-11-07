@@ -4,13 +4,15 @@
 #   docker compose run --rm seed   … Firebase Emulator にサンプル（架空のデータ）を入れる。何度実行してもよい
 #   docker compose up firebase     … Firebase Emulator だけ起動（確認用の画面 http://localhost:4001）
 #   docker compose up api          … API（Hono）と Emulator だけ起動（http://localhost:8787/healthz）
+#   docker compose up auth         … 認証（Phoenix）と Emulator だけ起動（http://localhost:4100/healthz）
+#   docker compose up excel        … 見る人向けのスキルシート（Excel・PDF）を作る FastAPI だけ起動（http://localhost:8001/healthz）
 #   docker compose stop / down     … 止める。Firebase Emulator はこのときデータを ./firebase/emulator-data に書き出し、次の起動で読み込む
 #                                     （消すときは ./firebase/emulator-data を消す。docker compose kill だと書き出さない）
 #
 # ポート（このパソコン側）
-#   8000 frontend（nginx。/api/ と /healthz は api へ）  8787 api（services/api-hono）
+#   8000 frontend（nginx。/api/ と /healthz は api へ、/auth/ は auth へ）  8787 api（services/api-hono）  4100 auth（services/auth-phoenix）
+#   8001 excel（services/excel-fastapi。api から呼ぶ。画面からは直接つながない）
 #   4001 Emulator の確認用の画面  9099 Auth  8080 Firestore  9150 確認用の画面 → Firestore  4400 ハブ
-#   これから足すもの（docs/plan/architecture.md）：auth-phoenix 4100・excel-fastapi 8001
 name: dev-portfolio
 
 services:
@@ -23,6 +25,11 @@ services:
       FIREBASE_PROJECT: demo-dev-portfolio
       FIRESTORE_EMULATOR_HOST: firebase:8080
       FIREBASE_AUTH_EMULATOR_HOST: firebase:9099
+      # 見る人向けのスキルシート（Excel・PDF）は excel に作らせる（GET /api/public/:slug/skill-sheet.pdf・.xlsx）
+      EXCEL_ORIGIN: http://excel:8001
+      EXCEL_INTERNAL_TOKEN: local-only-excel-token
+      # make dev（flutter run --web-port 5000）の画面から直接呼べるように
+      ALLOWED_ORIGIN: http://localhost:5000
     ports:
       - "8787:8787"
     depends_on:
@@ -36,17 +43,63 @@ services:
       start_period: 10s
     restart: unless-stopped
 
+  # 見る人向けのスキルシート（Excel・PDF）を作る（services/excel-fastapi。Python・FastAPI）。Firestore にはつながない
+  # api から公開ページのデータを受け取り、本人の［ダウンロード］と同じ形（Excel のテンプレート）にして返すだけ（docs/plan/excel.md）
+  # 作るのは frontend の Dart の処理（bin/skill_sheet.dart）なので、ビルドに frontend も渡す
+  excel:
+    build:
+      context: ./services/excel-fastapi
+      additional_contexts:
+        frontend: ./frontend
+    environment:
+      PORT: "8001"
+      # api からだけ受け付ける（ローカル用の値。本番はシークレットにする）
+      INTERNAL_TOKEN: local-only-excel-token
+    ports:
+      - "8001:8001"
+    restart: unless-stopped
+
+  # 認証（services/auth-phoenix。Phoenix）。パスワードは Firebase（Auth Emulator）が持ち、ここは REST を呼ぶ窓口
+  auth:
+    build:
+      context: ./services/auth-phoenix
+    environment:
+      PORT: "4100"
+      FIREBASE_PROJECT: demo-dev-portfolio
+      FIREBASE_AUTH_EMULATOR_HOST: firebase:9099
+      # 登録できるメールアドレス（カンマ区切り。空なら誰でも。Emulator なので空にしている）
+      SIGNUP_ALLOWLIST: ""
+      # make dev（flutter run --web-port 5000）の画面から直接呼べるように
+      ALLOWED_ORIGIN: http://localhost:5000
+    ports:
+      - "4100:4100"
+    depends_on:
+      firebase:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:4100/healthz"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 15s
+    restart: unless-stopped
+
   frontend:
     build:
       context: ./frontend
       args:
         BASE_HREF: /
+        # ログイン・マイページを開ける（http://localhost:8000/#/login。認証・API は nginx が転送する）
+        ENABLE_ACCOUNT: "true"
     environment:
       BACKEND_ORIGIN: http://api:8787
+      AUTH_ORIGIN: http://auth:4100
     ports:
       - "8000:80"
     depends_on:
       api:
+        condition: service_healthy
+      auth:
         condition: service_healthy
     restart: unless-stopped
 

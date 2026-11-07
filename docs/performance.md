@@ -90,7 +90,7 @@ sequenceDiagram
 | 起動の速さ（初回 / 2 回目） | Chrome DevTools の Lighthouse（モバイル・低速 4G の設定）、Performance パネル |
 | 読み込むファイルの大きさ | DevTools の Network（`main.dart.js`・`canvaskit.wasm`・フォント・アセット） |
 | 操作中のなめらかさ | DevTools の Performance パネルでフレームの時間を見る、`flutter run --profile` の DevTools |
-| Excel / PDF の作成時間 | Work 12 件・50 件などで、ボタンを押してから保存のダイアログまでの時間を測る |
+| Excel / PDF の作成時間 | Work 12 件・50 件などで、ボタンを押してから保存のダイアログまでの時間を測る。目安は `dart run tool/measure_skill_sheet.dart`（Dart VM。[Excel：ブラウザか FastAPI か](plan/excel.md)） |
 
 ### 目標（案。測ってから決める）
 

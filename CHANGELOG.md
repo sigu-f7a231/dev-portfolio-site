@@ -14,9 +14,40 @@
 
 ## 未コミット
 
-（なし）
+### Phoenix の認証（段階 4。D-01 の B）
+- **追加**：`services/auth-phoenix/`（Elixir・Phoenix・Bandit・Req）。登録（確認のメール）・ログイン・トークンの取り直し・自分の情報・すべての端末からのログアウト・パスワードの再設定と変更・退会（`/auth/*`）。パスワードは Firebase Auth が持ち、Phoenix は REST を呼ぶ窓口。発行されるのは Firebase の ID トークンなので、API（Hono）は変えていない
+- **追加**：入力の確認（メールアドレスの形・パスワード 8〜128 文字）、登録できる人の制限（`SIGNUP_ALLOWLIST`）、総当たりの対策（同じメールアドレス・接続元で続けて失敗したら 429 と Retry-After）、ログインの失敗の理由を区別しない、再設定はいつも 204、JSON のログ（メールアドレス・パスワード・トークンは書かない）、demo- のプロジェクトは Emulator なしでは起動しない
+- **テスト・CI**：ExUnit 33 件（ルート 22・つなぎ先と入力 9・Emulator の上 2）。CI に `auth-phoenix`（OTP 28・Elixir 1.18。警告もエラーにするコンパイル・テスト）。読めない JSON・大きすぎる・JSON でない送信は、例外にせず同じ形の JSON で 400・413・415 を返す（`plugs/json_body.ex`）
+- **変更**：compose に `auth`（4100）、画面の nginx の `/auth/` を auth へ（`AUTH_ORIGIN`）、frontend は auth も healthy になってから起動
+- **決定**：D-01 を B に。D-03 は仕組み（`SIGNUP_ALLOWLIST`）だけ作り、本番の方針は未決
+- **ドキュメント**：設計・開発ガイド・ファイル構成・ライブラリ・ローカルのクラウド・テスト一覧・CI・計画（決めること・進め方）・CLAUDE.md・docs/claude/・README・services/
 
 ---
+
+### ログイン・マイページ（段階 5-1）
+
+- API（`services/api-hono`）に本人の情報（`GET /api/me`）・公開ページの名前（`PUT /api/me/slug`）・公開する／止める（`POST`・`DELETE /api/me/publish`）・データをすべて消す（`DELETE /api/me`）を追加。公開ページにはスキルシートだけの項目と表示設定で隠したものを入れない（`src/publish.ts`）
+- Flutter：認証・API の呼び出し（`lib/api/`・`lib/auth/auth_api.dart`、パッケージ `http`）、ログインの状態（`lib/auth/auth_controller.dart`。ID トークンの取り直し、このタブで続けてログイン）
+- ログイン中の Repository（`lib/data/api_portfolio_repository.dart`・`api_records.dart`）。ログインすると保存先がこのタブの中から API（Firestore）に替わる。ほかの場所で先に変わっていたら 3 回までやり直す
+- ログインを使うビルドでは、ログインしていなければどの URL もログイン画面（`/login?from=開こうとした URL`）に移り、ログインしたら開こうとした URL へ戻る（`loginRedirect`・`lib/auth/auth_gate.dart`。ほかのサイトの URL には移らない）
+- ログイン・登録・パスワードの再設定の画面（`/login`）、マイページ（`/me`：公開ページの名前・公開する／止める・ログアウト・退会）。`ENABLE_ACCOUNT` のときだけ。`compose.yaml` の frontend は `ENABLE_ACCOUNT=true` でビルド
+- テスト：`api_client_test`・`api_records_test`・`account_test`（認証・API は偽物の `test/fake_backend.dart`）
+
+### Excel と FastAPI（段階 6。D-06）
+
+- **決定**：D-06。Excel の読み込みと、本人がダウンロードする Excel・PDF は今の Flutter（ブラウザ）のまま。FastAPI には見る人向けのスキルシート（Excel・PDF）だけを任せる（比べた結果は `docs/plan/excel.md`）
+- **追加**：`services/excel-fastapi/`（Python 3.12・FastAPI）。公開ページのデータを受け取り、本人がダウンロードするものと同じ形（Excel のテンプレート。PDF はその見た目のまま）のスキルシートにして返す。作るのはブラウザと同じ Dart の処理（`frontend/bin/skill_sheet.dart` を `dart compile exe`）。Firestore にはつながない。`INTERNAL_TOKEN` で api からだけ受け付ける。pytest 21 件（うち本物のコマンドの 2 件は CI で。網羅率 90%）
+- **追加**：Flutter に依存しない共通の部品 `lib/utils/skill_sheet_data.dart`（本人の［ダウンロード］と見る人向けで、書く中身・並びを同じにする）・`skill_sheet_cli.dart`。テスト `skill_sheet_data_test`
+- **追加**：API（Hono）に `GET /api/public/:slug/skill-sheet.pdf`・`.xlsx`。表示設定の `allowSheetDownload` が `true` のときだけ（ほかは 404）、excel に作らせて返す（`src/sheet.ts`。`EXCEL_ORIGIN`・`EXCEL_INTERNAL_TOKEN`）。テスト 6 件
+- **変更**：compose に `excel`（8001）。api から `http://excel:8001` を呼ぶ。サンプルの利用者は `allowSheetDownload: true`（確かめやすいように）。CI に `excel-fastapi`
+- **修正**：ログイン中に Excel を読み込むと保存で弾かれていた。API に送る前に文字数を API と同じ上限にし、生年月日を `YYYY-MM-DD` にする（`lib/data/api_records.dart`）
+- **修正**：保存に失敗しても「読み込みました」と出ていた。理由を出す（`runReloading` が失敗の理由を返す。Work / Private・プロフィール・追加）
+- **追加**：リポジトリの直下の `Makefile`。起動（`make up`・`seed`・`logs`・`dev`）・確認（`make smoke`）・テスト（`make test`・`test-frontend` など）を直下から。Node・Elixir・Python は手元になければ Docker の中で動かす。`make dev` のために api・auth に `ALLOWED_ORIGIN=http://localhost:5000`
+- **追加**：ローカルの全体の疎通の確認 `scripts/smoke.sh`（起動・各サービス・ログイン・名前と公開・見る人向けのスキルシート・FastAPI のテスト。結果は Git 管理外の `smoke-result/`）
+- **修正**：`make seed` を何度か動かすと、前に増えた版（versions/2 など）が残り、次の「公開する」が失敗していた。入れ直すときに、増えた版とほかの名前（slugs・publicPages）を消す（自分の uid のものだけ）。テスト 1 件
+- **修正**：Docker の画面で、Excel のテンプレート・PDF のフォントが 403 になり、［ダウンロード］の Excel・PDF が作れなかった（手元のファイルの権限 600 がビルドしたアセットに残っていた）。ビルドのあとに誰でも読めるようにする（`frontend/Dockerfile`）
+- **修正**：api を作り直すと、画面の nginx が古い住所に送って 502 になっていた。転送先の名前を 10 秒ごとに引き直す（`resolver`。`NGINX_RESOLVER`、既定は Docker の DNS）
+- **追加**：計測のツール `tool/measure_skill_sheet.dart`（件数ごとの作成時間・大きさ）。テスト `excel_api_roundtrip_test`（Excel → API → Excel で同じ）、保存に失敗したときのテスト
 
 ## 2026-11-06 — 構成の分割・テスト・CI・ドキュメント
 

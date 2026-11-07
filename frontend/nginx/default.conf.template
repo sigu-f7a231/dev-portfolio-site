@@ -1,8 +1,14 @@
 # frontend/nginx/default.conf.template
-# ${BACKEND_ORIGIN} は起動時に環境変数で置き換わる（nginx 公式イメージの機能。$uri などの nginx の変数はそのまま残る）
+# ${BACKEND_ORIGIN}・${AUTH_ORIGIN}・${NGINX_RESOLVER} は起動時に環境変数で置き換わる（nginx 公式イメージの機能。$uri などの nginx の変数はそのまま残る）
 server {
     listen 80;
     server_name _;
+
+    # 転送先の名前（api・auth）は、起動したときに 1 回だけでなく、10 秒ごとに引き直す
+    # （api・auth のコンテナを作り直すと中での住所が変わり、覚えたままだと 502 になるため。127.0.0.11 は Docker の DNS）
+    resolver ${NGINX_RESOLVER} valid=10s ipv6=off;
+    set $api_origin ${BACKEND_ORIGIN};
+    set $auth_origin ${AUTH_ORIGIN};
     root /usr/share/nginx/html;
 
     gzip on;
@@ -10,14 +16,22 @@ server {
 
     # API は services/api-hono（Hono）へ
     location /api/ {
-        proxy_pass ${BACKEND_ORIGIN};
+        proxy_pass $api_origin;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    # 認証は services/auth-phoenix（Phoenix）へ
+    location /auth/ {
+        proxy_pass $auth_origin;
         proxy_set_header Host $host;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
     }
 
     location = /healthz {
-        proxy_pass ${BACKEND_ORIGIN};
+        proxy_pass $api_origin;
     }
 
     # index.html と Service Worker は毎回確かめる（新しいビルドがすぐ反映されるように）

@@ -59,7 +59,7 @@ flowchart LR
 |---|---|---|
 | 状態管理の整理 | Riverpod で、データの読み込みと作り直しをまとめる（画面の見た目・操作は変えない。ゴールデンテストで確かめながら）。**済み**（2026-11-06）：テーマ・プロフィール・Work / Private・Skills の集計・Projects の一覧を Provider にし、Home・About・Skills・Projects は Provider から読む。データが変わったときに Skills / Projects を作り直す `ValueKey` は、タブ・フィルターを初めに戻すために残した（前と同じ動き） | 画面が Provider から読む |
 | Repository 層 | 読み先（サンプル・sessionStorage・API）を切り替えられるようにし、API から自分のデータを最初に表示する。**済み**（2026-11-06）：`PortfolioRepository`（`lib/data/`）は構造のデータ（Map）で受け渡し、実装が書くのは 5 つの読み書きだけ。書き込みはすべて Repository 経由。残り：API の実装 | 画面を変えずに API から読める |
-| 画面の URL | go_router で URL を分ける。**済み**（2026-11-06）：`/`、`ENABLE_ACCOUNT` のときだけ `/login`・`/me`・`/me/edit`（空の画面。`#` 付きのまま）。残り：中身（[画面設計](plan/screens.md)） | 画面ごとに URL がある |
+| 画面の URL | go_router で URL を分ける。**済み**（2026-11-06）：`/`、`ENABLE_ACCOUNT` のときだけ `/login`・`/me`・`/me/edit`（`#` 付きのまま）。ログイン・マイページは作った（段階 5-1）。残り：編集・表示設定（5-2）、公開ページ `/u/:slug`（5-3）（[画面設計](plan/screens.md)） | 画面ごとに URL がある |
 | 共通の検証 | `utils/data_format.dart` を共通のパッケージに分け、frontend と api で同じ形の確認を使う（言語が違うので、形の定義を 1 か所に置いて両方で使う方法を考える） | 検証が 1 か所 |
 | つなぎのテスト | api の応答を frontend の読み込みに通すテスト（契約テスト） | 応答の形が変わったら気づける |
 

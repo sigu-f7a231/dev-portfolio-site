@@ -1,0 +1,6 @@
+# Elixir のビルド結果・依存（mix.lock はコミットする）
+/_build/
+/deps/
+/cover/
+erl_crash.dump
+*.ez

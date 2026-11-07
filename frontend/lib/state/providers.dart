@@ -7,6 +7,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../auth/auth_controller.dart';
 import '../data/portfolio_repository.dart';
 import '../models/profile.dart';
 import '../sections/projects/data/projects_private.dart';
@@ -43,8 +44,12 @@ class ThemeModeNotifier extends Notifier<ThemeMode> {
 // データ
 // ============================================================
 
-/// 使う Repository（今は PortfolioRepository.instance。API の実装に替えるときはここを差し替える）
-final portfolioRepositoryProvider = Provider<PortfolioRepository>((ref) => PortfolioRepository.instance);
+/// 使う Repository（ログイン中は API、していなければ Local。PortfolioRepository.instance）
+final portfolioRepositoryProvider = Provider<PortfolioRepository>((ref) {
+  // ログイン・ログアウトで PortfolioRepository.instance が替わる（AuthController）ので、そのたびに読み直す
+  ref.watch(authControllerProvider.select((session) => session != null));
+  return PortfolioRepository.instance;
+});
 
 /// 表示するデータ（Work / Private・プロフィールと一緒に読んだもの）が変わった回数
 /// 増えると、下の Work / Private を読み直す。HomePage は Skills / Projects を作り直す（選んでいたタブ・フィルターは初めに戻る）

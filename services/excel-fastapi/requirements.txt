@@ -1,0 +1,4 @@
+# 本番（Docker）で使うもの。バージョンは固定（docs/libraries-and-styling.md）
+# Excel・PDF は Dart のコマンド（frontend/bin/skill_sheet.dart）で作るので、Python の Excel・PDF のライブラリは使わない
+fastapi==0.115.12
+uvicorn==0.34.0

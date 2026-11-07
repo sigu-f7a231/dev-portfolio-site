@@ -30,6 +30,7 @@ GitHub 上の実行の履歴（Actions のタブ）は、Claude の作業環境�
 | `npm run test:emulator`（api-hono。Emulator の上で本人だけ・セキュリティルール） | 4 件すべて成功（オーナーの手元） | 2026-11-06 |
 | `npm run typecheck`・`npm test`（api-hono 全体） | 型の誤りが 1 件（テストのヘッダーの型）→ 直して、`tsc` は通り、テストは 47 件すべて成功（Emulator の上の 4 件は環境変数がないので飛ばす） | 2026-11-06 |
 | `docker compose up --build`（backend を api に置き換えたあと） | firebase・api・frontend がすべて起動し、api は healthy、`curl http://localhost:8787/healthz` → `{"status":"ok"}`（オーナーの手元。最初はファイルの権限で api が起動せず、`COPY --chown` で直した） | 2026-11-06 |
+| `mix compile --warnings-as-errors`・`mix test`（auth-phoenix。elixir:1.18-alpine＝OTP 28） | コンパイルは警告なしで通った。テストは 31 件のうち 1 件が失敗（Phoenix 1.8 は 404・400 の例外を投げ直さないのに、投げ直す前提で書いていた）→ テストを直した。直したあとは**未確認** | 2026-11-06 |
 | `flutter analyze` | 未確認（CI で初めて確かめることになる） | ― |
 
 ## 3. 初めて動かすときの注意点

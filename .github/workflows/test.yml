@@ -62,6 +62,48 @@ jobs:
       - run: npm run typecheck
       - run: npm test
 
+  # 認証（services/auth-phoenix）。コンパイル（警告もエラー）と、テスト（Firebase は偽物。Emulator の上のテストは段階 7）
+  auth-phoenix:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: services/auth-phoenix
+    env:
+      MIX_ENV: test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: erlef/setup-beam@v1
+        with:
+          otp-version: '28'
+          elixir-version: '1.18'
+      - run: mix deps.get
+      - run: mix compile --warnings-as-errors
+      - run: mix test
+
+  # 見る人向けのスキルシート（services/excel-fastapi）。Excel・PDF を作る Dart のコマンド（frontend/bin/skill_sheet.dart）を
+  # Dockerfile と同じやり方（dart/build.sh）で作り、本物のコマンドのテストも動かす
+  excel-fastapi:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: services/excel-fastapi
+    env:
+      SKILL_SHEET_REAL: '1'
+      SKILL_SHEET_CMD: ${{ github.workspace }}/skill_sheet
+      SKILL_SHEET_TEMPLATE: ${{ github.workspace }}/frontend/assets/data/format_skill_sheet.xlsx
+      FONT_PATH: ${{ github.workspace }}/frontend/assets/fonts/ipagp.ttf
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dart-lang/setup-dart@v1
+        with:
+          sdk: stable
+      - run: sh dart/build.sh ../../frontend "$SKILL_SHEET_CMD"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r requirements-dev.txt
+      - run: pytest --cov=app --cov-branch --cov-report=term-missing --cov-fail-under=90
+
   # Firebase Emulator にサンプルを入れるスクリプト（firebase/seed/）のテスト。Node の標準のテストだけ（パッケージはいらない）
   firebase-seed:
     runs-on: ubuntu-latest

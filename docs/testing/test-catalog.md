@@ -69,7 +69,12 @@ API は `services/api-hono/` で `npm test`（Emulator の上のテストは `np
 | `browser_storage_test.dart` | 17 | 正・異 | sessionStorage（メモリ）、ローダー、ProfileStore |
 | `yaml_loaders_test.dart` | 9 | 正・異 | 読む順番（セッション → サンプル）の全通りを Work / Private で、YAML の誤り、先頭が Map でない |
 | `portfolio_repository_test.dart` | 33 | 正・異 | 構造のデータ（`records.dart`）と YAML の行き来・壊れたデータ。`LocalPortfolioRepository` の文字（元の文字を保つ・保存 → 起動時の指定 → サンプル・サンプルかの判定）と構造のデータの読み書き、プロフィール（起動時の指定の成功 / 失敗 / なし、壊れた保存）。**構造のデータの 5 つだけを書いた偽物**に差し替えると、文字の読み書き・サンプル・ローダー・ProfileStore がそのまま動く（Firestore の実装の代わり） |
-| `app_state_test.dart` | 15 | 正・異 | Riverpod の Provider（Repository・データが変わった回数・テーマ・プロフィール・Work / Private・Skills の集計・Projects の一覧、読めないときは繰り返さない）、go_router（`/`、ない URL は `/` へ、`ENABLE_ACCOUNT` なしではログイン・マイページは `/` へ、ありなら空の画面、戻るボタン）、データが変わると画面を作り直して新しいデータを出す、テーマで画面がダークになる |
+| `app_state_test.dart` | 15 | 正・異 | Riverpod の Provider（Repository・データが変わった回数・テーマ・プロフィール・Work / Private・Skills の集計・Projects の一覧、読めないときは繰り返さない）、go_router（`/`、ない URL は `/` へ、`ENABLE_ACCOUNT` なしではログイン・マイページは `/` へ、ありならログイン・マイページ・編集の空の画面、戻るボタン）、データが変わると画面を作り直して新しいデータを出す、テーマで画面がダークになる |
+| `api_client_test.dart` | 14 | 正・異 | JSON の送受信（トークン・中身なし・JSON でない）、エラーの形（code・message・details、形でない、つながらない＝0）、認証の呼び出し（ログイン・登録・取り直し・パスワードの変更・自分の情報・ログアウト・再設定・退会、期限の 1 分前）、API の呼び出し（本人の情報・名前・公開・公開を止める・すべて消す・編集中のデータ） |
+| `api_records_test.dart` | 16 | 正・異 | アプリのデータ ⇔ API の形（技術は tech、「利用なし」、期間のいろいろな書き方、文字数の上限と生年月日の形、長すぎる文字・https でないリンク・Private の工程は送らない、id の引き継ぎ、プロフィールと skills）、`ApiPortfolioRepository`（まだなければサンプル、Work を保存しても Private は残る、並び替えても id を保つ、409 は 3 回までやり直す、ほかの失敗はやり直さない） |
+| `skill_sheet_data_test.dart` | 7 | 正・異 | 書く中身の作り方（公開ページのデータ → 名前・開発経験・開始の古い順・スキルシートだけの項目は空、本人の［ダウンロード］と同じ作り方）、テンプレートの形の Excel・PDF、見る人向けのコマンド（Excel・PDF、使い方・入力の誤り・ファイルがない） |
+| `excel_api_roundtrip_test.dart` | 2 | 正 | テンプレートの Excel を API の形にして JSON を通して戻しても、書き出すスキルシートが同じ。スキルシートだけの項目（生年月日など）も残る |
+| `account_test.dart` | 28 | 正・異 | ログインしていなければログインへ（`loginRedirect`・移る先はこのサイトの中だけ・`AuthGate`・/ と /me/edit を開いたとき・ログイン中の /login）、ログインの状態（ログインで Repository を API に・読み直しはログインのトークンで、ID トークンの取り直し、続けてログイン、ログアウト・サーバーの失敗、退会の順番）、ログイン画面（成功でマイページへ、入力の確認、パスワードの違い、登録・登録済み、パスワードを見せる、再設定のメール、戻る）、マイページ（ログインの案内、名前の誤り・保存、公開・公開を止める、前の名前、読めない、編集へ、ログアウト、退会の確認）。認証・API は偽物（`test/fake_backend.dart`） |
 | `project_append_test.dart` | 22 | 正・異 | 追加するプロジェクトの読み取り（3 つの書き方 / 見つからない 8 通り / 項目の形でない / title・workflow の過不足と番号）、今の一覧の後ろに足す、同じ名前、入力の候補 |
 | `project_data_test.dart` | 25 | 正・異 | ［データ］の画面の流れ（追加・更新・戻る）、入力フォーム、タグ入力、年月の選択、複数件のサンプル |
 | `projects_diff_test.dart` | 8 | 正 | 上書きの確認の違いの判定、テンプレートがそろっているか |
@@ -79,7 +84,7 @@ API は `services/api-hono/` で `npm test`（Emulator の上のテストは `np
 
 | ファイル | 件数 | 観点 | 確かめていること |
 |---|---|---|---|
-| `upload_dialogs_test.dart` | 27 | 正・異 | 貼り付け（YAML / Markdown）→ 確認 → 反映、弾くデータ、閉じられない、まとめて反映、上書きの確認（やめる / 上書き / 同じ内容なら出さない） |
+| `upload_dialogs_test.dart` | 28 | 正・異 | 貼り付け（YAML / Markdown）→ 確認 → 反映、弾くデータ、保存に失敗したら理由を出す、閉じられない、まとめて反映、上書きの確認（やめる / 上書き / 同じ内容なら出さない） |
 | `upload_paste_test.dart` | 13 | 正・異 | 貼り付け画面、テンプレートのコピー、形式の切替 |
 | `file_pick_dialogs_test.dart` | 17 | 正・異・組 | ファイルを選ぶ流れ：YAML / Markdown / Excel を選んでアップロード、キャンセル・中身なし・拡張子違い・選ぶ途中のエラー・UTF-8 でない中身・壊れた Excel・テンプレートを読めない、起動時のエラー表示、入力方法の切替、ダーク |
 | `yaml_format_help_test.dart` | 7 | 正・異・組 | 書き方の説明（Work / Private の違い、サンプルの中身）、読み込み中・読めない、ダーク |
@@ -110,17 +115,40 @@ API は `services/api-hono/` で `npm test`（Emulator の上のテストは `np
 | ファイル | 件数 | 観点 | 確かめていること |
 |---|---|---|---|
 | `values.test.ts` | 4 | 正・異 | Firestore の値への変換と戻し（整数・日時・空の並び・入れ子）、書けない値 |
-| `config.test.ts` | 4 | 正・異 | 既定・指定、本物のプロジェクト、ポートの誤り・demo- なのに Emulator なし・Auth だけ Emulator |
+| `config.test.ts` | 5 | 正・異 | 既定・指定、excel のつなぎ先、本物のプロジェクト、ポートの誤り・demo- なのに Emulator なし・Auth だけ Emulator |
 | `auth.test.ts` | 5 | 正・異 | RS256 の署名（正しい・別の鍵・鍵がない・署名なし）、公開鍵の使い回し、Emulator のトークン、宛先・発行元・期限・発行時刻・利用者の異常系、時計のずれ、ヘッダーの形 |
 | `firestore.test.ts` | 5 | 正・異 | REST に送る中身（読む・書く・項目だけ・消す・前提）、前提が崩れた → ConflictError、500、本物のアクセストークン、メタデータサーバー |
 | `validate.test.ts` | 7 | 正・異 | プロフィール・スキル・職務経歴（必須・期間・リンク・工程・同じ id・件数）・表示設定・全体（知らない項目・大きすぎる） |
 | `portfolio.test.ts` | 10 | 正・異 | はじめては空、本人の文書だけに書く、409（古い updatedAt・書くまでの間に変わった）、形の誤りは何も書かない、まとまりごとのやり直しとほかのまとまりを消さない、職務経歴の追加・変更・削除・ほかの人の案件、公開ページ |
+| `sheet.test.ts` | 5 | 正・異 | 見る人向けのスキルシート：許していれば PDF・Excel（ダウンロード・5 分キャッシュ。ほかの拡張子は 404）、許していない・公開していない・名前の形が違うは 404、excel の設定なし 503・失敗 502、excel に送る中身とトークン、失敗の答え・つながらない・時間切れ |
 | `app.test.ts` | 12 | 正・異 | ルート：401（なし・壊れた・ほかのプロジェクト）、本人だけ、各まとまり、409、400 と誤りの一覧・JSON でない、201 / 204 / 404、公開ページ、500、ログに uid・中身を書かない、CORS |
 | `emulator.test.ts` | 4 | 正・異 | Emulator の上で：Auth Emulator のトークンで本人だけ・Firestore には本人の文書だけ、トークンなしは 401、セキュリティルールがログインしていても・していなくても直接の読み書きを断る |
 
 ---
 
-## Firebase Emulator のサンプル（`firebase/seed/seed.test.mjs`、6 件）
+## 見る人向けのスキルシート（`services/excel-fastapi/tests/`）
+
+`pytest`。スキルシートを作るコマンドはふだん偽物（`tests/fake_skill_sheet.py`）。`test_real_sheet.py` は本物のコマンド（`frontend/bin/skill_sheet.dart` を `dart compile exe` したもの）があるときだけ（`SKILL_SHEET_REAL=1`。CI では作ってから動かす）。
+
+| ファイル | 件数 | 観点 | 確かめていること |
+|---|---|---|---|
+| `test_sheet.py` | 7 | 正・異 | コマンドに渡す引数（PDF はフォントも、Excel は渡さない）・入力（データと作成日）、既定の場所、コマンドがない・実行できない・ファイルを読めない（503 のもと）、失敗、時間切れ |
+| `test_app.py` | 12 | 正・異 | `/healthz`、PDF・Excel が返る、400（JSON でない・形の違い）・413、`INTERNAL_TOKEN`、404・405 も同じ形、503・500、ログに中身を書かない |
+| `test_real_sheet.py` | 2 | 正 | 本物のコマンドで：Excel はテンプレートの形（Skill Sheet・氏名の欄）に中身が入り、スキルシートだけの項目は入らない。PDF も同じ |
+
+---
+
+## 認証（`services/auth-phoenix/test/`）
+
+`mix test`（ExUnit。Firebase Auth は Req.Test の偽物）。`emulator_test.exs` は `mix test --only emulator` のときだけ（`FIREBASE_AUTH_EMULATOR_HOST` が要る）。
+
+| ファイル | 件数 | 観点 | 確かめていること |
+|---|---|---|---|
+| `auth_controller_test.exs` | 22 | 正・異 | 各ルート：登録（整えたメールアドレス・確認のメール・送れなくても成功・形・短い・409・登録できる人）、ログイン（同じ 401・続けて失敗で 429 と Retry-After・ほかの接続元・成功で数え直す）、取り直し、自分の情報、すべての端末からのログアウト（管理者として）、パスワードの変更、退会、再設定はいつも 204、502、404・読めない JSON、ログに秘密を書かない、CORS |
+| `firebase_test.exs` | 9 | 正・異 | つなぎ先（Emulator / 本物・メタデータサーバー）、demo- の安全の確認、利用者のいない応答、Firebase のエラーの日本語 11 通り、メールアドレス・パスワードの確認、失敗の数え方・時間で数え直す・キーにメールアドレスを入れない |
+| `emulator_test.exs` | 2 | 正・異 | Auth Emulator の上で、登録 → ログイン → 自分の情報 → 取り直し → パスワードの変更 → ログアウト → 再設定 → 退会、二重の登録は 409 |
+
+## Firebase Emulator のサンプル（`firebase/seed/seed.test.mjs`、7 件）
 
 `node --test firebase/seed/seed.test.mjs`（Node 22。パッケージはいらない）。CI の `firebase-seed` ジョブでも動く。
 

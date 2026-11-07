@@ -34,6 +34,7 @@ Flutter Web で作った SPA で、GitHub Pages で公開しています。API�
 | [次の構成の計画](docs/plan/README.md) | ログイン・マイページ・クラウド（Phoenix・Hono・FastAPI・Firebase、費用ゼロ）の要件定義・画面設計・データ設計・決めること |
 | [更新履歴](CHANGELOG.md) | いつ・何を追加 / 変更 / 修正したか（コミットごと） |
 | [services/api-hono/README.md](services/api-hono/README.md) | API（Hono）の詳細：エンドポイント・環境変数・テスト |
+| [services/auth-phoenix/README.md](services/auth-phoenix/README.md) | 認証（Phoenix）の詳細：エンドポイント・エラー・環境変数・テスト |
 | [CLAUDE.md](CLAUDE.md) | AI（Claude）向けの開発メモの入口（詳細は `docs/claude/`） |
 
 ---
@@ -66,14 +67,15 @@ Flutter Web で作った SPA で、GitHub Pages で公開しています。API�
 
 ## すぐ試す
 
-```bash
-# Docker（frontend + API + Firebase Emulator）：http://localhost:8000
-docker compose up --build
+すべてリポジトリの直下から `make ○○` で動かせます（`make` だけで一覧が出ます）。
 
-# Flutter で直接：自分のプロフィールを指定して起動
-cd frontend
-flutter pub get
-dart run tool/run.dart my_profile.yaml
+```bash
+make up        # Docker で全部（画面・API・認証・スキルシート・Firebase Emulator）を起動：http://localhost:8000
+make seed      # サンプルの利用者（sample@example.com / sample-password）を入れる
+make smoke     # 全体の疎通の確認（結果は smoke-result/）
+make test      # すべてのテスト（CI と同じ）
+make dev       # Flutter で直接開く（ログインあり。make up のあとに）
+make profile P=skill_sheet_yaml/my_profile.yaml   # 自分のプロフィールを指定して開く
 ```
 
 詳しい起動方法・テスト・CI は [開発ガイド](docs/development.md)、画面の使い方とデータの書き方は [操作説明書](docs/manual.md) を見てください。

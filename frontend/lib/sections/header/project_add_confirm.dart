@@ -55,13 +55,15 @@ Future<bool> confirmAndAppendProjects(
 
   final navigator = Navigator.of(context, rootNavigator: true);
   navigator.pop(); // 呼び出し元の画面を閉じる
-  await runReloading(navigator, () async {
+  final error = await runReloading(navigator, () async {
     await PortfolioRepository.instance.saveProjectsText(ProjectsKind.of(dataType), merged);
     onSaved?.call();
     await _loadCurrent(dataType);
   });
   messenger.showSnackBar(SnackBar(
-    content: Text(DataTexts.added(dataType == 'work' ? AppTexts.work : AppTexts.private, adding.length)),
+    content: Text(error == null
+        ? DataTexts.added(dataType == 'work' ? AppTexts.work : AppTexts.private, adding.length)
+        : AppTexts.saveFailed(error)),
   ));
   return true;
 }

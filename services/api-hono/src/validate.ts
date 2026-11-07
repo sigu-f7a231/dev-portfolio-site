@@ -120,13 +120,25 @@ function techMap(errors: Errors, at: string, v: unknown) {
   for (const key of TECH_CATEGORIES) textList(errors, `${at}.${key}`, map[key]);
 }
 
+/** 主な技術（分類 → 技術）。分類の名前は自由（Excel から読むと「言語」などの日本語になる）。30 分類まで */
+function groupMap(errors: Errors, at: string, v: unknown) {
+  const map = section(errors, at, v);
+  if (!map) return;
+  const keys = Object.keys(map);
+  if (keys.length > 30) errors.push(`${at}：30 分類までです`);
+  for (const key of keys) {
+    if (key.trim() === '' || key.length > 50) errors.push(`${at}：分類の名前は 1〜50 文字です（${key.slice(0, 50)}）`);
+    textList(errors, `${at}.${key}`, map[key]);
+  }
+}
+
 export function validateSkills(v: unknown, at = 'skills'): Errors {
   const errors: Errors = [];
   const skills = section(errors, at, v);
   if (!skills) return errors;
   unknownKeys(errors, at, skills, ['recentTech', 'pastTech']);
-  techMap(errors, `${at}.recentTech`, skills.recentTech);
-  techMap(errors, `${at}.pastTech`, skills.pastTech);
+  groupMap(errors, `${at}.recentTech`, skills.recentTech);
+  groupMap(errors, `${at}.pastTech`, skills.pastTech);
   return errors;
 }
 

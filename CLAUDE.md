@@ -8,10 +8,13 @@
 - **目的**: 履歴書を補完する開発者ポートフォリオ（SPA）。Work（業務）/ Private（個人）プロジェクトとスキル構成を可視化する。
 - **構成**:
   - `frontend/` … Flutter Web / Dart（SDK `^3.9.2`）、Material 3。Dart のパッケージ名は `dev_portfolio`（2026-11-06 に `dev_portfolio/` から改名したため。import は `package:dev_portfolio/...`）
-  - `compose.yaml` … Docker Compose で起動（frontend :8000 / api :8787 / Firebase Emulator：確認用の画面 :4001・Auth :9099・Firestore :8080）。`docker compose run --rm seed` でサンプルを入れる
+  - `Makefile` … よく使う作業はリポジトリの直下から `make ○○`（`make` で一覧。`make up`・`seed`・`smoke`・`test`・`test-frontend F=…`・`dev`）。コマンドを足したら Makefile と docs/development.md も直す
+  - `compose.yaml` … Docker Compose で起動（frontend :8000 / api :8787 / auth :4100 / excel :8001 / Firebase Emulator：確認用の画面 :4001・Auth :9099・Firestore :8080）。`make seed` でサンプルを入れる
+  - `scripts/smoke.sh` … 全体の疎通の確認（`make smoke`。結果は Git 管理外の `smoke-result/`）
   - `firebase/` … Firebase Emulator（ローカルのクラウド）。Emulator に入れるのはサンプルだけ（個人の情報は入れない）
-  - `services/api-hono/` … マイページの API（Hono・TypeScript・Node 22。Firestore は REST、ID トークンは Web Crypto で確かめる）。まだ frontend からは呼んでいない。Node 22 が `.ts` をそのまま動かす（ビルドなし。enum などは使わない）
-  - `services/auth-phoenix/`・`services/excel-fastapi/` … これから（README だけ。docs/plan/）
+  - `services/api-hono/` … マイページの API（Hono・TypeScript・Node 22。Firestore は REST、ID トークンは Web Crypto で確かめる）。frontend からはログイン中に呼ぶ。Node 22 が `.ts` をそのまま動かす（ビルドなし。enum などは使わない）
+  - `services/auth-phoenix/` … 認証（Elixir・Phoenix）。パスワードは Firebase Auth が持ち、Phoenix は REST を呼ぶ窓口（D-01 の B）。Claude の作業場所には Elixir がないので、コンパイル・テストはオーナーの Docker で
+  - `services/excel-fastapi/` … 見る人向けのスキルシート（Excel・PDF）を作る（FastAPI。api から呼ぶ。docs/plan/excel.md）
 - **公開先**: GitHub Pages（`/dev-portfolio-site/` 配下）
 - **リポジトリ**: `git@github.com:sigu-f7a231/dev-portfolio-site.git`
 - **ブランチ**: `develop`（作業・デプロイ対象）、`main`

@@ -26,12 +26,12 @@ dev-portfolio-site/
 │   ├── testing/                   # test-plan.md（テスト計画書）・test-catalog.md（テスト一覧）
 │   ├── ci/                        # ci-design.md（CI の設計）・ci-status.md（CI の状況）
 │   └── claude/                    # AI 向けの開発メモ：architecture / data-flow / conventions / testing / operations / status
-├── compose.yaml                   # frontend・api・Firebase Emulator をまとめて起動（docker compose up --build）。seed でサンプルを入れる
+├── compose.yaml                   # frontend・api・auth・Firebase Emulator をまとめて起動（docker compose up --build）。seed でサンプルを入れる
 ├── firebase/                      # Firebase Emulator（Dockerfile・firebase.json・firestore.rules・entrypoint.sh・seed/。書き出したデータ emulator-data/ は Git 管理外）
 ├── services/                      # サービス（次の構成）
 │   ├── api-hono/                  # マイページの API（Hono・TypeScript）。src/・test/・Dockerfile・README
-│   ├── auth-phoenix/              # 認証（Phoenix。まだ README だけ）
-│   └── excel-fastapi/             # Excel の処理（FastAPI。まだ README だけ）
+│   ├── auth-phoenix/              # 認証（Elixir・Phoenix）。lib/・config/・test/・Dockerfile（mix release）・README
+│   └── excel-fastapi/             # 見る人向けのスキルシート（Excel・PDF）を作る（FastAPI。api から呼ぶ）
 ├── .gitignore                     # リポジトリ全体（OS・エディタ・ビルド結果・秘密情報・Terraform など）
 ├── .github/workflows/
 │   ├── test.yml                   # テストと網羅率（行・分岐 90% 以上）、api（Hono）の型とテスト、Emulator のサンプルのスクリプトのテスト
@@ -124,7 +124,9 @@ flowchart TB
 | 分野 | ファイル | 中身 |
 |---|---|---|
 | データの入口（Repository） | `lib/data/portfolio_repository.dart`・`lib/data/local_portfolio_repository.dart`・`lib/data/records.dart` | データの読み書きの入口（`PortfolioRepository`）。実装が書くのは構造のデータ（`DataRecord`。Firestore の文書と同じ形）の読み書き 5 つだけで、YAML の文字・サンプルはそこから作る。今の実装（このタブの sessionStorage・起動時の指定）は元の文字を保つ。API の実装に差し替える場所 |
-| 状態・画面の URL | `lib/state/providers.dart`・`lib/router/app_router.dart`・`lib/pages/placeholder_page.dart` | Riverpod の Provider（テーマ・Repository・データが変わった回数・プロフィール・Work / Private・Skills の集計・Projects の一覧）、go_router の URL（`/`。`ENABLE_ACCOUNT` のときだけ `/login`・`/me`・`/me/edit` の空の画面） |
+| 状態・画面の URL | `lib/state/providers.dart`・`lib/router/app_router.dart`・`lib/pages/placeholder_page.dart` | Riverpod の Provider（テーマ・Repository・データが変わった回数・プロフィール・Work / Private・Skills の集計・Projects の一覧）、go_router の URL（`/`。`ENABLE_ACCOUNT` のときだけ `/login`・`/me`・`/me/edit`（編集はまだ空の画面）） |
+| ログイン・マイページ | `lib/auth/{auth_api,auth_controller}.dart`・`lib/pages/{login,my}_page.dart` | 認証（services/auth-phoenix）の呼び出し、ログインの状態（ID トークンの取り直し・このタブで続けてログイン・ログインで Repository を API に切り替え）、ログイン・登録・パスワードの再設定、公開ページの名前・公開する／止める・ログアウト・退会 |
+| API | `lib/api/{json_client,portfolio_api}.dart`・`lib/data/{api_records,api_portfolio_repository}.dart` | JSON の送受信とエラー、API（services/api-hono）の呼び出し、アプリのデータ（YAML の形）⇔ API（Firestore）の形、ログイン中の Repository（編集中のデータを通して読み書き。重なったら 3 回までやり直す） |
 | 読み込み・保存 | `work_yaml_loader.dart`・`private_yaml_loader.dart`・`profile_store.dart`・`app_ready.dart` | Work / Private の YAML を読む手伝い（中身は Repository）、表示中のプロフィールの保持、起動時の先読みと「準備できた」の知らせ |
 | ブラウザの機能（差し替えの入口） | `browser/browser.dart`・`file_saver.dart`・`file_pick.dart`・`asset_text.dart` | sessionStorage・ファイルの保存・ファイルの選択・アセットの読み込み。Web では本物、テストでは代わりの実装（`*_stub.dart`）や差し替えた関数を使う |
 | 形式と検証 | `data_format.dart`・`models/profile.dart`・`projects_yaml_validator.dart`・`profile_bundle.dart`・`project_append.dart`・`projects_diff.dart`・`yaml_writer.dart` | YAML / Markdown の見分けと変換、プロフィール・Work / Private の検証、追加、上書きの違いの判定、YAML の書き出し |
@@ -152,3 +154,14 @@ flowchart TB
 | `src/config.ts`・`src/log.ts`・`src/setup.ts` | 環境変数と安全の確認、1 行 1 件の JSON ログ、組み立て |
 | `src/server.ts`・`src/worker.ts` | Node の入口（SIGTERM で止まる・`healthcheck`）、Workers の入口（wrangler dev） |
 | `test/` | 単体・ルート・Emulator の上でのテスト（`npm test`・`npm run test:emulator`） |
+
+### auth（`services/auth-phoenix/`）
+
+| ファイル | 中身 |
+|---|---|
+| `lib/auth_service/accounts.ex` | 決まり（入力の確認・登録できる人・総当たりの対策）と Firebase の呼び出しをまとめる |
+| `lib/auth_service/firebase.ex`・`access_token.ex` | Firebase Auth の REST（Emulator / 本物）、管理者のトークン（Emulator は `owner`、本物はメタデータサーバー） |
+| `lib/auth_service/login_throttle.ex`・`error.ex` | ログインの失敗の数（ETS）、エラーと Firebase のエラーの日本語 |
+| `lib/auth_service_web/` | Endpoint・Router・コントローラー・JSON のログ・CORS |
+| `config/` | 設定（`runtime.exs` は起動のときに環境変数から） |
+| `test/` | ルート（Firebase は Req.Test の偽物）・つなぎ先と入力の確認・Emulator の上（`mix test --only emulator`） |

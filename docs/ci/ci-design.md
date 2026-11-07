@@ -14,6 +14,8 @@ flowchart TB
     direction LR
     fe["frontend<br/>analyze → test（網羅率）→ 網羅率の基準"]
     be["api-hono<br/>typecheck → test"]
+    ap["auth-phoenix<br/>compile → test"]
+    ex["excel-fastapi<br/>Dart のコマンド → pytest（網羅率 90%）"]
     fb["firebase-seed<br/>node --test"]
   end
   subgraph deploy["Deploy（deploy.yml）"]
@@ -71,6 +73,27 @@ flowchart LR
 | 4 | `npm run typecheck` | `tsc`（型の確認だけ。出力しない） | 型の誤りがある |
 | 5 | `npm test` | `node --test`（単体・ルート。Emulator の上のテストは環境変数がないので飛ばす。段階 7 で Emulator を起動して動かす） | テストが失敗 |
 
+### ジョブ：auth-phoenix（`services/auth-phoenix/` で実行）
+
+| 順 | ステップ | 内容 | 失敗する条件 |
+|---|---|---|---|
+| 1 | checkout | | |
+| 2 | Elixir の用意 | `erlef/setup-beam@v1`、OTP **28**・Elixir **1.18** | 版が取れない |
+| 3 | `mix deps.get` | 依存関係（`mix.lock` があればそのとおり） | 解決できない |
+| 4 | `mix compile --warnings-as-errors` | コンパイル。警告もエラーにする | 警告・エラーがある |
+| 5 | `mix test` | ExUnit（Firebase は偽物。Emulator の上のテストは飛ばす） | テストが失敗 |
+
+### ジョブ：excel-fastapi（`services/excel-fastapi/` で実行）
+
+| 順 | ステップ | 内容 | 失敗する条件 |
+|---|---|---|---|
+| 1 | checkout | | |
+| 2 | Dart の用意 | `dart-lang/setup-dart@v1`、stable | |
+| 3 | スキルシートのコマンドを作る | `sh dart/build.sh ../../frontend $SKILL_SHEET_CMD`（Dockerfile と同じやり方。frontend の `bin/skill_sheet.dart` を Flutter なしで `dart compile exe`） | コンパイルできない |
+| 4 | Python の用意 | `actions/setup-python@v5`、Python **3.12** | |
+| 5 | 依存関係 | `pip install -r requirements-dev.txt`（版は固定） | 解決できない |
+| 6 | `pytest --cov=app --cov-branch --cov-fail-under=90` | ルート・コマンドの呼び出し（偽物）と、本物のコマンドのテスト（`SKILL_SHEET_REAL=1`。テンプレート・フォントはリポジトリの frontend のもの） | テストが失敗、網羅率（行と分岐）が 90% 未満 |
+
 ### ジョブ：firebase-seed（リポジトリの直下で実行）
 
 | 順 | ステップ | 内容 | 失敗する条件 |
@@ -79,7 +102,7 @@ flowchart LR
 | 2 | Node の用意 | `actions/setup-node@v4`、Node **22** | |
 | 3 | `node --test firebase/seed/seed.test.mjs` | Firebase Emulator にサンプルを入れるスクリプトのテスト（偽物の Emulator に送った中身を確かめる。パッケージはいらない） | テストが失敗 |
 
-3 つのジョブ（frontend・api-hono・firebase-seed）は並んで動く（どれかが失敗しても、ほかは最後まで動く）。Firebase Emulator そのものは CI では起動しない（段階 7 で、Emulator を使った各サービスのテストと一緒に足す）。
+5 つのジョブ（frontend・api-hono・auth-phoenix・excel-fastapi・firebase-seed）は並んで動く（どれかが失敗しても、ほかは最後まで動く）。Firebase Emulator そのものは CI では起動しない（段階 7 で、Emulator を使った各サービスのテストと一緒に足す）。
 
 ## 3. Deploy（deploy.yml）
 

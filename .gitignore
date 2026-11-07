@@ -24,6 +24,9 @@ coverage/
 # 改名前に起動した flutter run の Chrome が .dart_tool/chrome-device を作り直すことがある
 /dev_portfolio/
 
+# ---------- 疎通の確認の結果（scripts/smoke.sh） ----------
+/smoke-result/
+
 # ---------- 個人情報・秘密情報 ----------
 # 自分のスキルシート・YAML の置き場（中身は管理しない。フォルダーだけ .gitkeep で残す）
 /skill_sheet_yaml/*

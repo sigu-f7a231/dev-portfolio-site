@@ -35,6 +35,11 @@ export class MemoryStore implements DocStore {
     if ('updateTime' in pre && doc?.updateTime !== pre.updateTime) throw new ConflictError(`${path}: updateTime`);
   }
 
+  async list(collectionPath: string): Promise<string[]> {
+    const prefix = `${collectionPath}/`;
+    return [...this.docs.keys()].filter((k) => k.startsWith(prefix) && !k.slice(prefix.length).includes('/')).sort();
+  }
+
   async commit(writes: Write[]): Promise<void> {
     const hook = this.beforeCommit;
     this.beforeCommit = undefined;

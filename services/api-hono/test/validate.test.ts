@@ -54,8 +54,10 @@ test('プロフィール：型・長さ・知らない項目・生年月日の�
   assert.deepEqual(validateProfile(undefined), []);
 });
 
-test('スキル：分類は決まったものだけ、中身は文字の並び', () => {
-  has(validateSkills({ recentTech: { languages: ['Dart'] } }), 'recentTech.languages：知らない項目');
+test('スキル：分類の名前は自由（日本語も）。中身は文字の並び、30 分類まで', () => {
+  assert.deepEqual(validateSkills({ recentTech: { 言語: ['Dart'], frontend_frameworks: ['Flutter'] } }), []);
+  has(validateSkills({ recentTech: { '': ['Dart'] } }), '分類の名前は 1〜50 文字');
+  has(validateSkills({ recentTech: Object.fromEntries(Array.from({ length: 31 }, (_, i) => [`c${i}`, []])) }), '30 分類まで');
   has(validateSkills({ pastTech: { skills: [1] } }), 'pastTech.skills[0]：文字で');
   has(validateSkills({ other: {} }), 'skills.other：知らない項目');
 });

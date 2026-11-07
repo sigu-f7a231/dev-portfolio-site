@@ -12,7 +12,10 @@ flowchart LR
     direction LR
     fe["frontend<br/>nginx が Flutter Web を配信<br/>:8000"]
     be["api（services/api-hono）<br/>Hono・Node 22<br/>:8787"]
+    au["auth（services/auth-phoenix）<br/>Phoenix<br/>:4100"]
     fe -- "/api/・/healthz を転送" --> be
+    fe -- "/auth/ を転送" --> au
+    au -- "登録・ログイン（REST）" --> emu
     be -- "本人のデータを読み書き" --> emu
     emu["firebase<br/>Firebase Emulator（Auth・Firestore）<br/>確認用の画面 :4001"]
     edata[("firebase/emulator-data<br/>止めたときに書き出し")]
@@ -25,6 +28,7 @@ flowchart LR
 
 - **frontend**（`frontend/`）：画面のすべて。表示するデータは、リポジトリのサンプル（`assets/data/`）か、画面から読み込んだもの（ブラウザの sessionStorage）。Excel / PDF の作成もブラウザの中で行い、サーバーには何も送りません。
 - **api**（`services/api-hono/`）：マイページの API（Hono・TypeScript）。プロフィール・スキル・職務経歴・表示設定・編集中のデータを、Firebase の ID トークンで本人を確かめてから Firestore（ローカルでは Emulator）に読み書きする。2026-11-06 に前の backend（Dart の shelf）を置き換えた。画面からはまだ呼んでいない（段階 5）。
+- **auth**（`services/auth-phoenix/`）：認証（Elixir・Phoenix）。登録・ログイン・トークンの取り直し・すべての端末からのログアウト・パスワードの再設定と変更・退会。パスワードは Firebase Auth が持ち、Phoenix は REST を呼ぶ窓口（[D-01](plan/decisions.md#d-01-認証の形) の B）。発行されるのは Firebase の ID トークンで、api がそれを確かめる。詳しくは [services/auth-phoenix/README.md](../services/auth-phoenix/README.md)。
 - **データの流れ**（frontend）
 
 ```mermaid
@@ -85,6 +89,7 @@ flowchart LR
 | データ | [yaml](https://pub.dev/packages/yaml)（読み込み）、[archive](https://pub.dev/packages/archive) / [xml](https://pub.dev/packages/xml)（Excel .xlsx の読み書き）、[pdf](https://pub.dev/packages/pdf)（PDF の出力） |
 | ブラウザ | [web](https://pub.dev/packages/web)（sessionStorage・ファイルの保存）、[file_picker](https://pub.dev/packages/file_picker)（ファイルの選択）、[url_launcher](https://pub.dev/packages/url_launcher)（公開ページへのリンク） |
 | API | **TypeScript**・[Hono](https://hono.dev/) 4・Node 22（型を外してそのまま動かす）。Firestore・Firebase Auth は REST と Web Crypto（Admin SDK なし） |
+| 認証 | **Elixir 1.18**・[Phoenix](https://www.phoenixframework.org/) 1.7 以降・Bandit・Req（Firebase Auth の REST）。`mix release` で動かす |
 | 実行環境 | **Docker / Docker Compose**（frontend は nginx、api は node:22-bookworm-slim、Firebase Emulator は Node 22 ＋ Java 21） |
 | テスト | flutter_test、Node の標準のテスト（`node --test`。api・seed）、網羅率は `flutter test --coverage --branch-coverage` と `tool/coverage_check.dart` |
 | CI / 公開 | **GitHub Actions**、**GitHub Pages** |

@@ -8,12 +8,14 @@ import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
 import { test } from 'node:test';
 
-import { publicDataOf, seed, toFields, toValue } from './seed.mjs';
+import { publicDataOf, seed, setLog, toFields, toValue } from './seed.mjs';
+
+setLog(() => {}); // 進み具合は表示しない
 
 const sample = JSON.parse(await readFile(new URL('./sample.json', import.meta.url), 'utf8'));
 
-/** 偽物の Emulator。emailExists なら signUp で EMAIL_EXISTS を返す */
-async function fakeEmulator({ emailExists = false, failWrite = false } = {}) {
+/** 偽物の Emulator。emailExists なら signUp で EMAIL_EXISTS を返す。lists はコレクション → 返す文書の並び */
+async function fakeEmulator({ emailExists = false, failWrite = false, lists = {} } = {}) {
   const requests = [];
   const server = createServer(async (req, res) => {
     let body = '';
@@ -27,6 +29,10 @@ async function fakeEmulator({ emailExists = false, failWrite = false } = {}) {
       return emailExists ? send(400, { error: { message: 'EMAIL_EXISTS' } }) : send(200, { localId: 'uid-new' });
     }
     if (req.url.includes('accounts:signInWithPassword')) return send(200, { localId: 'uid-existing' });
+    if (req.url.includes('/documents/') && req.method === 'GET') {
+      const collection = decodeURIComponent(req.url.split('/documents/')[1].split('?')[0]);
+      return send(200, lists[collection] ? { documents: lists[collection] } : {});
+    }
     if (req.url.includes('/documents/')) return failWrite ? send(403, { error: 'denied' }) : send(200, {});
     return send(404, {});
   });
@@ -76,7 +82,7 @@ test('seed：利用者を作り、data-model の 5 つの文書を Emulator の�
       'slugs/sample',
       'publicPages/sample',
     ]);
-    const writes = emu.requests.filter((r) => r.url.includes('/documents/'));
+    const writes = emu.requests.filter((r) => r.url.includes('/documents/') && r.method !== 'GET');
     assert.equal(writes.length, 5);
     for (const w of writes) {
       assert.equal(w.method, 'PATCH');
@@ -88,6 +94,31 @@ test('seed：利用者を作り、data-model の 5 つの文書を Emulator の�
     const draft = writes.find((w) => w.url.endsWith('drafts/current')).body.fields.data.mapValue.fields;
     assert.ok(draft.profile.mapValue.fields.sheet, '本人の編集中のデータには sheet がある');
     assert.deepEqual(draft.schemaVersion, { integerValue: '1' });
+  } finally {
+    await emu.close();
+  }
+});
+
+test('seed：前に増えた版・ほかの名前（slugs と publicPages）は消す。ほかの人の名前は消さない', async () => {
+  const base = 'projects/demo-test/databases/(default)/documents';
+  const uid = (v) => ({ uid: { stringValue: v } });
+  const emu = await fakeEmulator({
+    lists: {
+      'users/uid-new/versions': [{ name: `${base}/users/uid-new/versions/1` }, { name: `${base}/users/uid-new/versions/2` }],
+      slugs: [
+        { name: `${base}/slugs/sample`, fields: uid('uid-new') },
+        { name: `${base}/slugs/sample-2`, fields: uid('uid-new') },
+        { name: `${base}/slugs/someone`, fields: uid('uid-other') },
+      ],
+    },
+  });
+  try {
+    await seed({ authHost: emu.host, firestoreHost: emu.host, project: 'demo-test', sample });
+    const deleted = emu.requests.filter((r) => r.method === 'DELETE').map((r) => decodeURIComponent(r.url).split('/documents/')[1]);
+    assert.deepEqual(deleted, ['users/uid-new/versions/2', 'slugs/sample-2', 'publicPages/sample-2']);
+    for (const r of emu.requests.filter((r) => r.method === 'DELETE' || r.method === 'GET')) {
+      if (r.url.includes('/documents/')) assert.equal(r.headers.authorization, 'Bearer owner');
+    }
   } finally {
     await emu.close();
   }

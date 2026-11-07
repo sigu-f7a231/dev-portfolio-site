@@ -50,11 +50,20 @@ FIRESTORE_EMULATOR_HOST=localhost:8080 FIREBASE_AUTH_EMULATOR_HOST=localhost:909
 - Node 22.18 以上は `.ts` をそのまま動かす（型を外すだけ）。enum・引数のプロパティなど、型を外すだけでは消えない書き方は使わない（`tsconfig.json` の `erasableSyntaxOnly`）。import は `.ts` まで書く。
 - Claude のクラウドの作業場所では npm のパッケージを取れないので、hono に依存しないファイル（`src/` の app・setup・server・worker 以外と、そのテスト）だけを `node --test` と `tsc` で確かめられる。ルートと Emulator のテストはオーナーの手元で動かす。
 
+## auth（`services/auth-phoenix/` で）
+
+Claude の作業場所にもオーナーの Mac にも Elixir がない前提で、Docker で動かす（README の `docker run`）。`mix.lock` は最初に `mix deps.get` で作ってコミットする。
+
+- 環境変数：`PORT`（既定 4100）、`FIREBASE_PROJECT`、`FIREBASE_API_KEY`、`FIREBASE_AUTH_EMULATOR_HOST`、`SIGNUP_ALLOWLIST`、`ALLOWED_ORIGIN`、`SECRET_KEY_BASE`。
+- テスト：`mix test`（Firebase は Req.Test の偽物）、`FIREBASE_AUTH_EMULATOR_HOST=... mix test --only emulator`。
+- Elixir のコードはコンパイルできないまま書くことになるので、オーナーの手元で `mix compile --warnings-as-errors` と `mix test` の結果を見てから直す。
+
 ## CI / デプロイ（`.github/workflows/`）
 
 - `test.yml`：`develop` / `main` への push、プルリクエスト、手動。
   - frontend：Flutter 3.41.6 → `pub get` → `analyze` → `flutter test --coverage --branch-coverage` → `dart run tool/coverage_check.dart --min-line 90 --min-branch 90`（結果を Actions のサマリーに出す。`shell: bash` で pipefail を付け、tee を挟んでも失敗が伝わる）→ `coverage/` を artifact に保存。
   - api-hono：Node 22 → `npm ci`（lock がなければ `npm install`）→ `npm run typecheck` → `npm test`。
+  - auth-phoenix：OTP 28・Elixir 1.18 → `mix deps.get` → `mix compile --warnings-as-errors` → `mix test`。
   - firebase-seed：Node 22 → `node --test firebase/seed/seed.test.mjs`。
 - `deploy.yml`：**`develop` への push**（または手動実行）→ Flutter stable 3.x → `pub get` → `flutter create . --platforms web` → `build web --base-href "/dev-portfolio-site/"` → `actions/deploy-pages@v4`。
   - develop への push はそのまま本番公開になるので注意する。今は test.yml の結果を待たずにデプロイする（`needs` でつないでいない）。

@@ -1,0 +1,14 @@
+# スキルシートのコマンド（frontend/bin/skill_sheet.dart）を、Flutter なしで dart compile exe するための pubspec
+# frontend/lib のうち Flutter に依存しないもの（lib/utils/skill_sheet_*.dart など）だけを使う。
+# 名前は frontend と同じ dev_portfolio（package:dev_portfolio/... の import をそのまま使うため）
+# 版は frontend/pubspec.lock と同じに固定する（本人の［ダウンロード］と同じ見た目にするため。frontend を上げたらここも上げる）
+name: dev_portfolio
+publish_to: none
+environment:
+  sdk: ^3.9.2
+dependencies:
+  archive: 4.0.9
+  image: 4.10.2
+  pdf: 3.12.0
+  xml: 6.6.1
+  yaml: 3.1.3

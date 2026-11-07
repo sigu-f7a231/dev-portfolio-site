@@ -168,3 +168,35 @@ test('CORS：ALLOWED_ORIGIN を指定したときだけ、そのオリジンを�
   const res = await without.send('/api/public/none', { headers: { Origin: 'http://localhost:5000' } });
   assert.equal(res.headers.get('access-control-allow-origin'), null);
 });
+
+test('本人の情報・名前・公開・公開を止める・退会のルート', async () => {
+  const { send, store } = setup();
+  assert.deepEqual(await (await send('/api/me', { uid: 'a' })).json(), {
+    slug: null,
+    latestVersion: 0,
+    publishedVersion: null,
+    updatedAt: null,
+  });
+  assert.equal((await send('/api/me/slug', { method: 'PUT', uid: 'a', body: { slug: 'Bad Name' } })).status, 400);
+  assert.equal((await send('/api/me/slug', { method: 'PUT', uid: 'a', body: { slug: 'taro' } })).status, 200);
+  assert.equal((await send('/api/me/slug', { method: 'PUT', uid: 'b', body: { slug: 'taro' } })).status, 409);
+
+  assert.equal((await send('/api/me/publish', { method: 'POST', uid: 'a' })).status, 409, 'まだ保存していない');
+  await send('/api/me/profile', {
+    method: 'PUT',
+    uid: 'a',
+    body: { home: { name: 'A', role: 'R', tagline: 'T' }, about: { intro: 'I' }, sheet: { furigana: 'ひみつ' } },
+  });
+  const published = await send('/api/me/publish', { method: 'POST', uid: 'a' });
+  assert.equal(published.status, 200);
+  assert.equal(((await published.json()) as { publishedVersion: number }).publishedVersion, 1);
+  const page = (await (await send('/api/public/taro')).json()) as { data: { profile: Record<string, unknown> } };
+  assert.equal(page.data.profile.sheet, undefined);
+
+  assert.equal(((await (await send('/api/me/publish', { method: 'DELETE', uid: 'a' })).json()) as { publishedVersion: null }).publishedVersion, null);
+  assert.equal((await send('/api/public/taro')).status, 404);
+
+  assert.equal((await send('/api/me', { method: 'DELETE', uid: 'a' })).status, 204);
+  assert.equal([...store.docs.keys()].some((k) => k.includes('users/a')), false);
+  assert.equal((await send('/api/me', { method: 'DELETE' })).status, 401);
+});

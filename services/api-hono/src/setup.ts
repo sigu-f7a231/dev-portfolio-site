@@ -6,6 +6,7 @@ import { TokenVerifier } from './auth.ts';
 import type { Config } from './config.ts';
 import { FirestoreRestStore, type AccessTokenProvider } from './firestore.ts';
 import { PortfolioService } from './portfolio.ts';
+import { excelRenderer } from './sheet.ts';
 
 export function buildApp(config: Config, options: { accessToken?: AccessTokenProvider } = {}) {
   const store = new FirestoreRestStore({
@@ -17,5 +18,6 @@ export function buildApp(config: Config, options: { accessToken?: AccessTokenPro
     service: new PortfolioService(store),
     verifier: new TokenVerifier({ projectId: config.projectId, emulator: Boolean(config.authEmulatorHost) }),
     allowedOrigin: config.allowedOrigin,
+    renderSheet: config.excelOrigin ? excelRenderer({ origin: config.excelOrigin, token: config.excelToken }) : undefined,
   });
 }

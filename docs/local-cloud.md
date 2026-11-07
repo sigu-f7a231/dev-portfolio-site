@@ -13,7 +13,7 @@
 | **本物の Firebase にはつながらない** | プロジェクトの名前を `demo-dev-portfolio` にしている。`demo-` で始まる名前は Emulator だけで使える名前で、間違えて本物に書くことがない |
 | **確認に使うデータはサンプルだけ** | 個人の情報（プロフィールの中身・スキルシート）を Emulator に入れない。サンプルは `firebase/seed/sample.json` の架空の人・案件 |
 | **書き出したデータは Git に入れない** | `firebase/emulator-data/` は `.gitignore` 済み。サンプルでも入れない（止めるたびに作り直されるため） |
-| **これから作るサービスもここにつなぐ** | Hono（段階 3）・Phoenix（段階 4）・FastAPI（段階 6）は、ローカルではこの Emulator を本物の代わりに使う |
+| **これから作るサービスもここにつなぐ** | Hono（段階 3）・Phoenix（段階 4）は、ローカルではこの Emulator を本物の代わりに使う（FastAPI（段階 6）は Firestore につながず、Hono から受け取る） |
 
 ## 2. 全体の構成
 
@@ -39,14 +39,17 @@ flowchart LR
     seed -- "利用者を作る" --> auth
     seed -- "文書を書く（管理者として）" --> fs
     fb -- "止めたときに書き出す /<br/>起動したときに読み込む" --- vol
+    au["auth（services/auth-phoenix）<br/>Phoenix<br/>:4100"]
+    fe -- "/auth/" --> au
+    au -- "登録・ログイン（REST）" --> auth
   end
   browser -- ":8000" --> fe
   browser -- ":4001" --> ui
-  next["これから足す（点線）<br/>auth-phoenix :4100<br/>excel-fastapi :8001"]
-  next -. "FIREBASE_AUTH_EMULATOR_HOST<br/>FIRESTORE_EMULATOR_HOST" .-> fb
+  ex["excel（services/excel-fastapi）<br/>FastAPI<br/>:8001"]
+  api -- "見る人向けのスキルシート<br/>（X-Internal-Token）" --> ex
 ```
 
-- api（`services/api-hono/`）は Emulator につなぐ（`FIRESTORE_EMULATOR_HOST=firebase:8080`・`FIREBASE_AUTH_EMULATOR_HOST=firebase:9099`）。Flutter の画面（frontend）は、**まだ api を呼んでいない**。データは今までどおり、同梱のサンプルとブラウザの sessionStorage。画面から Emulator（の上の API）を使うのは段階 5。
+- auth（`services/auth-phoenix/`）は Auth Emulator に、api（`services/api-hono/`）は Emulator につなぐ（`FIRESTORE_EMULATOR_HOST=firebase:8080`・`FIREBASE_AUTH_EMULATOR_HOST=firebase:9099`）。Flutter の画面（frontend）は、**まだ api を呼んでいない**。データは今までどおり、同梱のサンプルとブラウザの sessionStorage。画面から Emulator（の上の API）を使うのは段階 5。
 - compose の `seed` は `profiles: ["seed"]` なので、`docker compose up` では動かず、`docker compose run --rm seed` のときだけ動く。
 
 ## 3. ポート
@@ -61,8 +64,8 @@ flowchart LR
 | 9150 | 9150 | firebase | 確認用の画面が Firestore の様子を見る WebSocket | 既定のまま。ブラウザから直接つなぐので外に出す |
 | 4400 | 4400 | firebase | ハブ（動いているエミュレーターの一覧） | 既定のまま。compose の healthcheck が使う |
 | ― | 4500 | firebase | ログ | 外には出さない |
-| （これから）4100 | | auth-phoenix | Phoenix | 既定の 4000 を避ける |
-| （これから）8001 | | excel-fastapi | FastAPI | 既定の 8000 は frontend と重なる |
+| 4100 | 4100 | auth | 認証（Phoenix） | Phoenix の既定の 4000 は Emulator の確認用の画面の既定と重なるので 4100 |
+| 8001 | 8001 | excel | 見る人向けのスキルシート（PDF。FastAPI）。api から呼ぶ | 既定の 8000 は frontend と重なる |
 
 `flutter run -d chrome` で画面を開くときのポートは、起動のたびに変わる。決めたいときは `--web-port 5000` のように、上の表にない番号を付ける。
 
@@ -142,7 +145,7 @@ sequenceDiagram
 
 ## 6. サンプル
 
-`docker compose run --rm seed` で入れる。何度実行しても同じ中身になる（あれば上書き）。
+`make seed`（`docker compose run --rm seed`）で入れる。何度実行しても同じ中身になる（あれば上書き。前に増えた版・ほかの名前の公開ページは消す）。
 
 | 種類 | 中身 |
 |---|---|
@@ -229,7 +232,7 @@ docker compose build --no-cache firebase  # firebase-tools の版を変えたあ
 | 段階 | ここに足すもの |
 |---|---|
 | 3（済み） | `services/api-hono/`（Firestore Emulator につなぐ API）を compose に足し、`backend/` を消した |
-| 4 | `services/auth-phoenix/`（Auth Emulator につなぐ認証） |
+| 4（済み） | `services/auth-phoenix/`（Auth Emulator につなぐ認証）を compose に足した |
 | 5 | Flutter の画面から API を呼ぶ（ローカルでは Emulator のデータが画面に出る） |
-| 6 | `services/excel-fastapi/`（必要なら） |
+| 6 | `services/excel-fastapi/`（見る人向けのスキルシート（Excel・PDF） だけ。[D-06](plan/decisions.md#d-06-fastapi-に任せる範囲)） |
 | 7 | CI で Emulator を起動し、各サービスのテストとセキュリティルールのテストを動かす |

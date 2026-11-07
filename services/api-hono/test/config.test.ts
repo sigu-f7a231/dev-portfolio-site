@@ -21,6 +21,13 @@ test('指定したものを使う。空の文字は指定なし', () => {
   assert.equal(c.projectId, 'demo-dev-portfolio');
 });
 
+test('excel（見る人向けのスキルシート）：EXCEL_ORIGIN・EXCEL_INTERNAL_TOKEN。なければ指定なし', () => {
+  assert.equal(configFrom(emulator).excelOrigin, undefined);
+  const c = configFrom({ ...emulator, EXCEL_ORIGIN: 'http://excel:8001', EXCEL_INTERNAL_TOKEN: 't' });
+  assert.equal(c.excelOrigin, 'http://excel:8001');
+  assert.equal(c.excelToken, 't');
+});
+
 test('本物のプロジェクトなら Emulator なしでよい', () => {
   const c = configFrom({ FIREBASE_PROJECT: 'my-real-project' });
   assert.equal(c.firestoreEmulatorHost, undefined);

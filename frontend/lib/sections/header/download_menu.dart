@@ -22,13 +22,12 @@ import '../../utils/private_yaml_loader.dart';
 import '../../utils/profile_store.dart';
 import '../../utils/project_append.dart';
 import '../../utils/skill_sheet.dart';
+import '../../utils/skill_sheet_data.dart';
 import '../../utils/skill_sheet_pdf.dart';
 import '../../utils/skill_sheet_writer.dart';
-import '../../utils/tech_catalog.dart';
 import '../../utils/work_yaml_loader.dart';
 import '../../widgets/app_loading_indicator.dart';
 import '../config/header_config.dart';
-import '../projects/models/projects_model.dart';
 
 /// ［ダウンロード］のボタン（押すと Excel / PDF を選ぶメニュー）
 class HeaderDownloadButton extends StatelessWidget {
@@ -73,35 +72,19 @@ class HeaderDownloadButton extends StatelessWidget {
   }
 }
 
-/// 今のプロフィールと Work / Private（それぞれ開始の古い順）
+/// 今のプロフィールと Work / Private（それぞれ開始の古い順。作り方は見る人向けと同じ：lib/utils/skill_sheet_data.dart）
 Future<SkillSheetData> currentSkillSheetData() async {
   final profile = ProfileStore.instance.value ?? Profile.empty;
   final texts =
       await Future.wait([WorkYamlLoader.loadYamlString(), PrivateYamlLoader.loadYamlString()]);
-  List<Map<String, dynamic>> projects(String text) {
-    // Skills・Tools に書かれたフロントエンドなどは本来の分類に移してから書く（画面の表示と同じ）
-    final list = redistributeProjects(projectsOf(text));
-    list.sort((a, b) => Project.fromMap(a).periodStart.compareTo(Project.fromMap(b).periodStart));
-    return list;
-  }
-
-  return SkillSheetData(
-    name: profile.name,
-    experience: profile.name.isEmpty ? '' : experienceTextOf(profile),
-    work: projects(texts[0]),
-    private: projects(texts[1]),
-    // ふりがな・生年月日などは、読み込んだスキルシート（Excel）に書かれていたものをそのまま
-    sheet: profile.sheet,
-  );
+  return skillSheetDataOf(profile, projectsOf(texts[0]), projectsOf(texts[1]));
 }
 
 /// スキルシートの中身（Excel か PDF のバイト列）を作る
 Future<Uint8List> buildSkillSheetBytes({required bool pdf, DateTime? today}) async {
   final template = await loadAssetBytes(skillSheetTemplateAsset);
-  final xlsx = fillSkillSheet(template, await currentSkillSheetData(), today: today);
-  if (!pdf) return xlsx;
-  final font = await loadAssetBytes(skillSheetPdfFontAsset);
-  return skillSheetPdf(xlsx, ByteData.sublistView(font));
+  final font = pdf ? ByteData.sublistView(await loadAssetBytes(skillSheetPdfFontAsset)) : null;
+  return buildSkillSheet(template, await currentSkillSheetData(), font: font, today: today);
 }
 
 /// スキルシートを「名前を付けて保存」し、画面の下に結果を知らせる
