@@ -378,6 +378,11 @@ void main() {
       return (b, container, router);
     }
 
+    testWidgets('画面の幅いっぱいに敷く', (tester) async {
+      await openHome(tester);
+      expect(tester.getSize(find.byType(AccountBar)).width, 1280);
+    });
+
     testWidgets('ログインしていなければ出さない', (tester) async {
       ProfileStore.instance.value = null;
       await _pumpApp(tester, _container(FakeBackend()), AppRoutes.home);

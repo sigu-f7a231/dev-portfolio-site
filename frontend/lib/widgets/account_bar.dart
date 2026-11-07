@@ -110,11 +110,13 @@ class _AccountBarState extends ConsumerState<AccountBar> {
     final textTheme = Theme.of(context).textTheme;
     final published = _me?.publishedVersion;
     final status = _me == null ? '' : (published == null ? AccountTexts.notPublished : AccountTexts.published(published));
+    // 画面の幅いっぱいに敷く（中身の Wrap の幅に縮まないように）
     return Material(
       color: colors.surfaceContainerHigh,
       child: SafeArea(
         bottom: false,
-        child: Padding(
+        child: Container(
+          width: double.infinity,
           padding: const EdgeInsets.symmetric(horizontal: AppSizes.space16, vertical: AppSizes.space8),
           child: Wrap(
             alignment: WrapAlignment.spaceBetween,
