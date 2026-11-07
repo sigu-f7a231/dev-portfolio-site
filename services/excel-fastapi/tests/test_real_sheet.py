@@ -12,6 +12,7 @@ import asyncio
 import copy
 import io
 import os
+import re
 from datetime import date
 
 import pytest
@@ -47,8 +48,9 @@ def test_Excel_テンプレートの形のまま中身が入り_スキルシー�
 def test_PDF_Excel_の見た目のまま_Skill_Sheet_の見出し_名前_案件(public_data):
     pdf = asyncio.run(sheet.build("pdf", _with_secrets(public_data), created=date(2026, 11, 8)))
     assert pdf.startswith(b"%PDF")
-    text = pdf_text(pdf).replace("\n", "")
+    # PDF から取り出した文字は空白・改行が抜けることがあるので、空白を除いて比べる
+    text = re.sub(r"\s", "", pdf_text(pdf))
     for expected in ["Skill Sheet", "サンプル 太郎", "サンプル・ワークプロジェクト", "PostgreSQL"]:
-        assert expected in text, expected
+        assert re.sub(r"\s", "", expected) in text, expected
     for secret in ["さんぷる", "架空駅", "1990"]:
         assert secret not in text
