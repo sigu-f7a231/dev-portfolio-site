@@ -30,10 +30,20 @@ class ProfileStore extends ValueNotifier<Profile?> {
   /// 起動時に指定した YAML が読めなかったときの理由（入力画面に出す）
   List<String> startupErrors = const [];
 
-  /// 今の読み込み（load）。終わるまで待てる（ログインした直後の公開ページが、読み込みの途中で「入力画面」を出さないように）
-  Future<void> loading = Future<void>.value();
+  /// 読み込み中（load）なら、その終わりを待てる。読み込み中でなければすぐ終わる
+  /// （ログインした直後の公開ページが、読み込みの途中で「入力画面」を出さないように）
+  /// 済んだ Future を持ち続けない（作ったときの Zone でしか知らせが届かず、テストをまたぐと待ち続けるため）
+  Future<void> get loading => _pending ?? Future<void>.value();
+  Future<void>? _pending;
 
-  Future<void> load() => loading = _load();
+  Future<void> load() {
+    final pending = _load();
+    _pending = pending;
+    pending.whenComplete(() {
+      if (identical(_pending, pending)) _pending = null;
+    }).ignore();
+    return pending;
+  }
 
   Future<void> _load() async {
     final result = await PortfolioRepository.instance.loadProfile();
