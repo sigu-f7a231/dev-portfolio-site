@@ -23,7 +23,7 @@ from .conftest import pdf_text
 pytestmark = pytest.mark.skipif(not os.environ.get("SKILL_SHEET_REAL"), reason="本物のコマンドがない（SKILL_SHEET_REAL）")
 
 
-def with_secrets(public_data):
+def _with_secrets(public_data):
     data = copy.deepcopy(public_data)
     data["profile"]["sheet"] = {"furigana": "さんぷる たろう", "station": "架空駅", "birthday": "1990-04-01"}
     return data
